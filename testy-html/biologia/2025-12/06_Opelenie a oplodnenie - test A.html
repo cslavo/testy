@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test A: Opelenie a Oplodnenie</title>
+    <!-- MathJax pre vzorce -->
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.5; background: #f9f9f9; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+        .question-container { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .question-text { font-weight: 600; font-size: 1.1em; margin-bottom: 15px; color: #2c3e50; }
+        .option { display: block; width: 100%; padding: 12px 15px; margin: 8px 0; background: #fff; border: 2px solid #e0e0e0; border-radius: 6px; cursor: pointer; text-align: left; transition: all 0.2s; font-size: 0.95em; box-sizing: border-box; }
+        .option:hover:not(.disabled) { background: #f0f7ff; border-color: #2196F3; }
+        
+        /* Stavy odpovedí */
+        .option.correct { background: #d4edda !important; border-color: #28a745 !important; color: #155724; cursor: default; }
+        .option.incorrect { background: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; cursor: default; }
+        .option.disabled { cursor: default; opacity: 0.7; pointer-events: none; }
+        
+        .results { text-align: center; padding: 20px; margin-top: 20px; font-size: 1.2em; font-weight: bold; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: none; }
+        
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; animation: fadeIn 0.3s; }
+        .modal-content { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-header { font-weight: bold; color: #dc3545; margin-bottom: 10px; font-size: 1.1em; }
+        .modal-body { margin-bottom: 20px; color: #555; }
+        .btn-close { background: #2c3e50; color: white; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-size: 1em; }
+        .btn-close:hover { background: #1a252f; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <h1 id="testTitle">Test vedomostí: SADA A</h1>
+    <div id="quiz-container"></div>
+    <div id="results" class="results"></div>
+
+    <!-- Modal pre feedback -->
+    <div class="modal-overlay" id="feedbackModal">
+        <div class="modal-content">
+            <div class="modal-header">Nesprávna odpoveď</div>
+            <div class="modal-body" id="feedbackText"></div>
+            <button class="btn-close" onclick="closeModal()">Rozumiem</button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // DÁTA TESTU A (UNIKÁTNE OTÁZKY)
+        // ==========================================
+        const questionsData = [
+            {
+                text: "Čo je podstatou procesu opelenia?",
+                options: [
+                    { text: "Prenos peľového zrnka na bliznu piestika", isCorrect: true, feedback: "" },
+                    { text: "Splynutie samčej a samičej bunky", isCorrect: false, feedback: "Toto je definícia oplodnenia, nie opelenia." },
+                    { text: "Vznik peľových zŕn v peľniciach", isCorrect: false, feedback: "Toto je proces dozrievania peľu, ktorý predchádza opeleniu." },
+                    { text: "Klíčenie semena v pôde", isCorrect: false, feedback: "Opelenie sa týka kvetu a prenosu peľu, nie klíčenia semena." }
+                ]
+            },
+            {
+                text: "Ktoré rastliny patria medzi typické samoopelivé druhy?",
+                options: [
+                    { text: "Ríbezle a maliny", isCorrect: true, feedback: "" },
+                    { text: "Ihličnany", isCorrect: false, feedback: "Ihličnany sú vetroopelivé a cudzoopelivé." },
+                    { text: "Obilniny", isCorrect: false, feedback: "Obilniny sú typicky vetroopelivé druhy." },
+                    { text: "Väčšina okrasných kvetov", isCorrect: false, feedback: "Väčšina kvetov je hmyzoopelivá a cudzoopelivá." }
+                ]
+            },
+            {
+                text: "Ktoré rastliny sú opeľované vetrom (vetroopelivé)?",
+                options: [
+                    { text: "Ihličnany a obilniny", isCorrect: true, feedback: "" },
+                    { text: "Ríbezle", isCorrect: false, feedback: "Ríbezle sú samoopelivé rastliny." },
+                    { text: "Väčšina kvitnúcich bylín", isCorrect: false, feedback: "Väčšina rastlinných druhov je opeľovaná hmyzom." },
+                    { text: "Len vodné rastliny", isCorrect: false, feedback: "Vetroopelivé sú najmä suchozemské stromy (ihličnany) a trávy (obilniny)." }
+                ]
+            },
+            {
+                text: "Kde presne vznikajú peľové zrnká?",
+                options: [
+                    { text: "V peľniciach", isCorrect: true, feedback: "" },
+                    { text: "V semenníku", isCorrect: false, feedback: "V semenníku sa nachádzajú vajíčka, nie peľ." },
+                    { text: "Na blizne", isCorrect: false, feedback: "Blizna peľ iba zachytáva, nevytvára ho." },
+                    { text: "V zárodočnom miešku", isCorrect: false, feedback: "Zárodočný miešok je súčasťou vajíčka (samičia časť)." }
+                ]
+            },
+            {
+                text: "Ako sa nazýva vonkajší obal peľového zrnka?",
+                options: [
+                    { text: "Exina", isCorrect: true, feedback: "" },
+                    { text: "Intina", isCorrect: false, feedback: "Intina je vnútorný obal peľového zrnka." },
+                    { text: "Osemenie", isCorrect: false, feedback: "Osemenie je obal celého semena, nie peľového zrnka." },
+                    { text: "Kutikula", isCorrect: false, feedback: "Kutikula je vosková vrstva na povrchu listov." }
+                ]
+            },
+            {
+                text: "Akú funkciu má vegetatívna bunka v peľovom zrnku?",
+                options: [
+                    { text: "Vyživovaciu a zabezpečuje klíčenie peľového vrecúška", isCorrect: true, feedback: "" },
+                    { text: "Rozmnožovaciu", isCorrect: false, feedback: "Rozmnožovaciu funkciu má generatívna bunka." },
+                    { text: "Ochrannú proti vyschnutiu", isCorrect: false, feedback: "Ochrannú funkciu majú obaly (exina/intina), nie bunka vo vnútri." },
+                    { text: "Vytvára vajíčka", isCorrect: false, feedback: "Peľové zrnko je samčia časť, nevytvára vajíčka." }
+                ]
+            },
+            {
+                text: "Kde sa nachádza centrálne jadro v rámci zárodočného mieška?",
+                options: [
+                    { text: "V strede", isCorrect: true, feedback: "" },
+                    { text: "Na póle pri peľovom vchode", isCorrect: false, feedback: "Tam sa nachádza vajcová bunka a pomocné bunky." },
+                    { text: "Na opačnom póle ako vajcová bunka", isCorrect: false, feedback: "Tam sa nachádzajú protistojné bunky." },
+                    { text: "V obaloch vajíčka", isCorrect: false, feedback: "Centrálne jadro je vnútri zárodočného mieška, nie v obaloch." }
+                ]
+            },
+            {
+                text: "Ktoré bunky sa nachádzajú na jednom póle zárodočného mieška spolu s vajcovou bunkou?",
+                options: [
+                    { text: "2 pomocné bunky", isCorrect: true, feedback: "" },
+                    { text: "3 protistojné bunky", isCorrect: false, feedback: "Tie sú na opačnom póle." },
+                    { text: "Spermatické bunky", isCorrect: false, feedback: "Tie prichádzajú s peľom, nie sú súčasťou zárodočného mieška pred oplodnením." },
+                    { text: "Centrálne jadro", isCorrect: false, feedback: "To sa nachádza v strede." }
+                ]
+            },
+            {
+                text: "Ako prebieha oplodnenie u nahosemenných rastlín?",
+                options: [
+                    { text: "Je jednoduché, zúčastňuje sa ho len jedna spermatická bunka", isCorrect: true, feedback: "" },
+                    { text: "Je dvojité, vzniká endosperm", isCorrect: false, feedback: "Dvojité oplodnenie je typické pre krytosemenné rastliny." },
+                    { text: "Splynutím dvoch vajcových buniek", isCorrect: false, feedback: "Oplodnenie je vždy splynutie samčej a samičej bunky." },
+                    { text: "Vzniká pri ňom triploidná zygóta", isCorrect: false, feedback: "Vzniká diploidná zygóta (2n)." }
+                ]
+            },
+            {
+                text: "Čo vznikne splynutím druhej spermatickej bunky s centrálnym jadrom u krytosemenných rastlín?",
+                options: [
+                    { text: "Triploidný endosperm", isCorrect: true, feedback: "" },
+                    { text: "Diploidná zygóta", isCorrect: false, feedback: "Zygóta vzniká splynutím prvej spermatickej bunky s vajcovou bunkou." },
+                    { text: "Zárodok (embryo)", isCorrect: false, feedback: "Zárodok sa vyvíja zo zygóty." },
+                    { text: "Osemenie", isCorrect: false, feedback: "Osemenie vzniká z obalov vajíčka." }
+                ]
+            },
+            {
+                text: "Z čoho sa vyvinie zárodok (embryo)?",
+                options: [
+                    { text: "Z diploidnej zygóty", isCorrect: true, feedback: "" },
+                    { text: "Z triploidného endospermu", isCorrect: false, feedback: "Endosperm slúži na výživu, nevyvíja sa z neho zárodok." },
+                    { text: "Z pomocných buniek", isCorrect: false, feedback: "Pomocné bunky zanikajú alebo majú inú funkciu, netvoria embryo." },
+                    { text: "Z peľového vchodu", isCorrect: false, feedback: "Peľový vchod je len otvor." }
+                ]
+            },
+            {
+                text: "Na základe schémy semena rozlišujeme tri hlavné časti. Ktoré?",
+                options: [
+                    { text: "Osemenie, embryo, endosperm", isCorrect: true, feedback: "" },
+                    { text: "Exina, intina, jadro", isCorrect: false, feedback: "Toto sú časti peľového zrnka." },
+                    { text: "Blizna, čnelka, semenník", isCorrect: false, feedback: "Toto sú časti piestika." },
+                    { text: "Peľový vchod, miešok, obaly", isCorrect: false, feedback: "Toto sú časti vajíčka pred premenou na semeno." }
+                ]
+            }
+        ];
+
+        // ==========================================
+        // LOGIKA APLIKÁCIE (UNIVERSAL)
+        // ==========================================
+        let currentScore = 0;
+        let answeredCount = 0;
+        const totalQuestions = questionsData.length;
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function initQuiz() {
+            const container = document.getElementById('quiz-container');
+            shuffleArray(questionsData);
+
+            questionsData.forEach((q, index) => {
+                let currentOptions = [...q.options];
+                shuffleArray(currentOptions);
+
+                const qDiv = document.createElement('div');
+                qDiv.className = 'question-container';
+                qDiv.id = `q-${index}`;
+
+                let optionsHtml = '';
+                currentOptions.forEach((opt) => {
+                    const safeFeedback = opt.feedback.replace(/"/g, '&quot;');
+                    optionsHtml += `
+                        <button class="option" 
+                            onclick="handleAnswer(this, ${opt.isCorrect}, '${safeFeedback}')"
+                            data-is-correct="${opt.isCorrect}">
+                            ${opt.text}
+                        </button>
+                    `;
+                });
+
+                qDiv.innerHTML = `
+                    <div class="question-text">${index + 1}. ${q.text}</div>
+                    <div class="options-grid">${optionsHtml}</div>
+                `;
+                container.appendChild(qDiv);
+            });
+            
+            if (window.MathJax) window.MathJax.typesetPromise();
+        }
+
+        function handleAnswer(btn, isCorrect, feedback) {
+            const parent = btn.parentElement;
+            if (parent.dataset.locked === "true") return;
+            
+            parent.dataset.locked = "true";
+            const buttons = parent.querySelectorAll('.option');
+            
+            // Disable all buttons
+            buttons.forEach(b => b.classList.add('disabled'));
+
+            if (isCorrect) {
+                btn.classList.add('correct');
+                currentScore++;
+            } else {
+                btn.classList.add('incorrect');
+                // Nájdi a zvýrazni správnu odpoveď
+                const correctBtn = parent.querySelector('.option[data-is-correct="true"]');
+                if(correctBtn) correctBtn.classList.add('correct');
+                
+                showModal(feedback);
+            }
+
+            answeredCount++;
+            if (answeredCount === totalQuestions) {
+                showResults();
+            }
+        }
+
+        function showModal(text) {
+            if (!text) return;
+            document.getElementById('feedbackText').innerHTML = text;
+            document.getElementById('feedbackModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('feedbackModal').style.display = 'none';
+        }
+
+        function showResults() {
+            const percentage = Math.round((currentScore / totalQuestions) * 100);
+            let grade = '';
+            if (percentage >= 90) grade = 'Výborný';
+            else if (percentage >= 80) grade = 'Veľmi dobrý';
+            else if (percentage >= 70) grade = 'Dobrý';
+            else if (percentage >= 60) grade = 'Dostačujúci';
+            else grade = 'Nedostačujúci';
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `
+                Výsledok: ${currentScore} / ${totalQuestions} (${percentage}%)<br>
+                <span style="color: #2c3e50; font-size: 1.1em">${grade}</span>
+            `;
+            resultsDiv.scrollIntoView({behavior: "smooth"});
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('feedbackModal');
+            if (event.target == modal) closeModal();
+        }
+
+        initQuiz();
+    </script>
+</body>
+</html>

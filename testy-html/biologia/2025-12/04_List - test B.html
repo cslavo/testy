@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test z biológie: Listy (Variant B)</title>
+    <!-- MathJax pre vzorce -->
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.5; background: #f9f9f9; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+        .question-container { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .question-text { font-weight: 600; font-size: 1.1em; margin-bottom: 15px; color: #2c3e50; }
+        .option { display: block; width: 100%; padding: 12px 15px; margin: 8px 0; background: #fff; border: 2px solid #e0e0e0; border-radius: 6px; cursor: pointer; text-align: left; transition: all 0.2s; font-size: 0.95em; box-sizing: border-box; }
+        .option:hover:not(.disabled) { background: #f0f7ff; border-color: #2196F3; }
+        
+        /* Stavy odpovedí */
+        .option.correct { background: #d4edda !important; border-color: #28a745 !important; color: #155724; cursor: default; }
+        .option.incorrect { background: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; cursor: default; }
+        .option.disabled { cursor: default; opacity: 0.7; pointer-events: none; }
+        
+        .results { text-align: center; padding: 20px; margin-top: 20px; font-size: 1.2em; font-weight: bold; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: none; }
+        
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; animation: fadeIn 0.3s; }
+        .modal-content { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-header { font-weight: bold; color: #dc3545; margin-bottom: 10px; font-size: 1.1em; }
+        .modal-body { margin-bottom: 20px; color: #555; }
+        .btn-close { background: #2c3e50; color: white; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-size: 1em; }
+        .btn-close:hover { background: #1a252f; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <h1 id="testTitle">Biológia: Stavba a funkcia listu (Test B)</h1>
+    <div id="quiz-container"></div>
+    <div id="results" class="results"></div>
+
+    <!-- Modal pre feedback -->
+    <div class="modal-overlay" id="feedbackModal">
+        <div class="modal-content">
+            <div class="modal-header">Nesprávna odpoveď</div>
+            <div class="modal-body" id="feedbackText"></div>
+            <button class="btn-close" onclick="closeModal()">Rozumiem</button>
+        </div>
+    </div>
+
+    <script>
+        const questionsData = [
+            {
+                text: "Ktorá z uvedených funkcií listu zabezpečuje výdaj vody v podobe vodnej pary?",
+                options: [
+                    { text: "Transpiračná funkcia", isCorrect: true, feedback: "" },
+                    { text: "Fotosyntetická funkcia", isCorrect: false, feedback: "Fotosyntetická funkcia je asimilačná, slúži na tvorbu organických látok." },
+                    { text: "Dýchacia funkcia", isCorrect: false, feedback: "Dýchacia funkcia zabezpečuje výmenu plynov (CO2 a O2)." },
+                    { text: "Ochranná funkcia", isCorrect: false, feedback: "Ochranná funkcia súvisí napr. s tŕňmi, nie s výdajom pary." }
+                ]
+            },
+            {
+                text: "Dýchacia funkcia listu zabezpečuje výmenu ktorých plynov?",
+                options: [
+                    { text: "$CO_2$ a $O_2$", isCorrect: true, feedback: "" },
+                    { text: "Len $CO_2$", isCorrect: false, feedback: "Dýchanie zahŕňa výmenu kyslíka aj oxidu uhličitého." },
+                    { text: "Dusíka a kyslíka", isCorrect: false, feedback: "Dusík sa pri dýchaní listov nevymieňa." },
+                    { text: "Vodnej pary a metánu", isCorrect: false, feedback: "Metán nie je respiračný plyn rastlín." }
+                ]
+            },
+            {
+                text: "Aký typ listov má pagaštan?",
+                options: [
+                    { text: "Dlaňovito zložené", isCorrect: true, feedback: "" },
+                    { text: "Párno perovito zložené", isCorrect: false, feedback: "Párno perovito zložené listy má napr. hrach." },
+                    { text: "Nepárno perovito zložené", isCorrect: false, feedback: "Nepárno perovito zložené listy má napr. agát." },
+                    { text: "Jednoduché", isCorrect: false, feedback: "Pagaštan má zložené listy." }
+                ]
+            },
+            {
+                text: "Čo je to čepeľ?",
+                options: [
+                    { text: "Plochá časť listu", isCorrect: true, feedback: "" },
+                    { text: "Stopka listu", isCorrect: false, feedback: "Stopka je časť, ktorá list prichytáva k stonke." },
+                    { text: "Koreňový vlások", isCorrect: false, feedback: "Koreňový vlások je súčasťou koreňa." },
+                    { text: "Kvetný obal", isCorrect: false, feedback: "Čepeľ je vegetatívna časť listu, nie kvetu." }
+                ]
+            },
+            {
+                text: "Aký typ pripojenia listu k stonke poznáme (okrem striedavého a protistojného)?",
+                options: [
+                    { text: "Praslenovité", isCorrect: true, feedback: "" },
+                    { text: "Kruhovité", isCorrect: false, feedback: "Správny botanický termín je praslenovité." },
+                    { text: "Špirálovité", isCorrect: false, feedback: "V kontexte základného rozdelenia sa používa termín praslenovité." },
+                    { text: "Zväzkovité", isCorrect: false, feedback: "Zväzkovitý je typ koreňa, nie postavenia listov." }
+                ]
+            },
+            {
+                text: "Ktorá rastlina je typická pre dlaňovitú žilnatinu?",
+                options: [
+                    { text: "Javor", isCorrect: true, feedback: "" },
+                    { text: "Lipa", isCorrect: false, feedback: "Lipa má perovitú žilnatinu." },
+                    { text: "Tráva", isCorrect: false, feedback: "Trávy majú rovnobežnú žilnatinu." },
+                    { text: "Papraď", isCorrect: false, feedback: "Paprade majú sperenú žilnatinu." }
+                ]
+            },
+            {
+                text: "Čo je typické pre monofaciálny list?",
+                options: [
+                    { text: "Nemožno na ňom rozlíšiť rub a líce", isCorrect: true, feedback: "" },
+                    { text: "Má rub svetlozelený a líce tmavozelené", isCorrect: false, feedback: "Toto je charakteristika bifaciálneho listu." },
+                    { text: "Prieduchy má len na spodnej strane", isCorrect: false, feedback: "Monofaciálny list má prieduchy na vrchnej aj spodnej strane." },
+                    { text: "Mezofyl je diferencovaný na palisádový a špongiový", isCorrect: false, feedback: "U monofaciálneho listu mezofyl nie je diferencovaný." }
+                ]
+            },
+            {
+                text: "Akú funkciu má kutikula?",
+                options: [
+                    { text: "Vytvára ochrannú vrstvu na povrchu pokožky", isCorrect: true, feedback: "" },
+                    { text: "Umožňuje fotosyntézu", isCorrect: false, feedback: "Fotosyntézu zabezpečujú chloroplasty v mezofyle." },
+                    { text: "Slúži na transport živín", isCorrect: false, feedback: "Na transport slúžia cievne zväzky." },
+                    { text: "Reguluje otváranie prieduchov", isCorrect: false, feedback: "To robia zvieravé bunky prieduchov, kutikula je len vrstva." }
+                ]
+            },
+            {
+                text: "Čím je charakteristický špongiový (hubový) parenchým?",
+                options: [
+                    { text: "Obsahuje veľa medzibunkových priestorov", isCorrect: true, feedback: "" },
+                    { text: "Obsahuje najviac chloroplastov zo všetkých pletív", isCorrect: false, feedback: "Najviac chloroplastov má palisádový parenchým." },
+                    { text: "Nachádza sa na povrchu listu", isCorrect: false, feedback: "Na povrchu je epiderma, parenchým je vnútri." },
+                    { text: "Je tvorený mŕtvymi bunkami", isCorrect: false, feedback: "Parenchým je živé pletivo." }
+                ]
+            },
+            {
+                text: "Čo sú kvetné listy?",
+                options: [
+                    { text: "Metamorfované listy, z ktorých sa vyvinuli kvety", isCorrect: true, feedback: "" },
+                    { text: "Listy pri kvetnej stopke", isCorrect: false, feedback: "To sú listence." },
+                    { text: "Prvé listy po vyklíčení", isCorrect: false, feedback: "To sú klíčne listy." },
+                    { text: "Listy slúžiace na asimiláciu", isCorrect: false, feedback: "To sú asimilačné listy." }
+                ]
+            },
+            {
+                text: "Ktorá metamorfóza listu slúži na lapanie hmyzu a produkciu enzýmov (napr. rosička)?",
+                options: [
+                    { text: "Listy mäsožravých rastlín", isCorrect: true, feedback: "" },
+                    { text: "Úponky", isCorrect: false, feedback: "Úponky slúžia na prichytávanie (hrach)." },
+                    { text: "Listové tŕne", isCorrect: false, feedback: "Tŕne slúžia na ochranu (kaktus)." },
+                    { text: "Cibule", isCorrect: false, feedback: "Cibule slúžia na zásobovanie látkami." }
+                ]
+            },
+            {
+                text: "Na čo slúžia cibuľové listy (napr. u tulipánu, cibule)?",
+                options: [
+                    { text: "Obsahujú zásobné látky", isCorrect: true, feedback: "" },
+                    { text: "Slúžia na fotosyntézu", isCorrect: false, feedback: "Zásobné cibule sú zvyčajne podzemné a neasimilačné." },
+                    { text: "Slúžia na prichytávanie", isCorrect: false, feedback: "Na to slúžia úponky." },
+                    { text: "Odrádzajú bylinožravce tŕňmi", isCorrect: false, feedback: "To je funkcia tŕňov." }
+                ]
+            },
+            {
+                text: "Listové tŕne u kaktusov plnia predovšetkým akú funkciu?",
+                options: [
+                    { text: "Ochrannú funkciu", isCorrect: true, feedback: "" },
+                    { text: "Zásobnú funkciu", isCorrect: false, feedback: "Zásobnú funkciu má stonka kaktusov (sukulentná)." },
+                    { text: "Rozmnožovaciu funkciu", isCorrect: false, feedback: "Tŕne neslúžia na rozmnožovanie." },
+                    { text: "Prijímajú vodu zo vzduchu", isCorrect: false, feedback: "Tŕne sú redukované listy na minimalizáciu výdaja vody, nie príjem." }
+                ]
+            },
+            {
+                text: "Koľko klíčnych listov majú dvojklíčnolistové rastliny?",
+                options: [
+                    { text: "Dva", isCorrect: true, feedback: "" },
+                    { text: "Jeden", isCorrect: false, feedback: "Jeden majú jednoklíčnolistové rastliny." },
+                    { text: "Viac (3 a viac)", isCorrect: false, feedback: "Viac majú ihličnany." },
+                    { text: "Žiaden", isCorrect: false, feedback: "Vždy majú aspoň nejaké klíčne listy." }
+                ]
+            }
+        ];
+
+        let currentScore = 0;
+        let answeredCount = 0;
+        const totalQuestions = questionsData.length;
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function initQuiz() {
+            const container = document.getElementById('quiz-container');
+            shuffleArray(questionsData);
+
+            questionsData.forEach((q, index) => {
+                let currentOptions = [...q.options];
+                shuffleArray(currentOptions);
+
+                const qDiv = document.createElement('div');
+                qDiv.className = 'question-container';
+                qDiv.id = `q-${index}`;
+
+                let optionsHtml = '';
+                currentOptions.forEach((opt) => {
+                    const safeFeedback = opt.feedback.replace(/"/g, '&quot;');
+                    optionsHtml += `
+                        <button class="option" 
+                            onclick="handleAnswer(this, ${opt.isCorrect}, '${safeFeedback}')">
+                            ${opt.text}
+                        </button>
+                    `;
+                });
+
+                qDiv.innerHTML = `
+                    <div class="question-text">${index + 1}. ${q.text}</div>
+                    <div class="options-grid">${optionsHtml}</div>
+                `;
+                container.appendChild(qDiv);
+            });
+
+            if (window.MathJax) window.MathJax.typesetPromise();
+        }
+
+        function handleAnswer(btn, isCorrect, feedback) {
+            const parent = btn.parentElement;
+            if (parent.dataset.locked === "true") return;
+            
+            parent.dataset.locked = "true";
+            const buttons = parent.querySelectorAll('.option');
+            
+            buttons.forEach(b => {
+                b.classList.add('disabled');
+                if (b.getAttribute('onclick').includes('true,')) {
+                    b.classList.add('correct');
+                }
+            });
+
+            if (isCorrect) {
+                currentScore++;
+            } else {
+                btn.classList.add('incorrect');
+                showModal(feedback);
+            }
+
+            answeredCount++;
+            if (answeredCount === totalQuestions) {
+                showResults();
+            }
+        }
+
+        function showModal(text) {
+            if (!text) return;
+            document.getElementById('feedbackText').innerHTML = text;
+            document.getElementById('feedbackModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('feedbackModal').style.display = 'none';
+        }
+
+        function showResults() {
+            const percentage = Math.round((currentScore / totalQuestions) * 100);
+            let grade = '';
+            if (percentage >= 90) grade = 'Výborný';
+            else if (percentage >= 80) grade = 'Veľmi dobrý';
+            else if (percentage >= 70) grade = 'Dobrý';
+            else if (percentage >= 60) grade = 'Dostačujúci';
+            else grade = 'Nedostačujúci';
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `
+                Výsledok: ${currentScore} / ${totalQuestions} (${percentage}%)<br>
+                <span style="color: #2c3e50; font-size: 1.1em">${grade}</span>
+            `;
+            resultsDiv.scrollIntoView({behavior: "smooth"});
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('feedbackModal');
+            if (event.target == modal) closeModal();
+        }
+
+        initQuiz();
+    </script>
+</body>
+</html>

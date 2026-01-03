@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktívny Test B: Reprodukčné orgány rastlín</title>
+    <!-- MathJax pre vzorce -->
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.5; background: #f9f9f9; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+        .question-container { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .question-text { font-weight: 600; font-size: 1.1em; margin-bottom: 15px; color: #2c3e50; }
+        .option { display: block; width: 100%; padding: 12px 15px; margin: 8px 0; background: #fff; border: 2px solid #e0e0e0; border-radius: 6px; cursor: pointer; text-align: left; transition: all 0.2s; font-size: 0.95em; box-sizing: border-box; }
+        .option:hover:not(.disabled) { background: #f0f7ff; border-color: #2196F3; }
+        .option.correct { background: #d4edda !important; border-color: #28a745 !important; color: #155724; cursor: default; }
+        .option.incorrect { background: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; cursor: default; }
+        .option.disabled { cursor: default; opacity: 0.7; pointer-events: none; }
+        .results { text-align: center; padding: 20px; margin-top: 20px; font-size: 1.2em; font-weight: bold; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: none; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; animation: fadeIn 0.3s; }
+        .modal-content { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-header { font-weight: bold; color: #dc3545; margin-bottom: 10px; font-size: 1.1em; }
+        .modal-body { margin-bottom: 20px; color: #555; }
+        .btn-close { background: #2c3e50; color: white; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-size: 1em; }
+        .btn-close:hover { background: #1a252f; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <h1 id="testTitle">Test B: Reprodukčné orgány rastlín</h1>
+    <div id="quiz-container"></div>
+    <div id="results" class="results"></div>
+
+    <div class="modal-overlay" id="feedbackModal">
+        <div class="modal-content">
+            <div class="modal-header">Nesprávna odpoveď</div>
+            <div class="modal-body" id="feedbackText"></div>
+            <button class="btn-close" onclick="closeModal()">Rozumiem</button>
+        </div>
+    </div>
+
+    <script>
+        const questionsData = [
+            {
+                text: "Ako vznikajú semená?",
+                options: [
+                    { text: "Splynutím gamét v kvetoch po opelení a oplodnení", isCorrect: true, feedback: "" },
+                    { text: "Z telových buniek", isCorrect: false, feedback: "Z telových buniek vznikajú výtrusy, nie semená." },
+                    { text: "Metamorfózou listov", isCorrect: false, feedback: "Semená vznikajú z vajíčok v reprodukčných orgánoch, nie priamo z listov." },
+                    { text: "Rozpadom koreňového systému", isCorrect: false, feedback: "Korene sa nepodieľajú na tvorbe semien týmto spôsobom." }
+                ]
+            },
+            {
+                text: "Kde sú uložené pohlavné orgány krytosemenných rastlín (magnóliorasty)?",
+                options: [
+                    { text: "V kvetoch", isCorrect: true, feedback: "" },
+                    { text: "V šišticiach", isCorrect: false, feedback: "V šišticiach sú pohlavné orgány nahosemenných rastlín." },
+                    { text: "Na spodnej strane listov", isCorrect: false, feedback: "Tam sa často nachádzajú výtrusnice papradí, nie orgány krytosemenných." },
+                    { text: "V stonkách", isCorrect: false, feedback: "Stonka nesie kvety, ale sama nie je reprodukčným orgánom." }
+                ]
+            },
+            {
+                text: "Čo tvorí samičiu (♀) šišticu borovicorastov?",
+                options: [
+                    { text: "Vreteno, podporné listene, semenné šupiny, dve nahé vajíčka", isCorrect: true, feedback: "" },
+                    { text: "Vreteno, tyčinky, peľové komôrky", isCorrect: false, feedback: "Toto je stavba samčej šištice." },
+                    { text: "Piestik, kalich a koruna", isCorrect: false, feedback: "Tieto orgány patria krytosemenným rastlinám." },
+                    { text: "Nitka a peľnica", isCorrect: false, feedback: "Nitka a peľnica tvoria tyčinku (samčí orgán)." }
+                ]
+            },
+            {
+                text: "Akú farbu majú zvyčajne samičie šištice v čase kvitnutia?",
+                options: [
+                    { text: "Sú červené", isCorrect: true, feedback: "" },
+                    { text: "Sú žlté", isCorrect: false, feedback: "Žlté sú samčie šištice." },
+                    { text: "Sú zelené (rovnaké ako listy)", isCorrect: false, feedback: "Podľa textu sú samičie šištice červené." },
+                    { text: "Sú modré", isCorrect: false, feedback: "Modrá farba nie je typická pre šištice borovicorastov." }
+                ]
+            },
+            {
+                text: "Ako sa nazýva rozlíšený kvetný obal?",
+                options: [
+                    { text: "Kalich (K) a Koruna (C)", isCorrect: true, feedback: "" },
+                    { text: "Okvetie (P)", isCorrect: false, feedback: "Okvetie je nerozlíšený kvetný obal (rovnaké lístky)." },
+                    { text: "Tyčinka a Piestik", isCorrect: false, feedback: "Toto sú reprodukčné orgány, nie obaly." },
+                    { text: "Integumenty", isCorrect: false, feedback: "Integumenty sú vajíčkové obaly vo vnútri semenníka." }
+                ]
+            },
+            {
+                text: "Ktorá časť piestika zachytáva peľové zrnká?",
+                options: [
+                    { text: "Blizna", isCorrect: true, feedback: "" },
+                    { text: "Čnelka", isCorrect: false, feedback: "Čnelka je stredná rúrkovitá časť, ktorá spája bliznu a semenník." },
+                    { text: "Semenník", isCorrect: false, feedback: "Semenník obsahuje vajíčka, peľ sa zachytáva hore na blizne." },
+                    { text: "Nitka", isCorrect: false, feedback: "Nitka je súčasťou tyčinky (samčieho orgánu)." }
+                ]
+            },
+            {
+                text: "Čo sa nachádza vo vnútri semenníka?",
+                options: [
+                    { text: "Vajíčko", isCorrect: true, feedback: "" },
+                    { text: "Peľnica", isCorrect: false, feedback: "Peľnica je súčasť tyčinky." },
+                    { text: "Kalich", isCorrect: false, feedback: "Kalich je vonkajší kvetný obal." },
+                    { text: "Tyčinka", isCorrect: false, feedback: "Tyčinka je samčí orgán, semenník je časť samičieho." }
+                ]
+            },
+            {
+                text: "Čo vzniká nezrastením vajíčkových obalov (integumentov) na vrchole vajíčka?",
+                options: [
+                    { text: "Peľový vchod", isCorrect: true, feedback: "" },
+                    { text: "Blizna", isCorrect: false, feedback: "Blizna je časť piestika, nie vajíčka." },
+                    { text: "Stopka", isCorrect: false, feedback: "Stopka nesie celý kvet." },
+                    { text: "Nucellus", isCorrect: false, feedback: "Nucellus je vajíčkové jadro vo vnútri obalov." }
+                ]
+            },
+            {
+                text: "Čo je to dvojdomá rastlina?",
+                options: [
+                    { text: "Rastlina, ktorá má len jednopohlavné kvety – buď iba samčie, alebo iba samičie (na jednej rastline)", isCorrect: true, feedback: "" },
+                    { text: "Rastlina, ktorá má samčie aj samičie kvety na jednom jedincovi", isCorrect: false, feedback: "To je jednodomá rastlina." },
+                    { text: "Rastlina s obojpohlavnými kvetmi", isCorrect: false, feedback: "Rastliny s obojpohlavnými kvetmi nie sú dvojdomé." },
+                    { text: "Rastlina, ktorá nekvitne", isCorrect: false, feedback: "Pojem sa týka kvitnúcich rastlín." }
+                ]
+            },
+            {
+                text: "Ktorá z uvedených rastlín je dvojdomá?",
+                options: [
+                    { text: "Pŕhľava", isCorrect: true, feedback: "" },
+                    { text: "Kukurica", isCorrect: false, feedback: "Kukurica je jednodomá (má samčie aj samičie súkvetia na jednej rastline)." },
+                    { text: "Tulipán", isCorrect: false, feedback: "Tulipán má obojpohlavné kvety." },
+                    { text: "Čerešňa", isCorrect: false, feedback: "Čerešňa má obojpohlavné kvety." }
+                ]
+            },
+            {
+                text: "Aký typ súkvetia má breza, lieska alebo vŕba?",
+                options: [
+                    { text: "Jahňada", isCorrect: true, feedback: "" },
+                    { text: "Šiška", isCorrect: false, feedback: "Šišku má borovica." },
+                    { text: "Hlávka", isCorrect: false, feedback: "Hlávku má ďatelina." },
+                    { text: "Úbor", isCorrect: false, feedback: "Úbor má púpava alebo margaréta." }
+                ]
+            },
+            {
+                text: "Ktoré súkvetie patrí medzi vrcholíkovité?",
+                options: [
+                    { text: "Vrcholík (napr. baza)", isCorrect: true, feedback: "" },
+                    { text: "Okolík (napr. prvosienka)", isCorrect: false, feedback: "Okolík je strapcovité súkvetie." },
+                    { text: "Chocholík (napr. hruška)", isCorrect: false, feedback: "Chocholík je strapcovité súkvetie." },
+                    { text: "Strapec (napr. ríbezľa)", isCorrect: false, feedback: "Strapec je strapcovité súkvetie." }
+                ]
+            },
+            {
+                text: "Aký kvetný obal majú typicky dvojklíčnolistové rastliny?",
+                options: [
+                    { text: "Rozlíšený (Kalich a Koruna)", isCorrect: true, feedback: "" },
+                    { text: "Nerozlíšený (Okvetie)", isCorrect: false, feedback: "Okvetie majú typicky jednoklíčnolistové rastliny." },
+                    { text: "Žiadny", isCorrect: false, feedback: "Majú kvetné obaly." },
+                    { text: "Len kalich", isCorrect: false, feedback: "Majú kalich aj korunu." }
+                ]
+            }
+        ];
+
+        let currentScore = 0;
+        let answeredCount = 0;
+        const totalQuestions = questionsData.length;
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function initQuiz() {
+            const container = document.getElementById('quiz-container');
+            shuffleArray(questionsData);
+
+            questionsData.forEach((q, index) => {
+                let currentOptions = [...q.options];
+                shuffleArray(currentOptions);
+
+                const qDiv = document.createElement('div');
+                qDiv.className = 'question-container';
+                qDiv.id = `q-${index}`;
+
+                let optionsHtml = '';
+                currentOptions.forEach((opt) => {
+                    const safeFeedback = opt.feedback.replace(/"/g, '&quot;');
+                    optionsHtml += `
+                        <button class="option" 
+                            onclick="handleAnswer(this, ${opt.isCorrect}, '${safeFeedback}')">
+                            ${opt.text}
+                        </button>
+                    `;
+                });
+
+                qDiv.innerHTML = `
+                    <div class="question-text">${index + 1}. ${q.text}</div>
+                    <div class="options-grid">${optionsHtml}</div>
+                `;
+                container.appendChild(qDiv);
+            });
+            
+            if (window.MathJax) window.MathJax.typesetPromise();
+        }
+
+        function handleAnswer(btn, isCorrect, feedback) {
+            const parent = btn.parentElement;
+            if (parent.dataset.locked === "true") return;
+            parent.dataset.locked = "true";
+            
+            const buttons = parent.querySelectorAll('.option');
+            buttons.forEach(b => {
+                b.classList.add('disabled');
+                if (b.onclick.toString().includes('true,')) {
+                    b.classList.add('correct');
+                }
+            });
+
+            if (isCorrect) {
+                currentScore++;
+            } else {
+                btn.classList.add('incorrect');
+                showModal(feedback);
+            }
+
+            answeredCount++;
+            if (answeredCount === totalQuestions) {
+                showResults();
+            }
+        }
+
+        function showModal(text) {
+            if (!text) return;
+            document.getElementById('feedbackText').innerHTML = text;
+            document.getElementById('feedbackModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('feedbackModal').style.display = 'none';
+        }
+
+        function showResults() {
+            const percentage = Math.round((currentScore / totalQuestions) * 100);
+            let grade = '';
+            if (percentage >= 90) grade = 'Výborný';
+            else if (percentage >= 80) grade = 'Veľmi dobrý';
+            else if (percentage >= 70) grade = 'Dobrý';
+            else if (percentage >= 60) grade = 'Dostačujúci';
+            else grade = 'Nedostačujúci';
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `
+                Výsledok: ${currentScore} / ${totalQuestions} (${percentage}%)<br>
+                <span style="color: #2c3e50; font-size: 1.1em">${grade}</span>
+            `;
+            resultsDiv.scrollIntoView({behavior: "smooth"});
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('feedbackModal');
+            if (event.target == modal) closeModal();
+        }
+
+        initQuiz();
+    </script>
+</body>
+</html>
