@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktívny Test B: Teplota a tlak plynu</title>
+    <!-- MathJax pre vzorce -->
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.5; background: #f9f9f9; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+        .question-container { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .question-text { font-weight: 600; font-size: 1.1em; margin-bottom: 15px; color: #2c3e50; }
+        .option { display: block; width: 100%; padding: 12px 15px; margin: 8px 0; background: #fff; border: 2px solid #e0e0e0; border-radius: 6px; cursor: pointer; text-align: left; transition: all 0.2s; font-size: 0.95em; box-sizing: border-box; }
+        .option:hover:not(.disabled) { background: #f0f7ff; border-color: #2196F3; }
+        
+        /* Stavy odpovedí */
+        .option.correct { background: #d4edda !important; border-color: #28a745 !important; color: #155724; cursor: default; }
+        .option.incorrect { background: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; cursor: default; }
+        .option.disabled { cursor: default; opacity: 0.7; pointer-events: none; }
+        
+        .results { text-align: center; padding: 20px; margin-top: 20px; font-size: 1.2em; font-weight: bold; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: none; }
+        
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; animation: fadeIn 0.3s; }
+        .modal-content { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-header { font-weight: bold; color: #dc3545; margin-bottom: 10px; font-size: 1.1em; }
+        .modal-body { margin-bottom: 20px; color: #555; }
+        .btn-close { background: #2c3e50; color: white; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-size: 1em; }
+        .btn-close:hover { background: #1a252f; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <h1 id="testTitle">2.7 Teplota a tlak ideálneho plynu - Test B</h1>
+    <div id="quiz-container"></div>
+    <div id="results" class="results"></div>
+
+    <!-- Modal pre feedback -->
+    <div class="modal-overlay" id="feedbackModal">
+        <div class="modal-content">
+            <div class="modal-header">Nesprávna odpoveď</div>
+            <div class="modal-body" id="feedbackText"></div>
+            <button class="btn-close" onclick="closeModal()">Rozumiem</button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // DÁTA TESTU B (UNIKÁTNE OTÁZKY)
+        // ==========================================
+        const questionsData = [
+            {
+                text: "Čoho mierou je teplota podľa časticovej fyziky?",
+                options: [
+                    { text: "Strednej kinetickej energie pohybu molekúl.", isCorrect: true, feedback: "" },
+                    { text: "Hustoty plynu.", isCorrect: false, feedback: "Hustota súvisí s hmotnosťou a objemom, teplota je mierou energie pohybu molekúl." },
+                    { text: "Celkovej potenciálnej energie molekúl.", isCorrect: false, feedback: "Teplota súvisí s kinetickou (pohybovou) energiou, nie potenciálnou." },
+                    { text: "Rýchlosti zvuku v danom prostredí.", isCorrect: false, feedback: "Aj keď rýchlosť zvuku s teplotou súvisí, definícia teploty je viazaná na kinetickú energiu molekúl." }
+                ]
+            },
+            {
+                text: "Ktorá z nasledujúcich rovníc predstavuje základnú rovnicu pre tlak ideálneho plynu uvedenú v texte?",
+                options: [
+                    { text: "$p = \\frac{2}{3} \\frac{N}{V} E_{ks}$", isCorrect: true, feedback: "" },
+                    { text: "$p = m \\cdot g \\cdot h$", isCorrect: false, feedback: "Toto je vzorec pre hydrostatický tlak kvapalín." },
+                    { text: "$E_{ks} = \\frac{1}{2} m v^2$", isCorrect: false, feedback: "Toto je vzorec pre kinetickú energiu jednej častice, nie pre tlak plynu." },
+                    { text: "$p = \\frac{F}{S}$", isCorrect: false, feedback: "Toto je všeobecná definícia tlaku, ale nie časticová rovnica pre ideálny plyn uvedená v učive." }
+                ]
+            },
+            {
+                text: "Čo sa deje s tlakom vzduchu pri jeho zahrievaní v uzavretej nádobe?",
+                options: [
+                    { text: "Tlak narastá priamo úmerne s teplotou.", isCorrect: true, feedback: "" },
+                    { text: "Tlak klesá, pretože vzduch redne.", isCorrect: false, feedback: "V uzavretej nádobe (stály objem) vzduch neredne a tlak pri zahrievaní stúpa." },
+                    { text: "Tlak sa nemení, mení sa len objem.", isCorrect: false, feedback: "V zadaní je špecifikovaná uzavretá nádoba, teda objem je stály, preto sa musí meniť tlak." },
+                    { text: "Tlak narastá kvadraticky (exponenciálne).", isCorrect: false, feedback: "Text definuje vzťah ako priamu (lineárnu) úmernosť." }
+                ]
+            },
+            {
+                text: "Aké podmienky musia byť splnené, aby platil vzťah priamej úmernosti medzi tlakom a teplotou?",
+                options: [
+                    { text: "Stála hmotnosť a stály objem plynu.", isCorrect: true, feedback: "" },
+                    { text: "Stály tlak a premenlivý objem.", isCorrect: false, feedback: "Ak by bol tlak stály, nemohli by sme skúmať jeho závislosť. Objem musí byť konštantný." },
+                    { text: "Stála teplota.", isCorrect: false, feedback: "Teplota sa práveže mení, aby sme sledovali jej vplyv na tlak." },
+                    { text: "Otvorená nádoba.", isCorrect: false, feedback: "V otvorenej nádobe nie je možné udržať stálu hmotnosť a objem pre meranie tlaku." }
+                ]
+            },
+            {
+                text: "Aké prístroje sa používajú pri experimente na meranie závislosti teploty a tlaku (strana 58)?",
+                options: [
+                    { text: "Teplomer a manometer.", isCorrect: true, feedback: "" },
+                    { text: "Teplomer a barometer.", isCorrect: false, feedback: "Barometer meria atmosférický tlak, na meranie tlaku v nádobe sa používa manometer." },
+                    { text: "Vlhkomer a tlakomer.", isCorrect: false, feedback: "Vlhkosť sa v tomto experimente nemeria." },
+                    { text: "Kalorimeter a váhy.", isCorrect: false, feedback: "Tieto prístroje slúžia na meranie tepla a hmotnosti, nie tlaku plynu." }
+                ]
+            },
+            {
+                text: "V praktickom cvičení sa uvádza prepočet jednotky mmHg na pascaly. Aká je hodnota 1 mmHg?",
+                options: [
+                    { text: "približne 133,321 Pa", isCorrect: true, feedback: "" },
+                    { text: "101 325 Pa", isCorrect: false, feedback: "Toto je hodnota normálneho atmosférického tlaku, nie 1 mmHg." },
+                    { text: "1000 Pa", isCorrect: false, feedback: "1 mmHg je výrazne menšia hodnota než 1 kPa." },
+                    { text: "1 Pa", isCorrect: false, feedback: "1 mmHg zodpovedá približne 133 Pa." }
+                ]
+            },
+            {
+                text: "Ak meriame tlak manometrom (pretlak), ako vypočítame výsledný celkový tlak vzduchu v nádobe?",
+                options: [
+                    { text: "K nameranému tlaku musíme pripočítať atmosférický tlak ($p_a$).", isCorrect: true, feedback: "" },
+                    { text: "Od nameraného tlaku musíme odčítať atmosférický tlak.", isCorrect: false, feedback: "Manometer meria rozdiel oproti atmosfére, celkový tlak je teda súčet." },
+                    { text: "Nameraná hodnota na manometri je už celkový tlak.", isCorrect: false, feedback: "Manometer meria len pretlak voči okoliu." },
+                    { text: "Musíme hodnotu vynásobiť dvomi.", isCorrect: false, feedback: "Násobenie nie je súčasťou prepočtu na absolútny tlak." }
+                ]
+            }
+        ];
+
+        // ==========================================
+        // LOGIKA APLIKÁCIE
+        // ==========================================
+        let currentScore = 0;
+        let answeredCount = 0;
+        const totalQuestions = questionsData.length;
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function initQuiz() {
+            const container = document.getElementById('quiz-container');
+            shuffleArray(questionsData);
+
+            questionsData.forEach((q, index) => {
+                let currentOptions = [...q.options];
+                shuffleArray(currentOptions);
+
+                const qDiv = document.createElement('div');
+                qDiv.className = 'question-container';
+                qDiv.id = `q-${index}`;
+
+                let optionsHtml = '';
+                currentOptions.forEach((opt) => {
+                    const safeFeedback = opt.feedback.replace(/"/g, '&quot;');
+                    
+                    optionsHtml += `
+                        <button class="option" 
+                            onclick="handleAnswer(this, ${opt.isCorrect}, '${safeFeedback}', ${index})">
+                            ${opt.text}
+                        </button>
+                    `;
+                });
+
+                qDiv.innerHTML = `
+                    <div class="question-text">${index + 1}. ${q.text}</div>
+                    <div class="options-grid">${optionsHtml}</div>
+                `;
+                container.appendChild(qDiv);
+            });
+            
+            if (window.MathJax) {
+                window.MathJax.typesetPromise();
+            }
+        }
+
+        function handleAnswer(btn, isCorrect, feedback, qIndex) {
+            const parent = btn.parentElement;
+            if (parent.dataset.locked === "true") return;
+            
+            parent.dataset.locked = "true";
+            
+            const buttons = parent.querySelectorAll('.option');
+            buttons.forEach(b => {
+                b.classList.add('disabled');
+                if (b.getAttribute('onclick').includes('true,')) {
+                    b.classList.add('correct');
+                }
+            });
+
+            if (isCorrect) {
+                // btn.classList.add('correct'); // Už pridané v cykle vyššie
+                currentScore++;
+            } else {
+                btn.classList.add('incorrect');
+                showModal(feedback);
+            }
+
+            answeredCount++;
+            if (answeredCount === totalQuestions) {
+                showResults();
+            }
+        }
+
+        function showModal(text) {
+            if (!text) return;
+            document.getElementById('feedbackText').innerHTML = text;
+            document.getElementById('feedbackModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('feedbackModal').style.display = 'none';
+        }
+
+        function showResults() {
+            const percentage = Math.round((currentScore / totalQuestions) * 100);
+            let grade = '';
+            if (percentage >= 90) grade = 'Výborný';
+            else if (percentage >= 80) grade = 'Veľmi dobrý';
+            else if (percentage >= 70) grade = 'Dobrý';
+            else if (percentage >= 60) grade = 'Dostačujúci';
+            else grade = 'Nedostačujúci';
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `
+                Výsledok: ${currentScore} / ${totalQuestions} (${percentage}%)<br>
+                <span style="color: #2c3e50; font-size: 1.1em">${grade}</span>
+            `;
+            resultsDiv.scrollIntoView({behavior: "smooth"});
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('feedbackModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        initQuiz();
+    </script>
+</body>
+</html>
