@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Tabuliek - Testy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            background: #f5f5f5;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .back-link {
+            display: inline-block;
+            color: #667eea;
+            text-decoration: none;
+            margin-bottom: 20px;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .table-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+        .table-card h2 {
+            color: #444;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        /* Základná tabuľka */
+        .table-basic {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table-basic th,
+        .table-basic td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .table-basic th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+        .table-basic tr:hover {
+            background: #f8f9ff;
+        }
+
+        /* Pruhovaná tabuľka */
+        .table-striped {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table-striped th,
+        .table-striped td {
+            padding: 12px 15px;
+            text-align: left;
+        }
+        .table-striped th {
+            background: #333;
+            color: white;
+            font-weight: 600;
+        }
+        .table-striped tr:nth-child(even) {
+            background: #f5f5f5;
+        }
+        .table-striped tr:hover {
+            background: #e8e8e8;
+        }
+
+        /* Ohraničená tabuľka */
+        .table-bordered {
+            width: 100%;
+            border-collapse: collapse;
+            border: 2px solid #667eea;
+        }
+        .table-bordered th,
+        .table-bordered td {
+            padding: 12px 15px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        .table-bordered th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Status badges */
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Responzívna tabuľka */
+        @media (max-width: 600px) {
+            .table-responsive thead {
+                display: none;
+            }
+            .table-responsive tr {
+                display: block;
+                margin-bottom: 15px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                padding: 10px;
+            }
+            .table-responsive td {
+                display: flex;
+                justify-content: space-between;
+                padding: 8px 0;
+                border: none;
+                border-bottom: 1px solid #eee;
+            }
+            .table-responsive td:last-child {
+                border-bottom: none;
+            }
+            .table-responsive td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #667eea;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Späť na úvod</a>
+        <h1>Test Tabuliek</h1>
+
+        <div class="table-card">
+            <h2>Základná tabuľka</h2>
+            <table class="table-basic">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Meno</th>
+                        <th>Email</th>
+                        <th>Pozícia</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Ján Novák</td>
+                        <td>jan.novak@email.sk</td>
+                        <td>Vývojár</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Mária Kováčová</td>
+                        <td>maria.kovacova@email.sk</td>
+                        <td>Dizajnérka</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Peter Horváth</td>
+                        <td>peter.horvath@email.sk</td>
+                        <td>Projektový manažér</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Anna Szabóová</td>
+                        <td>anna.szaboova@email.sk</td>
+                        <td>Testerka</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-card">
+            <h2>Pruhovaná tabuľka so statusmi</h2>
+            <table class="table-striped">
+                <thead>
+                    <tr>
+                        <th>Projekt</th>
+                        <th>Klient</th>
+                        <th>Termín</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Webová aplikácia</td>
+                        <td>ABC s.r.o.</td>
+                        <td>15.02.2026</td>
+                        <td><span class="status status-active">Aktívny</span></td>
+                    </tr>
+                    <tr>
+                        <td>Mobilná appka</td>
+                        <td>XYZ a.s.</td>
+                        <td>28.02.2026</td>
+                        <td><span class="status status-pending">Čaká</span></td>
+                    </tr>
+                    <tr>
+                        <td>E-shop</td>
+                        <td>Obchod123</td>
+                        <td>10.01.2026</td>
+                        <td><span class="status status-active">Aktívny</span></td>
+                    </tr>
+                    <tr>
+                        <td>CRM systém</td>
+                        <td>BigCorp</td>
+                        <td>01.12.2025</td>
+                        <td><span class="status status-inactive">Ukončený</span></td>
+                    </tr>
+                    <tr>
+                        <td>Blog</td>
+                        <td>Bloger.sk</td>
+                        <td>20.03.2026</td>
+                        <td><span class="status status-pending">Čaká</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-card">
+            <h2>Ohraničená tabuľka s číslami</h2>
+            <table class="table-bordered">
+                <thead>
+                    <tr>
+                        <th>Mesiac</th>
+                        <th>Tržby (€)</th>
+                        <th>Náklady (€)</th>
+                        <th>Zisk (€)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Január</td>
+                        <td>45 000</td>
+                        <td>32 000</td>
+                        <td>13 000</td>
+                    </tr>
+                    <tr>
+                        <td>Február</td>
+                        <td>52 000</td>
+                        <td>35 000</td>
+                        <td>17 000</td>
+                    </tr>
+                    <tr>
+                        <td>Marec</td>
+                        <td>48 000</td>
+                        <td>30 000</td>
+                        <td>18 000</td>
+                    </tr>
+                    <tr>
+                        <td>Apríl</td>
+                        <td>61 000</td>
+                        <td>38 000</td>
+                        <td>23 000</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr style="font-weight: bold; background: #f0f0f0;">
+                        <td>Spolu</td>
+                        <td>206 000</td>
+                        <td>135 000</td>
+                        <td>71 000</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="table-card">
+            <h2>Responzívna tabuľka (zmenšite okno)</h2>
+            <table class="table-basic table-responsive">
+                <thead>
+                    <tr>
+                        <th>Produkt</th>
+                        <th>Kategória</th>
+                        <th>Cena</th>
+                        <th>Skladom</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-label="Produkt">Notebook Pro</td>
+                        <td data-label="Kategória">Elektronika</td>
+                        <td data-label="Cena">1 299 €</td>
+                        <td data-label="Skladom">Áno</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Produkt">Bezdrôtové slúchadlá</td>
+                        <td data-label="Kategória">Audio</td>
+                        <td data-label="Cena">199 €</td>
+                        <td data-label="Skladom">Áno</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Produkt">Smart hodinky</td>
+                        <td data-label="Kategória">Wearables</td>
+                        <td data-label="Cena">349 €</td>
+                        <td data-label="Skladom">Nie</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
