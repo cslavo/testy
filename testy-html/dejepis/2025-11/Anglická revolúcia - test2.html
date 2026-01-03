@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <title>Test 2 - Anglická revolúcia (Detaily a súvislosti)</title>
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background: #fdfdfd; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; margin-bottom: 30px; color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 15px; }
+        .question { margin: 25px 0; padding: 20px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .question-text { font-weight: bold; margin-bottom: 15px; color: #2c3e50; font-size: 1.15em; }
+        .options { margin-top: 10px; }
+        .option { margin: 10px 0; padding: 12px 15px; cursor: pointer; user-select: none; color: #444; background: white; border: 1px solid #dcdcdc; border-radius: 5px; transition: all 0.2s; }
+        .option:hover { background: #f0f8ff; border-color: #3498db; }
+        .option.selected-correct { background: #d4edda !important; color: #155724 !important; cursor: default; border: 1px solid #c3e6cb; font-weight: bold; }
+        .option.selected-incorrect { background: #f8d7da !important; color: #721c24 !important; cursor: default; border: 1px solid #f5c6cb; }
+        .option.correct-answer { background: #d4edda !important; color: #155724 !important; cursor: default; border: 1px solid #c3e6cb; }
+        .option.disabled { cursor: default; pointer-events: none; opacity: 0.7; }
+        
+        .results { padding: 25px; margin-top: 30px; text-align: center; font-size: 20px; font-weight: bold; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .results.hidden { display: none; }
+        
+        /* Modal pre vysvetlenie */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; backdrop-filter: blur(2px); }
+        .modal-content { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 10px; max-width: 600px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: fadeIn 0.3s; }
+        .modal-header { font-weight: bold; font-size: 20px; margin-bottom: 15px; color: #e74c3c; border-bottom: 1px solid #eee; padding-bottom: 10px; display: flex; align-items: center; }
+        .modal-header::before { content: "ℹ"; display: inline-block; margin-right: 10px; background: #e74c3c; color: white; width: 24px; height: 24px; text-align: center; line-height: 24px; border-radius: 50%; font-size: 14px; }
+        .modal-text { margin-bottom: 25px; line-height: 1.6; color: #555; font-size: 16px; }
+        .modal-button { background: #3498db; color: white; border: none; padding: 10px 30px; border-radius: 5px; cursor: pointer; font-size: 16px; display: block; margin: 0 auto; transition: background 0.2s; }
+        .modal-button:hover { background: #2980b9; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translate(-50%, -55%); } to { opacity: 1; transform: translate(-50%, -50%); } }
+        @media print { .results, .modal-overlay { display: none !important; } }
+    </style>
+</head>
+<body>
+    <h1>Test 2 - Anglická revolúcia</h1>
+    
+    <!-- Otázka 1 -->
+    <div class="question">
+        <div class="question-text">1. Podľa vzoru ktorého panovníka sa snažil vládnuť Jakub I. Stuart v Anglicku?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 1, 'a', false, 'Jakub I. sa snažil vládnuť absolutisticky podľa vzoru francúzskych kráľov, konkrétne Ľudovíta XIII.')">a) Podľa vzoru španielskeho kráľa Filipa II.</div>
+            <div class="option" onclick="selectAnswer(this, 1, 'b', false, 'Jakub I. sa snažil vládnuť absolutisticky podľa vzoru francúzskych kráľov, konkrétne Ľudovíta XIII.')">b) Podľa vzoru ruskej cárovnej Kataríny Veľkej.</div>
+            <div class="option" onclick="selectAnswer(this, 1, 'c', true, 'Jakub I. sa snažil vládnuť absolutisticky podľa vzoru francúzskych kráľov, konkrétne Ľudovíta XIII.')">c) Podľa vzoru francúzskeho kráľa Ľudovíta XIII.</div>
+            <div class="option" onclick="selectAnswer(this, 1, 'd', false, 'Jakub I. sa snažil vládnuť absolutisticky podľa vzoru francúzskych kráľov, konkrétne Ľudovíta XIII.')">d) Podľa vzoru svojej predchodkyne Alžbety I.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 2 -->
+    <div class="question">
+        <div class="question-text">2. Aký bol vzťah Írska k Jakubovi I.?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 2, 'a', false, 'Írsko bolo katolícke a voči anglikánskym snahám Jakuba I. kládlo silný odpor.')">a) Íri ho vítali ako osloboditeľa.</div>
+            <div class="option" onclick="selectAnswer(this, 2, 'b', true, 'Írsko bolo katolícke a voči anglikánskym snahám Jakuba I. kládlo silný odpor.')">b) Írsko bolo katolícke a kládlo mu silný odpor.</div>
+            <div class="option" onclick="selectAnswer(this, 2, 'c', false, 'Írsko bolo katolícke a voči anglikánskym snahám Jakuba I. kládlo silný odpor.')">c) Írsko bolo presbyteriánske a podporovalo ho.</div>
+            <div class="option" onclick="selectAnswer(this, 2, 'd', false, 'Írsko bolo katolícke a voči anglikánskym snahám Jakuba I. kládlo silný odpor.')">d) Írsko bolo neutrálne a do politiky nezasahovalo.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 3 -->
+    <div class="question">
+        <div class="question-text">3. Čo obsahovala „Petícia práv“, ktorú spísali členovia parlamentu za vlády Karola I.?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 3, 'a', false, 'V Petícii práv parlament označil kráľovo svojvoľné vyberanie daní a uväzňovanie šľachticov bez súdu za protizákonné.')">a) Žiadosť o vyhlásenie vojny Španielsku.</div>
+            <div class="option" onclick="selectAnswer(this, 3, 'b', false, 'V Petícii práv parlament označil kráľovo svojvoľné vyberanie daní a uväzňovanie šľachticov bez súdu za protizákonné.')">b) Návrh na zrušenie monarchie.</div>
+            <div class="option" onclick="selectAnswer(this, 3, 'c', false, 'V Petícii práv parlament označil kráľovo svojvoľné vyberanie daní a uväzňovanie šľachticov bez súdu za protizákonné.')">c) Požiadavku na zavedenie katolicizmu.</div>
+            <div class="option" onclick="selectAnswer(this, 3, 'd', true, 'V Petícii práv parlament označil kráľovo svojvoľné vyberanie daní a uväzňovanie šľachticov bez súdu za protizákonné.')">d) Označenie vyberania daní a uväzňovania bez súdu za protizákonné.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 4 -->
+    <div class="question">
+        <div class="question-text">4. Prečo sa v roku 1639 vzbúrila škótska šľachta?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 4, 'a', true, 'Karol I. sa pokúsil v Škótsku, kde prevládali presbyteriáni, zaviesť anglikánsku cirkev, čo vyvolalo vzburu.')">a) Pretože kráľ chcel v Škótsku zaviesť anglikánsku cirkev.</div>
+            <div class="option" onclick="selectAnswer(this, 4, 'b', false, 'Karol I. sa pokúsil v Škótsku, kde prevládali presbyteriáni, zaviesť anglikánsku cirkev, čo vyvolalo vzburu.')">b) Pretože kráľ odmietol navštíviť Edinburgh.</div>
+            <div class="option" onclick="selectAnswer(this, 4, 'c', false, 'Karol I. sa pokúsil v Škótsku, kde prevládali presbyteriáni, zaviesť anglikánsku cirkev, čo vyvolalo vzburu.')">c) Pretože chceli vytvoriť úniu s Francúzskom.</div>
+            <div class="option" onclick="selectAnswer(this, 4, 'd', false, 'Karol I. sa pokúsil v Škótsku, kde prevládali presbyteriáni, zaviesť anglikánsku cirkev, čo vyvolalo vzburu.')">d) Pretože kráľ zvýšil dane na vlnu.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 5 -->
+    <div class="question">
+        <div class="question-text">5. Ako dlho zasadal takzvaný „Krátky parlament“?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 5, 'a', false, 'Krátky parlament zasadal iba 14 dní v roku 1640, kým ho kráľ opäť nerozpustil, lebo odmietol schváliť dane.')">a) 3 mesiace</div>
+            <div class="option" onclick="selectAnswer(this, 5, 'b', true, 'Krátky parlament zasadal iba 14 dní v roku 1640, kým ho kráľ opäť nerozpustil, lebo odmietol schváliť dane.')">b) 14 dní</div>
+            <div class="option" onclick="selectAnswer(this, 5, 'c', false, 'Krátky parlament zasadal iba 14 dní v roku 1640, kým ho kráľ opäť nerozpustil, lebo odmietol schváliť dane.')">c) 1 rok</div>
+            <div class="option" onclick="selectAnswer(this, 5, 'd', false, 'Krátky parlament zasadal iba 14 dní v roku 1640, kým ho kráľ opäť nerozpustil, lebo odmietol schváliť dane.')">d) 2 týždne a 2 dni</div>
+        </div>
+    </div>
+
+    <!-- Otázka 6 -->
+    <div class="question">
+        <div class="question-text">6. Ktorých kráľových radcov žiadal parlament potrestať a popraviť?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 6, 'a', false, 'Parlament žiadal hlavu lorda Stafforda a arcibiskupa Lauda, pretože boli zodpovední za porušovanie práv a presadzovanie absolutizmu.')">a) Princa Ruperta a vojvodu z Buckinghamu.</div>
+            <div class="option" onclick="selectAnswer(this, 6, 'b', false, 'Parlament žiadal hlavu lorda Stafforda a arcibiskupa Lauda, pretože boli zodpovední za porušovanie práv a presadzovanie absolutizmu.')">b) Richarda Cromwella a Johna Pyma.</div>
+            <div class="option" onclick="selectAnswer(this, 6, 'c', true, 'Parlament žiadal hlavu lorda Stafforda a arcibiskupa Lauda, pretože boli zodpovední za porušovanie práv a presadzovanie absolutizmu.')">c) Lorda Stafforda a arcibiskupa Lauda.</div>
+            <div class="option" onclick="selectAnswer(this, 6, 'd', false, 'Parlament žiadal hlavu lorda Stafforda a arcibiskupa Lauda, pretože boli zodpovední za porušovanie práv a presadzovanie absolutizmu.')">d) Lorda Essexa a generála Fairfaxa.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 7 -->
+    <div class="question">
+        <div class="question-text">7. Kto bol John Pym a čo sa mu stalo?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 7, 'a', true, 'John Pym bol jeden z radikálnych vodcov parlamentu. Kráľ sa ho pokúsil v parlamente zatknúť, ale neúspešne, pretože mu Londýnčania poskytli ochranu.')">a) Radikálny vodca parlamentu, ktorého sa kráľ neúspešne pokúsil zatknúť.</div>
+            <div class="option" onclick="selectAnswer(this, 7, 'b', false, 'John Pym bol jeden z radikálnych vodcov parlamentu. Kráľ sa ho pokúsil v parlamente zatknúť, ale neúspešne, pretože mu Londýnčania poskytli ochranu.')">b) Veliteľ kráľovskej jazdy, ktorý zradil kráľa.</div>
+            <div class="option" onclick="selectAnswer(this, 7, 'c', false, 'John Pym bol jeden z radikálnych vodcov parlamentu. Kráľ sa ho pokúsil v parlamente zatknúť, ale neúspešne, pretože mu Londýnčania poskytli ochranu.')">c) Autor navigačných aktov.</div>
+            <div class="option" onclick="selectAnswer(this, 7, 'd', false, 'John Pym bol jeden z radikálnych vodcov parlamentu. Kráľ sa ho pokúsil v parlamente zatknúť, ale neúspešne, pretože mu Londýnčania poskytli ochranu.')">d) Prvý anglický kráľ z rodu Stuartovcov.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 8 -->
+    <div class="question">
+        <div class="question-text">8. Aká významná bitka sa odohrala v roku 1644?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 8, 'a', false, 'V roku 1644 prebehla bitka u Marston Moor, ktorá bola jednou z najvýznamnejších bitiek občianskej vojny.')">a) Bitka pri Hastingse</div>
+            <div class="option" onclick="selectAnswer(this, 8, 'b', true, 'V roku 1644 prebehla bitka u Marston Moor, ktorá bola jednou z najvýznamnejších bitiek občianskej vojny.')">b) Bitka u Marston Moor</div>
+            <div class="option" onclick="selectAnswer(this, 8, 'c', false, 'V roku 1644 prebehla bitka u Marston Moor, ktorá bola jednou z najvýznamnejších bitiek občianskej vojny.')">c) Bitka pri Waterloo</div>
+            <div class="option" onclick="selectAnswer(this, 8, 'd', false, 'V roku 1644 prebehla bitka u Marston Moor, ktorá bola jednou z najvýznamnejších bitiek občianskej vojny.')">d) Bitka pri Agincourte</div>
+        </div>
+    </div>
+
+    <!-- Otázka 9 -->
+    <div class="question">
+        <div class="question-text">9. Čo chceli dosiahnuť „umiernení“ presbyteriáni v parlamente počas konfliktu s kráľom?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 9, 'a', false, 'Umiernení presbyteriáni videli v povstaní hrozbu, preto sa chceli s kráľom uzmieriť a schváliť mu dane.')">a) Chceli kráľa okamžite popraviť.</div>
+            <div class="option" onclick="selectAnswer(this, 9, 'b', false, 'Umiernení presbyteriáni videli v povstaní hrozbu, preto sa chceli s kráľom uzmieriť a schváliť mu dane.')">b) Chceli zaviesť republiku bez akejkoľvek monarchie.</div>
+            <div class="option" onclick="selectAnswer(this, 9, 'c', false, 'Umiernení presbyteriáni videli v povstaní hrozbu, preto sa chceli s kráľom uzmieriť a schváliť mu dane.')">c) Chceli odovzdať moc Škótsku.</div>
+            <div class="option" onclick="selectAnswer(this, 9, 'd', true, 'Umiernení presbyteriáni videli v povstaní hrozbu, preto sa chceli s kráľom uzmieriť a schváliť mu dane.')">d) Chceli sa s kráľom uzmieriť a schváliť dane.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 10 -->
+    <div class="question">
+        <div class="question-text">10. Aký bol výsledok obchodnej vojny medzi Anglickom a Holandskom?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 10, 'a', false, 'Anglicko vojnu vyhralo, stalo sa obchodnou veľmocou a vyradilo Holandsko z pozície lídra námorného obchodu.')">a) Holandsko zvíťazilo a ovládlo obchod v kanáli La Manche.</div>
+            <div class="option" onclick="selectAnswer(this, 10, 'b', true, 'Anglicko vojnu vyhralo, stalo sa obchodnou veľmocou a vyradilo Holandsko z pozície lídra námorného obchodu.')">b) Anglicko vyhralo a stalo sa obchodnou veľmocou.</div>
+            <div class="option" onclick="selectAnswer(this, 10, 'c', false, 'Anglicko vojnu vyhralo, stalo sa obchodnou veľmocou a vyradilo Holandsko z pozície lídra námorného obchodu.')">c) Vojna skončila nerozhodne a oba štáty skrachovali.</div>
+            <div class="option" onclick="selectAnswer(this, 10, 'd', false, 'Anglicko vojnu vyhralo, stalo sa obchodnou veľmocou a vyradilo Holandsko z pozície lídra námorného obchodu.')">d) Anglicko stratilo všetky svoje kolónie v prospech Holandska.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 11 -->
+    <div class="question">
+        <div class="question-text">11. Čo charakterizovalo režim Olivera Cromwella v oblasti kultúry a spoločenského života?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 11, 'a', false, 'Cromwell zaviedol prísny puritánsky režim. Zakázal zábavy, zatvoril divadlá a zaviedol cenzúru.')">a) Podpora umenia, divadiel a bujarých osláv.</div>
+            <div class="option" onclick="selectAnswer(this, 11, 'b', true, 'Cromwell zaviedol prísny puritánsky režim. Zakázal zábavy, zatvoril divadlá a zaviedol cenzúru.')">b) Prísny puritánsky režim, zákaz zábav a divadiel.</div>
+            <div class="option" onclick="selectAnswer(this, 11, 'c', false, 'Cromwell zaviedol prísny puritánsky režim. Zakázal zábavy, zatvoril divadlá a zaviedol cenzúru.')">c) Návrat k katolíckym tradíciám a sviatkom.</div>
+            <div class="option" onclick="selectAnswer(this, 11, 'd', false, 'Cromwell zaviedol prísny puritánsky režim. Zakázal zábavy, zatvoril divadlá a zaviedol cenzúru.')">d) Úplná sloboda slova bez akejkoľvek cenzúry.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 12 -->
+    <div class="question">
+        <div class="question-text">12. Kto nastúpil k moci po smrti Olivera Cromwella v roku 1658?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 12, 'a', true, 'Moc prevzal jeho syn Richard. Nebol však ambiciózny, v krajine narástla anarchia, čo viedlo k obnoveniu monarchie.')">a) Jeho syn Richard, ktorý však nebol ambiciózny.</div>
+            <div class="option" onclick="selectAnswer(this, 12, 'b', false, 'Moc prevzal jeho syn Richard. Nebol však ambiciózny, v krajine narástla anarchia, čo viedlo k obnoveniu monarchie.')">b) Generál Fairfax, ktorý nastolil vojenskú diktatúru.</div>
+            <div class="option" onclick="selectAnswer(this, 12, 'c', false, 'Moc prevzal jeho syn Richard. Nebol však ambiciózny, v krajine narástla anarchia, čo viedlo k obnoveniu monarchie.')">c) Okamžite nastúpil Karol II.</div>
+            <div class="option" onclick="selectAnswer(this, 12, 'd', false, 'Moc prevzal jeho syn Richard. Nebol však ambiciózny, v krajine narástla anarchia, čo viedlo k obnoveniu monarchie.')">d) Viliam III. Oranžský.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 13 -->
+    <div class="question">
+        <div class="question-text">13. Kto nastúpil na anglický trón v roku 1685 po smrti Karola II.?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 13, 'a', false, 'Po Karolovi II. nastúpil jeho brat Jakub II., ktorý konvertoval na katolícku vieru, čo vyvolalo obavy šľachty.')">a) Jeho syn Karol III.</div>
+            <div class="option" onclick="selectAnswer(this, 13, 'b', false, 'Po Karolovi II. nastúpil jeho brat Jakub II., ktorý konvertoval na katolícku vieru, čo vyvolalo obavy šľachty.')">b) Jeho synovec Viliam.</div>
+            <div class="option" onclick="selectAnswer(this, 13, 'c', true, 'Po Karolovi II. nastúpil jeho brat Jakub II., ktorý konvertoval na katolícku vieru, čo vyvolalo obavy šľachty.')">c) Jeho brat Jakub II.</div>
+            <div class="option" onclick="selectAnswer(this, 13, 'd', false, 'Po Karolovi II. nastúpil jeho brat Jakub II., ktorý konvertoval na katolícku vieru, čo vyvolalo obavy šľachty.')">d) Oliver Cromwell.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 14 -->
+    <div class="question">
+        <div class="question-text">14. Čo znamenal „Tolerantný patent“, ktorý vydal kráľ Viliam III.?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 14, 'a', false, 'Tolerantný patent uznal náboženskú slobodu, čím sa ukončili dlhotrvajúce náboženské konflikty.')">a) Povolenie pirátstva na mori.</div>
+            <div class="option" onclick="selectAnswer(this, 14, 'b', true, 'Tolerantný patent uznal náboženskú slobodu, čím sa ukončili dlhotrvajúce náboženské konflikty.')">b) Uznanie náboženskej slobody.</div>
+            <div class="option" onclick="selectAnswer(this, 14, 'c', false, 'Tolerantný patent uznal náboženskú slobodu, čím sa ukončili dlhotrvajúce náboženské konflikty.')">c) Zrušenie cla na dovoz tovaru.</div>
+            <div class="option" onclick="selectAnswer(this, 14, 'd', false, 'Tolerantný patent uznal náboženskú slobodu, čím sa ukončili dlhotrvajúce náboženské konflikty.')">d) Amnestiu pre všetkých kráľovrahov.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 15 -->
+    <div class="question">
+        <div class="question-text">15. Ako je definovaná Dolná snemovňa v anglickom parlamentnom systéme po revolúcii?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 15, 'a', false, 'Dolná snemovňa je snemovňa poslancov, ktorí sú volení a majú väčšie právomoci ako dedičná Horná snemovňa (lordi).')">a) Je to snemovňa lordov menovaná kráľom.</div>
+            <div class="option" onclick="selectAnswer(this, 15, 'b', false, 'Dolná snemovňa je snemovňa poslancov, ktorí sú volení a majú väčšie právomoci ako dedičná Horná snemovňa (lordi).')">b) Je to cirkevný snem bez politickej moci.</div>
+            <div class="option" onclick="selectAnswer(this, 15, 'c', true, 'Dolná snemovňa je snemovňa poslancov, ktorí sú volení a majú väčšie právomoci ako dedičná Horná snemovňa (lordi).')">c) Je to snemovňa volených poslancov s väčšími právomocami.</div>
+            <div class="option" onclick="selectAnswer(this, 15, 'd', false, 'Dolná snemovňa je snemovňa poslancov, ktorí sú volení a majú väčšie právomoci ako dedičná Horná snemovňa (lordi).')">d) Funkcia v nej je dedičná a doživotná.</div>
+        </div>
+    </div>
+    
+    <div class="results hidden" id="results"></div>
+
+    <!-- Modal pre vysvetlenie -->
+    <div class="modal-overlay" id="explanationModal">
+        <div class="modal-content">
+            <div class="modal-header">Vysvetlenie</div>
+            <div class="modal-text" id="explanationText"></div>
+            <button class="modal-button" onclick="closeExplanation()">Rozumiem</button>
+        </div>
+    </div>
+
+    <script>
+        let answers = {};
+        let correctAnswers = 0;
+        let totalQuestions = 15;
+        let questionsAnswered = 0;
+
+        function selectAnswer(element, questionNum, option, isCorrect, explanation) {
+            if (answers[questionNum] !== undefined) return;
+            
+            let allOptions = element.parentNode.querySelectorAll('.option');
+            allOptions.forEach(opt => {
+                opt.classList.add('disabled');
+                opt.onclick = null;
+            });
+
+            if (isCorrect) {
+                element.classList.add('selected-correct');
+                correctAnswers++;
+            } else {
+                element.classList.add('selected-incorrect');
+                // Nájdi správnu odpoveď pre zvýraznenie
+                allOptions.forEach(opt => {
+                    let onclickStr = opt.getAttribute('onclick');
+                    if (onclickStr && onclickStr.includes('true')) {
+                        opt.classList.add('correct-answer');
+                    }
+                });
+                // Zobraz vysvetlenie
+                showExplanation(explanation);
+            }
+
+            answers[questionNum] = { option: option, correct: isCorrect };
+            questionsAnswered++;
+
+            if (questionsAnswered === totalQuestions) {
+                showResults();
+            }
+        }
+
+        function showExplanation(text) {
+            document.getElementById('explanationText').textContent = text;
+            document.getElementById('explanationModal').style.display = 'block';
+        }
+
+        function closeExplanation() {
+            document.getElementById('explanationModal').style.display = 'none';
+        }
+
+        function showResults() {
+            let percentage = Math.round((correctAnswers / totalQuestions) * 100);
+            let grade = '';
+            let color = '';
+            
+            if (percentage >= 90) { grade = 'Výborný'; color = '#27ae60'; }
+            else if (percentage >= 80) { grade = 'Veľmi dobrý'; color = '#2ecc71'; }
+            else if (percentage >= 70) { grade = 'Dobrý'; color = '#f1c40f'; }
+            else if (percentage >= 60) { grade = 'Dostačujúci'; color = '#e67e22'; }
+            else { grade = 'Nedostačujúci'; color = '#c0392b'; }
+
+            document.getElementById('results').innerHTML = `
+                <div style="margin-bottom: 15px;">Dosiahnutý výsledok: ${correctAnswers} z ${totalQuestions} (${percentage}%)</div>
+                <div style="font-size: 26px; color: ${color}; text-transform: uppercase; letter-spacing: 1px;">${grade}</div>
+            `;
+            document.getElementById('results').classList.remove('hidden');
+        }
+
+        // Zatvor modal kliknutím mimo obsah
+        document.getElementById('explanationModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeExplanation();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <title>Test - Humanizmus a renesancia</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.4; background: white; color: black; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; margin-bottom: 30px; }
+        .question { margin: 25px 0; padding: 15px; border-top: 1px solid #ccc; }
+        .question-text { font-weight: bold; margin-bottom: 10px; font-size: 1.1em; }
+        .options { margin-left: 25px; }
+        .option { margin: 8px 0; padding: 10px; cursor: pointer; user-select: none; border: 1px solid #ddd; border-radius: 5px; transition: background-color 0.2s ease; }
+        .option:hover { background: #f0f0f0; }
+        .option.selected-correct { background: #4CAF50 !important; color: white; cursor: default; border-color: #4CAF50; }
+        .option.selected-incorrect { background: #f44336 !important; color: white; cursor: default; border-color: #f44336; }
+        .option.correct-answer { background: #4CAF50 !important; color: white; cursor: default; border-color: #4CAF50; }
+        .option.disabled { cursor: default; opacity: 0.7; }
+        .option.disabled:hover { background: none; }
+        .results { padding: 20px; margin-top: 30px; text-align: center; font-size: 18px; font-weight: bold; border: 2px solid #333; border-radius: 10px; background-color: #f9f9f9; }
+        .results.hidden { display: none; }
+        @media print { .results, .option { background: none !important; color: black !important; } .question { page-break-inside: avoid; } h1, .question-text { color: black; } }
+    </style>
+</head>
+<body>
+    <h1>Test - Humanizmus a renesancia</h1>
+
+    <div class="question">
+        <div class="question-text">1. Ktoré talianske mesto sa v 14. storočí preslávilo najmä bankovými domami a súkenníckou výrobou?</div>
+        <div class="options">
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 1)">a) Benátky</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 1)">b) Miláno</div>
+            <div class="option" data-correct="true" onclick="selectAnswer(this, 1)">c) Florencia</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 1)">d) Janov</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">2. Čo bolo hlavným myšlienkovým posunom humanizmu v porovnaní so stredovekým myslením?</div>
+        <div class="options">
+            <div class="option" data-correct="true" onclick="selectAnswer(this, 2)">a) Dôraz sa presunul z Boha a posmrtného života na človeka, prírodu a pozemský život.</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 2)">b) Hlavným cieľom sa stalo obnovenie Svätej rímskej ríše podľa antických vzorov.</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 2)">c) Začalo sa presadzovať úplné odmietnutie náboženstva a cirkvi.</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 2)">d) Jediným zdrojom poznania sa stali spisy arabských filozofov.</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">3. Kto je považovaný za priekopníka renesančného staviteľstva a autorom prvej renesančnej stavby, florentského útulku pre neviniatka?</div>
+        <div class="options">
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 3)">a) Leonardo da Vinci</div>
+            <div class="option" data-correct="true" onclick="selectAnswer(this, 3)">b) Filippo Brunelleschi</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 3)">c) Michelangelo Buonarroti</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 3)">d) Rafaelo Santi</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">4. Aký zásadný objav urobil Mikuláš Koperník v roku 1543, ktorý zmenil pohľad na vesmír?</div>
+        <div class="options">
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 4)">a) Tvrdil, že Zem je plochá a Slnko okolo nej obieha.</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 4)">b) Vytvoril teóriu, že Zem je centrom vesmíru, ale planéty obiehajú Slnko.</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 4)">c) Vynašiel ďalekohľad, ktorým pozoroval krátery na Mesiaci.</div>
+            <div class="option" data-correct="true" onclick="selectAnswer(this, 4)">d) Upozornil na heliocentrickú sústavu, kde Zem a planéty obiehajú Slnko.</div>
+        </div>
+    </div>
+    
+    <div class="question">
+        <div class="question-text">5. Ktorá technika maľby, prvýkrát použitá v renesancii, umožnila zobraziť hĺbku a priestor na rovnom povrchu?</div>
+        <div class="options">
+            <div class="option" data-correct="true" onclick="selectAnswer(this, 5)">a) Perspektíva</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 5)">b) Sgrafito</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 5)">c) Freska (al fresco)</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 5)">d) Kalokagatia</div>
+        </div>
+    </div>
+    
+    <div class="question">
+        <div class="question-text">6. Ktorá mocná rodina bola významným mecenášom umenia v Miláne?</div>
+        <div class="options">
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 6)">a) Alighieri</div>
+            <div class="option" data-correct="true" onclick="selectAnswer(this, 6)">b) Sforzovci</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 6)">c) Medici</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 6)">d) Rienzo</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">7. Čo znamená humanistické heslo "Carpe diem"?</div>
+        <div class="options">
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 7)">a) Človek človeku vlkom</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 7)">b) Viem, že nič neviem</div>
+            <div class="option" data-correct="true" onclick="selectAnswer(this, 7)">c) Uži dňa</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 7)">d) Myslím, teda som</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">8. Ktorý umelec je autorom slávnej fresky Posledná večera a obrazu Mona Lisa?</div>
+        <div class="options">
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 8)">a) Botticelli</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 8)">b) Michelangelo</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 8)">c) Rafaelo Santi</div>
+            <div class="option" data-correct="true" onclick="selectAnswer(this, 8)">d) Leonardo da Vinci</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">9. Vynález kníhtlače Johanom Gutenbergom okolo roku 1443 mal zásadný vplyv na:</div>
+        <div class="options">
+            <div class="option" data-correct="true" onclick="selectAnswer(this, 9)">a) Rýchlejšie a lacnejšie šírenie vzdelanosti a nových myšlienok.</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 9)">b) Zdokonalenie stavby lodí a námorných objavov.</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 9)">c) Rozvoj bankovníctva a medzinárodného obchodu.</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 9)">d) Vytvorenie nových techník v sochárstve a architektúre.</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">10. Ktorý mysliteľ, na rozdiel od Galilea, neunikol upáleniu za svoje tvrdenia o vesmíre (napr. že je nekonečný)?</div>
+        <div class="options">
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 10)">a) Tycho de Brahe</div>
+            <div class="option" data-correct="true" onclick="selectAnswer(this, 10)">b) Giordano Bruno</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 10)">c) Erazmus Rotterdamský</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 10)">d) Francesco Petrarca</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">11. Čo je "sgrafito", spomínané ako jeden zo znakov renesančnej architektúry?</div>
+        <div class="options">
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 11)">a) Kamenné zábradlie kužeľovitého tvaru.</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 11)">b) Stĺpy pospájané oblúkmi tvoriace ochodzu.</div>
+            <div class="option" data-correct="true" onclick="selectAnswer(this, 11)">c) Technika imitácie muriva na fasáde budovy.</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 11)">d) Ozdobný nadstavec nad oknom.</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">12. Aký bol hlavný dôvod, prečo humanisti študovali antické spisy a pamiatky?</div>
+        <div class="options">
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 12)">a) Chceli nájsť stratené vojenské technológie Rímskej ríše.</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 12)">b) Snažili sa dokázať, že stredoveká cirkev sa mýlila vo všetkom.</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 12)">c) Hľadali iba umelecké námety pre maľby a sochy.</div>
+            <div class="option" data-correct="true" onclick="selectAnswer(this, 12)">d) Videli v antickom svete vzor krásy, dokonalosti a harmónie tela a duše (kalokagatia).</div>
+        </div>
+    </div>
+
+    <div class="results hidden" id="results"></div>
+
+    <script>
+        let answers = {};
+        let correctAnswers = 0;
+        let totalQuestions = 12;
+        let questionsAnswered = 0;
+
+        function selectAnswer(element, questionNum) {
+            // Zastaví funkciu, ak už bola na otázku zodpovedané
+            if (answers[questionNum] !== undefined) return;
+            
+            let isCorrect = element.dataset.correct === 'true';
+            
+            let allOptions = element.parentNode.querySelectorAll('.option');
+            allOptions.forEach(opt => {
+                opt.classList.add('disabled');
+                opt.onclick = null; // Zruší možnosť kliknúť
+            });
+
+            if (isCorrect) {
+                element.classList.remove('disabled'); // Pre plnú sýtosť farby
+                element.classList.add('selected-correct');
+                correctAnswers++;
+            } else {
+                element.classList.remove('disabled');
+                element.classList.add('selected-incorrect');
+                // Nájdi a zvýrazni správnu odpoveď
+                allOptions.forEach(opt => {
+                    if (opt.dataset.correct === 'true') {
+                        opt.classList.remove('disabled');
+                        opt.classList.add('correct-answer');
+                    }
+                });
+            }
+
+            answers[questionNum] = { selected: element, correct: isCorrect };
+            questionsAnswered++;
+
+            if (questionsAnswered === totalQuestions) {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            let percentage = Math.round((correctAnswers / totalQuestions) * 100);
+            let grade = '';
+            
+            if (percentage >= 90) grade = 'Výborný';
+            else if (percentage >= 80) grade = 'Veľmi dobrý';
+            else if (percentage >= 70) grade = 'Dobrý';
+            else if (percentage >= 60) grade = 'Dostačujúci';
+            else grade = 'Nedostačujúci';
+
+            document.getElementById('results').innerHTML = `
+                <div>Výsledok: ${correctAnswers}/${totalQuestions} (${percentage}%)</div>
+                <div>Hodnotenie: ${grade}</div>
+            `;
+            document.getElementById('results').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

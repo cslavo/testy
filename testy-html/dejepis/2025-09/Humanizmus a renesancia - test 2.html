@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <title>Test - Humanizmus a renesancia (2. verzia)</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.4; background: white; color: black; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; margin-bottom: 30px; }
+        .question { margin: 25px 0; padding: 15px; border-top: 1px solid #ccc; }
+        .question-text { font-weight: bold; margin-bottom: 10px; font-size: 1.1em; }
+        .options { margin-left: 25px; }
+        .option { margin: 8px 0; padding: 10px; cursor: pointer; user-select: none; border: 1px solid #ddd; border-radius: 5px; transition: background-color 0.2s ease; }
+        .option:hover { background: #f0f0f0; }
+        .option.selected-correct { background: #4CAF50 !important; color: white; cursor: default; border-color: #4CAF50; }
+        .option.selected-incorrect { background: #f44336 !important; color: white; cursor: default; border-color: #f44336; }
+        .option.correct-answer { background: #4CAF50 !important; color: white; cursor: default; border-color: #4CAF50; }
+        .option.disabled { cursor: default; opacity: 0.7; }
+        .option.disabled:hover { background: none; }
+        .results { padding: 20px; margin-top: 30px; text-align: center; font-size: 18px; font-weight: bold; border: 2px solid #333; border-radius: 10px; background-color: #f9f9f9; }
+        .results.hidden { display: none; }
+        @media print { .results, .option { background: none !important; color: black !important; } .question { page-break-inside: avoid; } h1, .question-text { color: black; } }
+    </style>
+</head>
+<body>
+    <h1>Test - Humanizmus a renesancia (2. verzia)</h1>
+
+    <div class="question">
+        <div class="question-text">1. Čím bolo špecifické mesto Miláno v rámci hospodárstva talianskych mestských štátov?</div>
+        <div class="options">
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 1)">a) Sprostredkovaním obchodu s luxusným tovarom od Arabov.</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 1)">b) Veľkým počtom bankových domov a pôžičkami na úrok.</div>
+            <div class="option" data-correct="true" onclick="selectAnswer(this, 1)">c) Ziskami z výroby zbraní a zbroje.</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 1)">d) Množstvom obchodných staníc v Stredozemnom mori.</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">2. Aký nový princíp sa začal presadzovať v spoločnosti, ktorý viedol k vzniku humanizmu?</div>
+        <div class="options">
+            <div class="option" data-correct="true" onclick="selectAnswer(this, 2)">a) Úspech človeka začal závisieť od jeho schopností a šikovnosti, nie od sociálneho pôvodu.</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 2)">b) Spoločnosť sa začala riadiť prísne podľa antických rímskych zákonov.</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 2)">c) Politickú moc prevzali remeselnícke cechy od patricijov.</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 2)">d) Bohatstvo sa začalo merať podľa množstva pôdy, nie podľa peňazí.</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">3. Kto stál na čele tzv. zaalpského humanizmu a ako prvý vydal grécke znenie Svätého písma?</div>
+        <div class="options">
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 3)">a) Dante Alighieri</div>
+            <div class="option" data-correct="true" onclick="selectAnswer(this, 3)">b) Erazmus Rotterdamský</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 3)">c) Cola di Rienzo</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 3)">d) Francesco Petrarca</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">4. Kto bol hlavným mecenášom renesančnej kultúry v Ríme v 15. a 16. storočí?</div>
+        <div class="options">
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 4)">a) Rodina Medici</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 4)">b) Rodina Sforzovcov</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 4)">c) Bohatí patricijovia a bankári</div>
+            <div class="option" data-correct="true" onclick="selectAnswer(this, 4)">d) Pápeži</div>
+        </div>
+    </div>
+    
+    <div class="question">
+        <div class="question-text">5. Ktoré z nasledujúcich diel vytvoril Michelangelo Buonarroti?</div>
+        <div class="options">
+            <div class="option" data-correct="true" onclick="selectAnswer(this, 5)">a) Maľba Sixtínskej kaplnky a socha Dávida</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 5)">b) Zrodenie Venuše a obraz Mona Lisa</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 5)">c) Aténska škola a freska Posledná večera</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 5)">d) Bronzová socha Dávida a Dáma s hranostajom</div>
+        </div>
+    </div>
+    
+    <div class="question">
+        <div class="question-text">6. Čo v renesančnej architektúre označuje pojem "arkier"?</div>
+        <div class="options">
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 6)">a) Strešná kupola s kruhovým pôdorysom.</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 6)">b) Stĺpová ochodza okolo nádvoria.</div>
+            <div class="option" data-correct="true" onclick="selectAnswer(this, 6)">c) Zamurovaný balkón vystupujúci zo steny.</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 6)">d) Kamenné zábradlie kužeľovitého tvaru.</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">7. Aký bol osud Galilea Galileiho po tom, čo potvrdil Koperníkovu teóriu?</div>
+        <div class="options">
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 7)">a) Bol okamžite upálený ako kacír.</div>
+            <div class="option" data-correct="true" onclick="selectAnswer(this, 7)">b) Musel svoje učenie odvolať, aby sa zachránil pred upálením.</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 7)">c) Cirkev prijala jeho teóriu a vymenovala ho za hlavného astronóma.</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 7)">d) Ušiel z Talianska a svoje teórie šíril v západnej Európe.</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">8. Čo v preklade znamená latinský pojem "renesancia", ktorý dal názov celému umeleckému slohu?</div>
+        <div class="options">
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 8)">a) Umenie človeka</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 8)">b) Návrat k prírode</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 8)">c) Nové myslenie</div>
+            <div class="option" data-correct="true" onclick="selectAnswer(this, 8)">d) Znovuzrodenie</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">9. Ktorá historická postava sa podľa textu politicky usilovala o obnovenie antickej Rímskej ríše?</div>
+        <div class="options">
+            <div class="option" data-correct="true" onclick="selectAnswer(this, 9)">a) Rímsky tribún Cola di Rienzo</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 9)">b) Florentský básnik Dante Alighieri</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 9)">c) Cosimo I. Medici</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 9)">d) Humanista Erazmus Rotterdamský</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">10. Ako teóriu usporiadania vesmíru vytvoril dánsky astronóm Tycho de Brahe?</div>
+        <div class="options">
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 10)">a) Jednoduchú heliocentrickú teóriu (Slnko je v strede).</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 10)">b) Pôvodnú geocentrickú teóriu (Zem je v strede, všetko obieha okolo nej).</div>
+            <div class="option" data-correct="true" onclick="selectAnswer(this, 10)">c) Zmiešanú teóriu: Zem je centrom, planéty obiehajú Slnko a Slnko obieha Zem.</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 10)">d) Teóriu nekonečného vesmíru s viacerými slnečnými sústavami.</div>
+        </div>
+    </div>
+    
+    <div class="question">
+        <div class="question-text">11. Ktoré z nasledujúcich technických vylepšení nepatrí medzi tie, ktoré priniesla renesancia?</div>
+        <div class="options">
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 11)">a) Zdokonalenie stavby lodí a výroba palných zbraní.</div>
+            <div class="option" data-correct="true" onclick="selectAnswer(this, 11)">b) Vynález parného stroja a mechanického krosna.</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 11)">c) Rozvoj baníctva, hutníctva a výroba sklenených zrkadiel.</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 11)">d) Vynález kníhtlače, ktorá prispela k šíreniu vzdelanosti.</div>
+        </div>
+    </div>
+    
+    <div class="question">
+        <div class="question-text">12. K akému významnému myšlienkovému hnutiu dal humanizmus podnet v západnej Európe?</div>
+        <div class="options">
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 12)">a) Vznik absolutistických monarchií.</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 12)">b) Začiatok zámorských objavov.</div>
+            <div class="option" data-correct="false" onclick="selectAnswer(this, 12)">c) Rozvoj scholastickej filozofie.</div>
+            <div class="option" data-correct="true" onclick="selectAnswer(this, 12)">d) Vznik reformačných ideí.</div>
+        </div>
+    </div>
+
+    <div class="results hidden" id="results"></div>
+
+    <script>
+        let answers = {};
+        let correctAnswers = 0;
+        let totalQuestions = 12;
+        let questionsAnswered = 0;
+
+        function selectAnswer(element, questionNum) {
+            // Zastaví funkciu, ak už bola na otázku zodpovedané
+            if (answers[questionNum] !== undefined) return;
+            
+            let isCorrect = element.dataset.correct === 'true';
+            
+            let allOptions = element.parentNode.querySelectorAll('.option');
+            allOptions.forEach(opt => {
+                opt.classList.add('disabled');
+                opt.onclick = null; // Zruší možnosť kliknúť
+            });
+
+            if (isCorrect) {
+                element.classList.remove('disabled'); // Pre plnú sýtosť farby
+                element.classList.add('selected-correct');
+                correctAnswers++;
+            } else {
+                element.classList.remove('disabled');
+                element.classList.add('selected-incorrect');
+                // Nájdi a zvýrazni správnu odpoveď
+                allOptions.forEach(opt => {
+                    if (opt.dataset.correct === 'true') {
+                        opt.classList.remove('disabled');
+                        opt.classList.add('correct-answer');
+                    }
+                });
+            }
+
+            answers[questionNum] = { selected: element, correct: isCorrect };
+            questionsAnswered++;
+
+            if (questionsAnswered === totalQuestions) {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            let percentage = Math.round((correctAnswers / totalQuestions) * 100);
+            let grade = '';
+            
+            if (percentage >= 90) grade = 'Výborný';
+            else if (percentage >= 80) grade = 'Veľmi dobrý';
+            else if (percentage >= 70) grade = 'Dobrý';
+            else if (percentage >= 60) grade = 'Dostačujúci';
+            else grade = 'Nedostačujúci';
+
+            document.getElementById('results').innerHTML = `
+                <div>Výsledok: ${correctAnswers}/${totalQuestions} (${percentage}%)</div>
+                <div>Hodnotenie: ${grade}</div>
+            `;
+            document.getElementById('results').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

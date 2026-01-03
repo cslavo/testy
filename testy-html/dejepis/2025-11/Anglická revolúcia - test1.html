@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <title>Test - Anglická revolúcia</title>
+    <!-- MathJax iba ak sú zložité vzorce -->
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; background: white; color: black; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; margin-bottom: 30px; color: black; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .question { margin: 20px 0; padding: 15px; border-bottom: 1px solid #eee; }
+        .question-text { font-weight: bold; margin-bottom: 15px; color: black; font-size: 1.1em; }
+        .options { margin-left: 10px; }
+        .option { margin: 8px 0; padding: 12px; cursor: pointer; user-select: none; color: black; background: white; border: 1px solid #ccc; border-radius: 4px; transition: background 0.2s; }
+        .option:hover { background: #f5f5f5; }
+        .option.selected-correct { background: #a5d6a7 !important; color: black !important; cursor: default; border: 1px solid #66bb6a; font-weight: bold; }
+        .option.selected-incorrect { background: #ef9a9a !important; color: black !important; cursor: default; border: 1px solid #e57373; }
+        .option.correct-answer { background: #a5d6a7 !important; color: black !important; cursor: default; border: 1px solid #66bb6a; }
+        .option.disabled { cursor: default; pointer-events: none; color: #555; }
+        .results { padding: 20px; margin-top: 30px; text-align: center; font-size: 18px; font-weight: bold; color: black; background: #f9f9f9; border-radius: 8px; }
+        .results.hidden { display: none; }
+        
+        /* Modal pre vysvetlenie */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .modal-content { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 8px; max-width: 600px; width: 90%; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .modal-header { font-weight: bold; font-size: 20px; margin-bottom: 15px; color: #d32f2f; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .modal-text { margin-bottom: 25px; line-height: 1.6; color: #333; font-size: 16px; }
+        .modal-button { background: #2196F3; color: white; border: none; padding: 10px 25px; border-radius: 4px; cursor: pointer; font-size: 16px; display: block; margin: 0 auto; }
+        .modal-button:hover { background: #1976D2; }
+        
+        @media print { .results { display: none; } .modal-overlay { display: none !important; } }
+    </style>
+</head>
+<body>
+    <h1>Test - Anglická revolúcia</h1>
+    
+    <!-- Otázka 1 -->
+    <div class="question">
+        <div class="question-text">1. Čo znamenalo, že medzi Anglickom a Škótskom existovala za vlády Jakuba I. „personálna únia“?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 1, 'a', false, 'Personálna únia znamená, že dve samostatné krajiny spája iba osoba panovníka. Zákony a parlamenty ostali oddelené.')">a) Krajiny mali spoločný parlament a zákony, ale iných kráľov.</div>
+            <div class="option" onclick="selectAnswer(this, 1, 'b', true, 'Personálna únia znamená, že dve samostatné krajiny spája iba osoba panovníka. Zákony a parlamenty ostali oddelené.')">b) Krajiny spájala iba osoba kráľa, inak fungovali samostatne.</div>
+            <div class="option" onclick="selectAnswer(this, 1, 'c', false, 'Personálna únia znamená, že dve samostatné krajiny spája iba osoba panovníka. Zákony a parlamenty ostali oddelené.')">c) Škótsko bolo úplne podriadené anglickým zákonom ako kolónia.</div>
+            <div class="option" onclick="selectAnswer(this, 1, 'd', false, 'Personálna únia znamená, že dve samostatné krajiny spája iba osoba panovníka. Zákony a parlamenty ostali oddelené.')">d) Išlo o náboženskú dohodu medzi anglikánmi a katolíkmi.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 2 -->
+    <div class="question">
+        <div class="question-text">2. Čo bolo cieľom „Spiknutia pušného prachu“?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 2, 'a', false, 'Spiknutie organizovali katolíci, ktorí sa chceli zbaviť kráľa Jakuba I., pretože v Anglicku vládol protestantizmus.')">a) Zvrhnutie anglikánskej cirkvi a nastolenie puritanizmu.</div>
+            <div class="option" onclick="selectAnswer(this, 2, 'b', false, 'Spiknutie organizovali katolíci, ktorí sa chceli zbaviť kráľa Jakuba I., pretože v Anglicku vládol protestantizmus.')">b) Snaha Škótov získať nezávislosť od Anglicka.</div>
+            <div class="option" onclick="selectAnswer(this, 2, 'c', true, 'Spiknutie organizovali katolíci, ktorí sa chceli zbaviť kráľa Jakuba I., pretože v Anglicku vládol protestantizmus.')">c) Pokus katolíkov zbaviť sa kráľa Jakuba I.</div>
+            <div class="option" onclick="selectAnswer(this, 2, 'd', false, 'Spiknutie organizovali katolíci, ktorí sa chceli zbaviť kráľa Jakuba I., pretože v Anglicku vládol protestantizmus.')">d) Atentát na Olivera Cromwella zo strany rojalistov.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 3 -->
+    <div class="question">
+        <div class="question-text">3. Ktorá daň zavedená Karolom I. bola v Anglicku najviac nenávidená?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 3, 'a', false, 'Najviac nenávidená bola „lodná daň“. Karol I. ju zavádzal bez súhlasu parlamentu, čo bolo považované za nezákonné.')">a) Daň z komínov</div>
+            <div class="option" onclick="selectAnswer(this, 3, 'b', false, 'Najviac nenávidená bola „lodná daň“. Karol I. ju zavádzal bez súhlasu parlamentu, čo bolo považované za nezákonné.')">b) Daň z okien</div>
+            <div class="option" onclick="selectAnswer(this, 3, 'c', false, 'Najviac nenávidená bola „lodná daň“. Karol I. ju zavádzal bez súhlasu parlamentu, čo bolo považované za nezákonné.')">c) Daň za soľ</div>
+            <div class="option" onclick="selectAnswer(this, 3, 'd', true, 'Najviac nenávidená bola „lodná daň“. Karol I. ju zavádzal bez súhlasu parlamentu, čo bolo považované za nezákonné.')">d) Lodná daň</div>
+        </div>
+    </div>
+
+    <!-- Otázka 4 -->
+    <div class="question">
+        <div class="question-text">4. Prečo musel Karol I. v roku 1640 po rokoch absolutizmu opäť zvolať parlament?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 4, 'a', true, 'Kráľ potreboval peniaze na vojnu proti Škótsku, kde sa šľachta vzbúrila proti zavedeniu anglikánskej cirkvi.')">a) Potreboval schváliť dane na vojnu proti Škótsku.</div>
+            <div class="option" onclick="selectAnswer(this, 4, 'b', false, 'Kráľ potreboval peniaze na vojnu proti Škótsku, kde sa šľachta vzbúrila proti zavedeniu anglikánskej cirkvi.')">b) Chcel dobrovoľne odovzdať moc ľudu.</div>
+            <div class="option" onclick="selectAnswer(this, 4, 'c', false, 'Kráľ potreboval peniaze na vojnu proti Škótsku, kde sa šľachta vzbúrila proti zavedeniu anglikánskej cirkvi.')">c) Potreboval financie na stavbu nových lodí proti Španielsku.</div>
+            <div class="option" onclick="selectAnswer(this, 4, 'd', false, 'Kráľ potreboval peniaze na vojnu proti Škótsku, kde sa šľachta vzbúrila proti zavedeniu anglikánskej cirkvi.')">d) Bol k tomu donútený írskym povstaním.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 5 -->
+    <div class="question">
+        <div class="question-text">5. Kto boli „independenti“ v anglickom parlamente?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 5, 'a', false, 'Independenti boli radikálni puritáni, ktorí chceli reformovať cirkev a posilniť moc parlamentu na úkor kráľa.')">a) Umiernení presbyteriáni, ktorí sa chceli s kráľom dohodnúť.</div>
+            <div class="option" onclick="selectAnswer(this, 5, 'b', true, 'Independenti boli radikálni puritáni, ktorí chceli reformovať cirkev a posilniť moc parlamentu na úkor kráľa.')">b) Radikálni puritáni, ktorí chceli reformovať cirkev a obmedziť kráľa.</div>
+            <div class="option" onclick="selectAnswer(this, 5, 'c', false, 'Independenti boli radikálni puritáni, ktorí chceli reformovať cirkev a posilniť moc parlamentu na úkor kráľa.')">c) Írski katolíci bojujúci za nezávislosť.</div>
+            <div class="option" onclick="selectAnswer(this, 5, 'd', false, 'Independenti boli radikálni puritáni, ktorí chceli reformovať cirkev a posilniť moc parlamentu na úkor kráľa.')">d) Prívrženci kráľa v snemovni lordov.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 6 -->
+    <div class="question">
+        <div class="question-text">6. Ako sa geograficky rozdelilo Anglicko počas občianskej vojny (1642 – 1648)?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 6, 'a', false, 'Severné a západné Anglicko podporovalo kráľa, zatiaľ čo ekonomicky vyspelejšie južné a východné Anglicko podporovalo parlament.')">a) Celé Anglicko podporovalo parlament, iba Škótsko kráľa.</div>
+            <div class="option" onclick="selectAnswer(this, 6, 'b', false, 'Severné a západné Anglicko podporovalo kráľa, zatiaľ čo ekonomicky vyspelejšie južné a východné Anglicko podporovalo parlament.')">b) Sever a západ bol za parlament, juh a východ za kráľa.</div>
+            <div class="option" onclick="selectAnswer(this, 6, 'c', true, 'Severné a západné Anglicko podporovalo kráľa, zatiaľ čo ekonomicky vyspelejšie južné a východné Anglicko podporovalo parlament.')">c) Sever a západ bol za kráľa, juh a východ za parlament.</div>
+            <div class="option" onclick="selectAnswer(this, 6, 'd', false, 'Severné a západné Anglicko podporovalo kráľa, zatiaľ čo ekonomicky vyspelejšie južné a východné Anglicko podporovalo parlament.')">d) Kráľ ovládal iba Londýn, zvyšok krajiny mal parlament.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 7 -->
+    <div class="question">
+        <div class="question-text">7. Čím sa vyznačovala „armáda nového typu“, ktorú vybudoval Oliver Cromwell?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 7, 'a', false, 'Cromwellova armáda bola založená na disciplíne a morálke. Hodnosti sa udeľovali podľa schopností, nie podľa šľachtického pôvodu.')">a) Pozostávala výlučne zo žoldnierov zo zahraničia.</div>
+            <div class="option" onclick="selectAnswer(this, 7, 'b', false, 'Cromwellova armáda bola založená na disciplíne a morálke. Hodnosti sa udeľovali podľa schopností, nie podľa šľachtického pôvodu.')">b) Dôstojnícke hodnosti sa v nej kupovali za peniaze.</div>
+            <div class="option" onclick="selectAnswer(this, 7, 'c', false, 'Cromwellova armáda bola založená na disciplíne a morálke. Hodnosti sa udeľovali podľa schopností, nie podľa šľachtického pôvodu.')">c) Bojovali v nej iba šľachtici.</div>
+            <div class="option" onclick="selectAnswer(this, 7, 'd', true, 'Cromwellova armáda bola založená na disciplíne a morálke. Hodnosti sa udeľovali podľa schopností, nie podľa šľachtického pôvodu.')">d) Hodnosti sa udeľovali podľa schopností a vojaci mali prísnu disciplínu.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 8 -->
+    <div class="question">
+        <div class="question-text">8. Čo sa stalo 30. januára 1649?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 8, 'a', true, 'Karol I. bol popravený a Anglicko sa stalo republikou. Bolo to bezprecedentné, pretože parlament súdil a odsúdil vlastného kráľa.')">a) Bol popravený kráľ Karol I. a vyhlásená republika.</div>
+            <div class="option" onclick="selectAnswer(this, 8, 'b', false, 'Karol I. bol popravený a Anglicko sa stalo republikou. Bolo to bezprecedentné, pretože parlament súdil a odsúdil vlastného kráľa.')">b) Začala sa bitka pri Naseby.</div>
+            <div class="option" onclick="selectAnswer(this, 8, 'c', false, 'Karol I. bol popravený a Anglicko sa stalo republikou. Bolo to bezprecedentné, pretože parlament súdil a odsúdil vlastného kráľa.')">c) Oliver Cromwell zomrel a nastúpil jeho syn.</div>
+            <div class="option" onclick="selectAnswer(this, 8, 'd', false, 'Karol I. bol popravený a Anglicko sa stalo republikou. Bolo to bezprecedentné, pretože parlament súdil a odsúdil vlastného kráľa.')">d) Bola podpísaná listina Bill of Rights.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 9 -->
+    <div class="question">
+        <div class="question-text">9. Kto boli „levelleri“ (rovnostári)?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 9, 'a', false, 'Levelleri boli radikálnou skupinou v armáde, ktorá žiadala ústavu zaručujúcu rovnosť a práva pre všetkých slobodných mužov.')">a) Skupina obchodníkov podporujúca kráľa.</div>
+            <div class="option" onclick="selectAnswer(this, 9, 'b', false, 'Levelleri boli radikálnou skupinou v armáde, ktorá žiadala ústavu zaručujúcu rovnosť a práva pre všetkých slobodných mužov.')">b) Prívrženci návratu katolicizmu.</div>
+            <div class="option" onclick="selectAnswer(this, 9, 'c', true, 'Levelleri boli radikálnou skupinou v armáde, ktorá žiadala ústavu zaručujúcu rovnosť a práva pre všetkých slobodných mužov.')">c) Radikálna skupina v armáde žiadajúca rovnosť a ústavu.</div>
+            <div class="option" onclick="selectAnswer(this, 9, 'd', false, 'Levelleri boli radikálnou skupinou v armáde, ktorá žiadala ústavu zaručujúcu rovnosť a práva pre všetkých slobodných mužov.')">d) Škótski šľachtici verní Stuartovcom.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 10 -->
+    <div class="question">
+        <div class="question-text">10. Čo znamenali Navigačné akty (1651) vydané Cromwellom?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 10, 'a', false, 'Navigačné akty povoľovali dovoz tovaru do Anglicka len na anglických lodiach alebo lodiach krajiny pôvodu. Cieľom bolo poškodiť holandský obchod.')">a) Zákaz plavby anglických lodí do Ameriky.</div>
+            <div class="option" onclick="selectAnswer(this, 10, 'b', true, 'Navigačné akty povoľovali dovoz tovaru do Anglicka len na anglických lodiach alebo lodiach krajiny pôvodu. Cieľom bolo poškodiť holandský obchod.')">b) Tovar sa mohol dovážať len na anglických lodiach alebo lodiach krajiny pôvodu.</div>
+            <div class="option" onclick="selectAnswer(this, 10, 'c', false, 'Navigačné akty povoľovali dovoz tovaru do Anglicka len na anglických lodiach alebo lodiach krajiny pôvodu. Cieľom bolo poškodiť holandský obchod.')">c) Umožnili voľný obchod s Holandskom bez obmedzení.</div>
+            <div class="option" onclick="selectAnswer(this, 10, 'd', false, 'Navigačné akty povoľovali dovoz tovaru do Anglicka len na anglických lodiach alebo lodiach krajiny pôvodu. Cieľom bolo poškodiť holandský obchod.')">d) Zákaz budovania vojnového loďstva.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 11 -->
+    <div class="question">
+        <div class="question-text">11. Aký titul prijal Oliver Cromwell v roku 1653?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 11, 'a', false, 'Cromwell rozpustil parlament a vládol neobmedzene ako vojenský diktátor s titulom Lord protektor.')">a) Kráľ Anglicka</div>
+            <div class="option" onclick="selectAnswer(this, 11, 'b', false, 'Cromwell rozpustil parlament a vládol neobmedzene ako vojenský diktátor s titulom Lord protektor.')">b) Prezident republiky</div>
+            <div class="option" onclick="selectAnswer(this, 11, 'c', false, 'Cromwell rozpustil parlament a vládol neobmedzene ako vojenský diktátor s titulom Lord protektor.')">c) Generálny vikár</div>
+            <div class="option" onclick="selectAnswer(this, 11, 'd', true, 'Cromwell rozpustil parlament a vládol neobmedzene ako vojenský diktátor s titulom Lord protektor.')">d) Lord protektor</div>
+        </div>
+    </div>
+
+    <!-- Otázka 12 -->
+    <div class="question">
+        <div class="question-text">12. Čo sa stalo s Írskom po potlačení povstania Cromwellom v roku 1652?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 12, 'a', true, 'Po brutálnom potlačení povstania sa Írsko stalo de facto prvou anglickou kolóniou a bolo hospodársky podriadené.')">a) Stalo sa prvou anglickou kolóniou.</div>
+            <div class="option" onclick="selectAnswer(this, 12, 'b', false, 'Po brutálnom potlačení povstania sa Írsko stalo de facto prvou anglickou kolóniou a bolo hospodársky podriadené.')">b) Získalo úplnú nezávislosť.</div>
+            <div class="option" onclick="selectAnswer(this, 12, 'c', false, 'Po brutálnom potlačení povstania sa Írsko stalo de facto prvou anglickou kolóniou a bolo hospodársky podriadené.')">c) Spojilo sa so Škótskom proti Anglicku.</div>
+            <div class="option" onclick="selectAnswer(this, 12, 'd', false, 'Po brutálnom potlačení povstania sa Írsko stalo de facto prvou anglickou kolóniou a bolo hospodársky podriadené.')">d) Stalo sa rovnocenným partnerom v únii.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 13 -->
+    <div class="question">
+        <div class="question-text">13. Prečo sa anglická šľachta rozhodla v roku 1688 zvrhnúť kráľa Jakuba II.?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 13, 'a', false, 'Jakub II. konvertoval na katolícku vieru a snažil sa obnoviť absolutizmus, čoho sa protestantská šľachta obávala.')">a) Pretože prehral vojnu s Holandskom.</div>
+            <div class="option" onclick="selectAnswer(this, 13, 'b', true, 'Jakub II. konvertoval na katolícku vieru a snažil sa obnoviť absolutizmus, čoho sa protestantská šľachta obávala.')">b) Pre jeho katolícku vieru a snahu o absolutizmus.</div>
+            <div class="option" onclick="selectAnswer(this, 13, 'c', false, 'Jakub II. konvertoval na katolícku vieru a snažil sa obnoviť absolutizmus, čoho sa protestantská šľachta obávala.')">c) Pretože chcel zrušiť otroctvo v kolóniách.</div>
+            <div class="option" onclick="selectAnswer(this, 13, 'd', false, 'Jakub II. konvertoval na katolícku vieru a snažil sa obnoviť absolutizmus, čoho sa protestantská šľachta obávala.')">d) Pretože odmietol prijať titul Lord protektor.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 14 -->
+    <div class="question">
+        <div class="question-text">14. Aký dokument musel prijať Viliam III. Oranžský pred svojou korunováciou v roku 1689?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 14, 'a', false, 'Viliam III. musel prijať „Bill of Rights“ (Listinu práv), ktorá obmedzovala moc kráľa a potvrdzovala práva parlamentu.')">a) Magnu Chartu Libertatum</div>
+            <div class="option" onclick="selectAnswer(this, 14, 'b', false, 'Viliam III. musel prijať „Bill of Rights“ (Listinu práv), ktorá obmedzovala moc kráľa a potvrdzovala práva parlamentu.')">b) Tolerantný patent</div>
+            <div class="option" onclick="selectAnswer(this, 14, 'c', true, 'Viliam III. musel prijať „Bill of Rights“ (Listinu práv), ktorá obmedzovala moc kráľa a potvrdzovala práva parlamentu.')">c) Bill of Rights (Listinu práv)</div>
+            <div class="option" onclick="selectAnswer(this, 14, 'd', false, 'Viliam III. musel prijať „Bill of Rights“ (Listinu práv), ktorá obmedzovala moc kráľa a potvrdzovala práva parlamentu.')">d) Navigačné akty</div>
+        </div>
+    </div>
+
+    <!-- Otázka 15 -->
+    <div class="question">
+        <div class="question-text">15. Aký politický systém vznikol v Anglicku po prijatí Listiny práv (Bill of Rights)?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 15, 'a', false, 'Vznikla parlamentná monarchia, kde kráľ „reprezentuje“, ale moc má v rukách parlament. Kráľ nemôže vládnuť bez súhlasu parlamentu.')">a) Absolutistická monarchia</div>
+            <div class="option" onclick="selectAnswer(this, 15, 'b', false, 'Vznikla parlamentná monarchia, kde kráľ „reprezentuje“, ale moc má v rukách parlament. Kráľ nemôže vládnuť bez súhlasu parlamentu.')">b) Teokratická republika</div>
+            <div class="option" onclick="selectAnswer(this, 15, 'c', false, 'Vznikla parlamentná monarchia, kde kráľ „reprezentuje“, ale moc má v rukách parlament. Kráľ nemôže vládnuť bez súhlasu parlamentu.')">c) Vojenská diktatúra</div>
+            <div class="option" onclick="selectAnswer(this, 15, 'd', true, 'Vznikla parlamentná monarchia, kde kráľ „reprezentuje“, ale moc má v rukách parlament. Kráľ nemôže vládnuť bez súhlasu parlamentu.')">d) Parlamentná monarchia</div>
+        </div>
+    </div>
+    
+    <div class="results hidden" id="results"></div>
+
+    <!-- Modal pre vysvetlenie -->
+    <div class="modal-overlay" id="explanationModal">
+        <div class="modal-content">
+            <div class="modal-header">Vysvetlenie</div>
+            <div class="modal-text" id="explanationText"></div>
+            <button class="modal-button" onclick="closeExplanation()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        let answers = {};
+        let correctAnswers = 0;
+        let totalQuestions = 15;
+        let questionsAnswered = 0;
+
+        function selectAnswer(element, questionNum, option, isCorrect, explanation) {
+            if (answers[questionNum] !== undefined) return;
+            
+            let allOptions = element.parentNode.querySelectorAll('.option');
+            allOptions.forEach(opt => {
+                opt.classList.add('disabled');
+                opt.onclick = null;
+            });
+
+            if (isCorrect) {
+                element.classList.add('selected-correct');
+                correctAnswers++;
+            } else {
+                element.classList.add('selected-incorrect');
+                // Nájdi správnu odpoveď
+                allOptions.forEach(opt => {
+                    let onclickStr = opt.getAttribute('onclick');
+                    if (onclickStr && onclickStr.includes('true')) {
+                        opt.classList.add('correct-answer');
+                    }
+                });
+                // Zobraz vysvetlenie iba pri nesprávnej odpovedi
+                showExplanation(explanation);
+            }
+
+            answers[questionNum] = { option: option, correct: isCorrect };
+            questionsAnswered++;
+
+            if (questionsAnswered === totalQuestions) {
+                showResults();
+            }
+        }
+
+        function showExplanation(text) {
+            document.getElementById('explanationText').textContent = text;
+            document.getElementById('explanationModal').style.display = 'block';
+        }
+
+        function closeExplanation() {
+            document.getElementById('explanationModal').style.display = 'none';
+        }
+
+        function showResults() {
+            let percentage = Math.round((correctAnswers / totalQuestions) * 100);
+            let grade = '';
+            let color = '';
+            
+            if (percentage >= 90) { grade = 'Výborný'; color = '#2e7d32'; }
+            else if (percentage >= 80) { grade = 'Veľmi dobrý'; color = '#388e3c'; }
+            else if (percentage >= 70) { grade = 'Dobrý'; color = '#fbc02d'; }
+            else if (percentage >= 60) { grade = 'Dostačujúci'; color = '#ef6c00'; }
+            else { grade = 'Nedostačujúci'; color = '#c62828'; }
+
+            document.getElementById('results').innerHTML = `
+                <div style="margin-bottom: 10px;">Výsledok: ${correctAnswers} z ${totalQuestions} (${percentage}%)</div>
+                <div style="font-size: 24px; color: ${color};">Hodnotenie: ${grade}</div>
+            `;
+            document.getElementById('results').classList.remove('hidden');
+        }
+
+        // Zatvor modal kliknutím mimo obsah
+        document.getElementById('explanationModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeExplanation();
+            }
+        });
+    </script>
+</body>
+</html>

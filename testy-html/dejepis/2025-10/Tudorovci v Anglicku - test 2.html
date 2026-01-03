@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <title>Test - Tudorovci v Anglicku (2)</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.4; background: white; color: black; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; margin-bottom: 30px; color: black; }
+        .question { margin: 20px 0; padding: 15px; border-top: 1px solid #eee; }
+        .question:first-of-type { border-top: none; }
+        .question-text { font-weight: bold; margin-bottom: 10px; color: black; font-size: 1.1em; }
+        .options { margin-left: 25px; }
+        .option { margin: 8px 0; padding: 10px; cursor: pointer; user-select: none; color: black; background: white; border: 1px solid #ddd; border-radius: 5px; transition: background-color 0.2s; }
+        .option:hover { background: #f0f0f0; }
+        .option.selected-correct { background: #a5d6a7 !important; color: black !important; cursor: default; border: 1px solid #66bb6a; }
+        .option.selected-incorrect { background: #ef9a9a !important; color: black !important; cursor: default; border: 1px solid #e57373; }
+        .option.correct-answer { background: #a5d6a7 !important; color: black !important; cursor: default; border: 1px solid #66bb6a; }
+        .option.disabled { cursor: default; }
+        .results { padding: 20px; margin-top: 30px; text-align: center; font-size: 18px; font-weight: bold; color: black; background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 5px; }
+        .results.hidden { display: none; }
+        
+        /* Modal pre vysvetlenie */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { position: relative; background: white; padding: 30px; border-radius: 8px; max-width: 600px; width: 90%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .modal-header { font-weight: bold; font-size: 18px; margin-bottom: 15px; color: #2e7d32; }
+        .modal-text { margin-bottom: 20px; line-height: 1.5; color: black; }
+        .modal-button { background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; float: right; }
+        .modal-button:hover { background: #45a049; }
+        
+        @media print { .results { display: none; } .modal-overlay { display: none !important; } }
+    </style>
+</head>
+<body>
+    <h1>Test - Tudorovci v Anglicku (2)</h1>
+    
+    <div class="question">
+        <div class="question-text">1. Ktoré dva rody bojovali proti sebe vo "Vojne ruží" a aké farby ruží ich symbolizovali?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 1, 'a', true, 'Vojna ruží bola konfliktom o anglický trón medzi dvoma vetvami kráľovského rodu. Rod Lancasterovcov mal v erbe červenú ružu, zatiaľ čo rod Yorkovcov mal bielu ružu. Vojna sa skončila spojením rodov sobášom.')">a) Rod Lancasterovcov (červená ruža) a rod Yorkovcov (biela ruža)</div>
+            <div class="option" onclick="selectAnswer(this, 1, 'b', false, 'Vojna ruží bola konfliktom o anglický trón medzi dvoma vetvami kráľovského rodu. Rod Lancasterovcov mal v erbe červenú ružu, zatiaľ čo rod Yorkovcov mal bielu ružu. Vojna sa skončila spojením rodov sobášom.')">b) Rod Tudorovcov (červená ruža) a rod Stuartovcov (biela ruža)</div>
+            <div class="option" onclick="selectAnswer(this, 1, 'c', false, 'Vojna ruží bola konfliktom o anglický trón medzi dvoma vetvami kráľovského rodu. Rod Lancasterovcov mal v erbe červenú ružu, zatiaľ čo rod Yorkovcov mal bielu ružu. Vojna sa skončila spojením rodov sobášom.')">c) Rod Plantagenetovcov (žltá ruža) a rod Anjouovcov (modrá ruža)</div>
+            <div class="option" onclick="selectAnswer(this, 1, 'd', false, 'Vojna ruží bola konfliktom o anglický trón medzi dvoma vetvami kráľovského rodu. Rod Lancasterovcov mal v erbe červenú ružu, zatiaľ čo rod Yorkovcov mal bielu ružu. Vojna sa skončila spojením rodov sobášom.')">d) Rod Lancasterovcov (biela ruža) a rod Yorkovcov (červená ruža)</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">2. Ako sa prejavoval absolutistický spôsob vlády Henricha VII., aj keď formálne rešpektoval parlament?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 2, 'a', false, 'Hoci Henrich VII. zachovával existenciu parlamentu a formálne s ním spolupracoval, v skutočnosti systematicky posilňoval svoju vlastnú moc. Táto centralizácia moci a oslabovanie iných inštitúcií viedlo postupne k absolutizmu, ktorý plne rozvinul jeho syn Henrich VIII.')">a) Zrušil parlament a vládol sám pomocou dekrétov</div>
+            <div class="option" onclick="selectAnswer(this, 2, 'b', false, 'Hoci Henrich VII. zachovával existenciu parlamentu a formálne s ním spolupracoval, v skutočnosti systematicky posilňoval svoju vlastnú moc. Táto centralizácia moci a oslabovanie iných inštitúcií viedlo postupne k absolutizmu, ktorý plne rozvinul jeho syn Henrich VIII.')">b) Vzdal sa všetkej moci v prospech svojich radcov</div>
+            <div class="option" onclick="selectAnswer(this, 2, 'c', true, 'Hoci Henrich VII. zachovával existenciu parlamentu a formálne s ním spolupracoval, v skutočnosti systematicky posilňoval svoju vlastnú moc. Táto centralizácia moci a oslabovanie iných inštitúcií viedlo postupne k absolutizmu, ktorý plne rozvinul jeho syn Henrich VIII.')">c) Postupne upevňoval svoju kráľovskú moc na úkor iných inštitúcií</div>
+            <div class="option" onclick="selectAnswer(this, 2, 'd', false, 'Hoci Henrich VII. zachovával existenciu parlamentu a formálne s ním spolupracoval, v skutočnosti systematicky posilňoval svoju vlastnú moc. Táto centralizácia moci a oslabovanie iných inštitúcií viedlo postupne k absolutizmu, ktorý plne rozvinul jeho syn Henrich VIII.')">d) Zaviedol demokratické voľby do parlamentu</div>
+        </div>
+    </div>
+    
+    <div class="question">
+        <div class="question-text">3. Ktorý cirkevný hodnostár bol vymenovaný za canterburského biskupa, aby zosobášil Henricha VIII. s Annou Boleynovou?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 3, 'a', false, 'Keď pápež odmietol anulovať Henrichovo manželstvo, kráľ potreboval na svoju stranu najvyššieho predstaviteľa cirkvi v Anglicku. Preto presadil vymenovanie Thomasa Cramera za canterburského biskupa, ktorý bol ochotný kráľovi vyhovieť a v roku 1533 ho zosobášil s Annou Boleynovou.')">a) Thomas Moore</div>
+            <div class="option" onclick="selectAnswer(this, 3, 'b', true, 'Keď pápež odmietol anulovať Henrichovo manželstvo, kráľ potreboval na svoju stranu najvyššieho predstaviteľa cirkvi v Anglicku. Preto presadil vymenovanie Thomasa Cramera za canterburského biskupa, ktorý bol ochotný kráľovi vyhovieť a v roku 1533 ho zosobášil s Annou Boleynovou.')">b) Thomas Cramer</div>
+            <div class="option" onclick="selectAnswer(this, 3, 'c', false, 'Keď pápež odmietol anulovať Henrichovo manželstvo, kráľ potreboval na svoju stranu najvyššieho predstaviteľa cirkvi v Anglicku. Preto presadil vymenovanie Thomasa Cramera za canterburského biskupa, ktorý bol ochotný kráľovi vyhovieť a v roku 1533 ho zosobášil s Annou Boleynovou.')">c) Martin Luther</div>
+            <div class="option" onclick="selectAnswer(this, 3, 'd', false, 'Keď pápež odmietol anulovať Henrichovo manželstvo, kráľ potreboval na svoju stranu najvyššieho predstaviteľa cirkvi v Anglicku. Preto presadil vymenovanie Thomasa Cramera za canterburského biskupa, ktorý bol ochotný kráľovi vyhovieť a v roku 1533 ho zosobášil s Annou Boleynovou.')">d) Filip Španielsky</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">4. Aký bol významný ekonomický dôsledok reformácie v Anglicku za vlády Henricha VIII.?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 4, 'a', false, 'Jedným z hlavných krokov po odtrhnutí od Ríma bolo zrušenie kláštorov a reholí, ktoré boli lojálne pápežovi. Ich rozsiahly majetok bol skonfiškovaný korunou a následne rozdaný medzi šľachticov, čím si Henrich VIII. zabezpečil ich vernosť a posilnil svoju pozíciu.')">a) Všetok cirkevný majetok bol vrátený Rímu</div>
+            <div class="option" onclick="selectAnswer(this, 4, 'b', false, 'Jedným z hlavných krokov po odtrhnutí od Ríma bolo zrušenie kláštorov a reholí, ktoré boli lojálne pápežovi. Ich rozsiahly majetok bol skonfiškovaný korunou a následne rozdaný medzi šľachticov, čím si Henrich VIII. zabezpečil ich vernosť a posilnil svoju pozíciu.')">b) Anglicko zažilo hlbokú ekonomickú krízu a hladomor</div>
+            <div class="option" onclick="selectAnswer(this, 4, 'c', false, 'Jedným z hlavných krokov po odtrhnutí od Ríma bolo zrušenie kláštorov a reholí, ktoré boli lojálne pápežovi. Ich rozsiahly majetok bol skonfiškovaný korunou a následne rozdaný medzi šľachticov, čím si Henrich VIII. zabezpečil ich vernosť a posilnil svoju pozíciu.')">c) Majetok kláštorov bol rozdaný medzi chudobných roľníkov</div>
+            <div class="option" onclick="selectAnswer(this, 4, 'd', true, 'Jedným z hlavných krokov po odtrhnutí od Ríma bolo zrušenie kláštorov a reholí, ktoré boli lojálne pápežovi. Ich rozsiahly majetok bol skonfiškovaný korunou a následne rozdaný medzi šľachticov, čím si Henrich VIII. zabezpečil ich vernosť a posilnil svoju pozíciu.')">d) Majetok zrušených kláštorov bol rozdaný medzi šľachticov</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">5. Aké bolo správne poradie nástupníctva detí Henricha VIII. na anglickom tróne?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 5, 'a', true, 'Po smrti Henricha VIII. vládol najprv jeho jediný syn Eduard VI. Keďže zomrel mladý, na trón nastúpila jeho najstaršia dcéra, katolíčka Mária I. Po jej smrti sa kráľovnou stala Alžbeta I., dcéra Anny Boleynovej.')">a) Eduard VI., potom Mária I., potom Alžbeta I.</div>
+            <div class="option" onclick="selectAnswer(this, 5, 'b', false, 'Po smrti Henricha VIII. vládol najprv jeho jediný syn Eduard VI. Keďže zomrel mladý, na trón nastúpila jeho najstaršia dcéra, katolíčka Mária I. Po jej smrti sa kráľovnou stala Alžbeta I., dcéra Anny Boleynovej.')">b) Alžbeta I., potom Mária I., potom Eduard VI.</div>
+            <div class="option" onclick="selectAnswer(this, 5, 'c', false, 'Po smrti Henricha VIII. vládol najprv jeho jediný syn Eduard VI. Keďže zomrel mladý, na trón nastúpila jeho najstaršia dcéra, katolíčka Mária I. Po jej smrti sa kráľovnou stala Alžbeta I., dcéra Anny Boleynovej.')">c) Mária I., potom Eduard VI., potom Alžbeta I.</div>
+            <div class="option" onclick="selectAnswer(this, 5, 'd', false, 'Po smrti Henricha VIII. vládol najprv jeho jediný syn Eduard VI. Keďže zomrel mladý, na trón nastúpila jeho najstaršia dcéra, katolíčka Mária I. Po jej smrti sa kráľovnou stala Alžbeta I., dcéra Anny Boleynovej.')">d) Všetci traja vládli spoločne ako regentská rada</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">6. Čo bolo hlavným dôvodom vzbúr v Anglicku pred sobášom Márie I. so španielskym princom Filipom?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 6, 'a', false, 'Máriin zámer vydať sa za španielskeho princa Filipa vyvolal v Anglicku veľký odpor. Protestanti sa obávali, že tento sobáš posilní katolícky vplyv a urýchli rekatolizáciu krajiny, ktorú Mária presadzovala. Cítili to ako ohrozenie svojich náboženských slobôd.')">a) Filip požadoval príliš vysoké veno</div>
+            <div class="option" onclick="selectAnswer(this, 6, 'b', true, 'Máriin zámer vydať sa za španielskeho princa Filipa vyvolal v Anglicku veľký odpor. Protestanti sa obávali, že tento sobáš posilní katolícky vplyv a urýchli rekatolizáciu krajiny, ktorú Mária presadzovala. Cítili to ako ohrozenie svojich náboženských slobôd.')">b) Protestanti sa obávali posilnenia katolicizmu a rekatolizácie</div>
+            <div class="option" onclick="selectAnswer(this, 6, 'c', false, 'Máriin zámer vydať sa za španielskeho princa Filipa vyvolal v Anglicku veľký odpor. Protestanti sa obávali, že tento sobáš posilní katolícky vplyv a urýchli rekatolizáciu krajiny, ktorú Mária presadzovala. Cítili to ako ohrozenie svojich náboženských slobôd.')">c) Anglická šľachta chcela, aby si Mária vzala anglického šľachtica</div>
+            <div class="option" onclick="selectAnswer(this, 6, 'd', false, 'Máriin zámer vydať sa za španielskeho princa Filipa vyvolal v Anglicku veľký odpor. Protestanti sa obávali, že tento sobáš posilní katolícky vplyv a urýchli rekatolizáciu krajiny, ktorú Mária presadzovala. Cítili to ako ohrozenie svojich náboženských slobôd.')">d) Španielsko bolo v tom čase nepriateľom Anglicka</div>
+        </div>
+    </div>
+    
+    <div class="question">
+        <div class="question-text">7. Ako Alžbeta I. využívala postavu sira Francisa Drakea v boji proti Španielsku?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 7, 'a', false, 'Sir Francis Drake bol korzár v službách kráľovnej Alžbety. Oficiálne bol objaviteľ, no jeho hlavnou úlohou bolo prepadávať a potápať španielske obchodné lode, najmä tie, ktoré prevážali bohatstvo z Ameriky. Týmto spôsobom Alžbeta oslabovala španielsku ekonomiku a moc bez toho, aby musela viesť otvorenú vojnu.')">a) Poverila ho vedením pozemnej armády</div>
+            <div class="option" onclick="selectAnswer(this, 7, 'b', false, 'Sir Francis Drake bol korzár v službách kráľovnej Alžbety. Oficiálne bol objaviteľ, no jeho hlavnou úlohou bolo prepadávať a potápať španielske obchodné lode, najmä tie, ktoré prevážali bohatstvo z Ameriky. Týmto spôsobom Alžbeta oslabovala španielsku ekonomiku a moc bez toho, aby musela viesť otvorenú vojnu.')">b) Bol jej hlavným diplomatom na španielskom dvore</div>
+            <div class="option" onclick="selectAnswer(this, 7, 'c', true, 'Sir Francis Drake bol korzár v službách kráľovnej Alžbety. Oficiálne bol objaviteľ, no jeho hlavnou úlohou bolo prepadávať a potápať španielske obchodné lode, najmä tie, ktoré prevážali bohatstvo z Ameriky. Týmto spôsobom Alžbeta oslabovala španielsku ekonomiku a moc bez toho, aby musela viesť otvorenú vojnu.')">c) Najala ho, aby potápal španielske lode a oslaboval tak španielsku krajinu</div>
+            <div class="option" onclick="selectAnswer(this, 7, 'd', false, 'Sir Francis Drake bol korzár v službách kráľovnej Alžbety. Oficiálne bol objaviteľ, no jeho hlavnou úlohou bolo prepadávať a potápať španielske obchodné lode, najmä tie, ktoré prevážali bohatstvo z Ameriky. Týmto spôsobom Alžbeta oslabovala španielsku ekonomiku a moc bez toho, aby musela viesť otvorenú vojnu.')">d) Menovala ho za admirála "Veľkej armády"</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">8. Prečo dala Alžbeta I. popraviť svoju sesternicu, škótsku kráľovnú Máriu Stuartovú?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 8, 'a', false, 'Mária Stuartová, ako katolíčka, mala podľa mnohých katolíkov väčšie právo na anglický trón než protestantka Alžbeta. Stala sa tak ústrednou postavou viacerých sprisahaní, ktoré mali za cieľ zosadiť Alžbetu. Keď bolo odhalené jej zapojenie do jedného z týchto spiknutí, Alžbeta ju dala popraviť, aby odstránila trvalú hrozbu pre svoju vládu.')">a) Mária Stuartová vyhlásila vojnu Anglicku</div>
+            <div class="option" onclick="selectAnswer(this, 8, 'b', false, 'Mária Stuartová, ako katolíčka, mala podľa mnohých katolíkov väčšie právo na anglický trón než protestantka Alžbeta. Stala sa tak ústrednou postavou viacerých sprisahaní, ktoré mali za cieľ zosadiť Alžbetu. Keď bolo odhalené jej zapojenie do jedného z týchto spiknutí, Alžbeta ju dala popraviť, aby odstránila trvalú hrozbu pre svoju vládu.')">b) Odmietla sa vzdať škótskeho trónu</div>
+            <div class="option" onclick="selectAnswer(this, 8, 'c', false, 'Mária Stuartová, ako katolíčka, mala podľa mnohých katolíkov väčšie právo na anglický trón než protestantka Alžbeta. Stala sa tak ústrednou postavou viacerých sprisahaní, ktoré mali za cieľ zosadiť Alžbetu. Keď bolo odhalené jej zapojenie do jedného z týchto spiknutí, Alžbeta ju dala popraviť, aby odstránila trvalú hrozbu pre svoju vládu.')">c) Z osobných rodinných sporov</div>
+            <div class="option" onclick="selectAnswer(this, 8, 'd', true, 'Mária Stuartová, ako katolíčka, mala podľa mnohých katolíkov väčšie právo na anglický trón než protestantka Alžbeta. Stala sa tak ústrednou postavou viacerých sprisahaní, ktoré mali za cieľ zosadiť Alžbetu. Keď bolo odhalené jej zapojenie do jedného z týchto spiknutí, Alžbeta ju dala popraviť, aby odstránila trvalú hrozbu pre svoju vládu.')">d) Kvôli jej zapojeniu do spiknutia s cieľom získať anglický trón</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">9. Na počesť koho bola pomenovaná prvá anglická kolónia v Amerike, Virgínia?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 9, 'a', false, 'Alžbeta I. sa nikdy nevydala, čo zdôvodňovala tým, že je „vydatá za Anglicko“. Vďaka tomu si vyslúžila prezývku „panenská kráľovná“. Prvá anglická kolónia v Amerike bola pomenovaná Virgínia práve na jej počesť.')">a) Na počesť Panny Márie</div>
+            <div class="option" onclick="selectAnswer(this, 9, 'b', true, 'Alžbeta I. sa nikdy nevydala, čo zdôvodňovala tým, že je „vydatá za Anglicko“. Vďaka tomu si vyslúžila prezývku „panenská kráľovná“. Prvá anglická kolónia v Amerike bola pomenovaná Virgínia práve na jej počesť.')">b) Na počesť kráľovnej Alžbety I., "panenskej kráľovnej"</div>
+            <div class="option" onclick="selectAnswer(this, 9, 'c', false, 'Alžbeta I. sa nikdy nevydala, čo zdôvodňovala tým, že je „vydatá za Anglicko“. Vďaka tomu si vyslúžila prezývku „panenská kráľovná“. Prvá anglická kolónia v Amerike bola pomenovaná Virgínia práve na jej počesť.')">c) Podľa mena manželky objaviteľa</div>
+            <div class="option" onclick="selectAnswer(this, 9, 'd', false, 'Alžbeta I. sa nikdy nevydala, čo zdôvodňovala tým, že je „vydatá za Anglicko“. Vďaka tomu si vyslúžila prezývku „panenská kráľovná“. Prvá anglická kolónia v Amerike bola pomenovaná Virgínia práve na jej počesť.')">d) Podľa domorodého názvu pre danú oblasť</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">10. Ktorý tudorovský panovník sa pokúsil o rekatolizáciu Anglicka?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 10, 'a', false, 'Mária I. bola dcérou španielskej katolíčky Kataríny Aragónskej a sama bola hlboko veriacou katolíčkou. Po protestantskej vláde jej brata Eduarda VI. bol jej hlavným cieľom návrat Anglicka ku katolicizmu. Tento proces, známy ako rekatolizácia, presadzovala veľmi násilne.')">a) Eduard VI.</div>
+            <div class="option" onclick="selectAnswer(this, 10, 'b', false, 'Mária I. bola dcérou španielskej katolíčky Kataríny Aragónskej a sama bola hlboko veriacou katolíčkou. Po protestantskej vláde jej brata Eduarda VI. bol jej hlavným cieľom návrat Anglicka ku katolicizmu. Tento proces, známy ako rekatolizácia, presadzovala veľmi násilne.')">b) Henrich VIII.</div>
+            <div class="option" onclick="selectAnswer(this, 10, 'c', true, 'Mária I. bola dcérou španielskej katolíčky Kataríny Aragónskej a sama bola hlboko veriacou katolíčkou. Po protestantskej vláde jej brata Eduarda VI. bol jej hlavným cieľom návrat Anglicka ku katolicizmu. Tento proces, známy ako rekatolizácia, presadzovala veľmi násilne.')">c) Mária I.</div>
+            <div class="option" onclick="selectAnswer(this, 10, 'd', false, 'Mária I. bola dcérou španielskej katolíčky Kataríny Aragónskej a sama bola hlboko veriacou katolíčkou. Po protestantskej vláde jej brata Eduarda VI. bol jej hlavným cieľom návrat Anglicka ku katolicizmu. Tento proces, známy ako rekatolizácia, presadzovala veľmi násilne.')">d) Alžbeta I.</div>
+        </div>
+    </div>
+    
+    <div class="results hidden" id="results"></div>
+
+    <!-- Modal pre vysvetlenie -->
+    <div class="modal-overlay" id="explanationModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">Vysvetlenie</div>
+            <div class="modal-text" id="explanationText"></div>
+            <button class="modal-button" onclick="closeExplanation()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        let answers = {};
+        let correctAnswers = 0;
+        let totalQuestions = 10;
+        let questionsAnswered = 0;
+
+        function selectAnswer(element, questionNum, option, isCorrect, explanation) {
+            if (answers[questionNum] !== undefined) return;
+            
+            let allOptions = element.parentNode.querySelectorAll('.option');
+            allOptions.forEach(opt => {
+                opt.classList.add('disabled');
+                opt.onclick = null;
+            });
+
+            if (isCorrect) {
+                element.classList.add('selected-correct');
+                correctAnswers++;
+            } else {
+                element.classList.add('selected-incorrect');
+                // Nájdi správnu odpoveď
+                allOptions.forEach(opt => {
+                    let onclickStr = opt.getAttribute('onclick');
+                    if (onclickStr && onclickStr.includes('true')) {
+                        opt.classList.add('correct-answer');
+                    }
+                });
+                // Zobraz vysvetlenie
+                showExplanation(explanation);
+            }
+
+            answers[questionNum] = { option: option, correct: isCorrect };
+            questionsAnswered++;
+
+            if (questionsAnswered === totalQuestions) {
+                showResults();
+            }
+        }
+
+        function showExplanation(text) {
+            document.getElementById('explanationText').textContent = text;
+            document.getElementById('explanationModal').style.display = 'flex';
+        }
+
+        function closeExplanation() {
+            document.getElementById('explanationModal').style.display = 'none';
+        }
+
+        function showResults() {
+            let percentage = Math.round((correctAnswers / totalQuestions) * 100);
+            let grade = '';
+            
+            if (percentage >= 90) grade = 'Výborný';
+            else if (percentage >= 80) grade = 'Veľmi dobrý';
+            else if (percentage >= 70) grade = 'Dobrý';
+            else if (percentage >= 60) grade = 'Dostačujúci';
+            else grade = 'Nedostačujúci';
+
+            document.getElementById('results').innerHTML = `
+                <div>Výsledok: ${correctAnswers}/${totalQuestions} (${percentage}%)</div>
+                <div>Hodnotenie: ${grade}</div>
+            `;
+            document.getElementById('results').classList.remove('hidden');
+        }
+
+        // Zatvor modal kliknutím mimo obsah
+        document.getElementById('explanationModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeExplanation();
+            }
+        });
+    </script>
+</body>
+</html>

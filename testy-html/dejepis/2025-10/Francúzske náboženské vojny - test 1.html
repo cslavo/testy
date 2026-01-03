@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <title>Test - Francúzske náboženské vojny</title>
+    <!-- MathJax nie je potrebný, keďže nie sú zložité vzorce -->
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.4; background: white; color: black; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; margin-bottom: 30px; color: black; }
+        .question { margin: 20px 0; padding: 15px; border: 1px solid #eee; border-radius: 8px; background-color: #f9f9f9; }
+        .question-text { font-weight: bold; margin-bottom: 10px; color: black; font-size: 1.1em; }
+        .options { margin-left: 25px; }
+        .option { margin: 8px 0; padding: 10px; cursor: pointer; user-select: none; color: black; background: white; border: 1px solid #ddd; border-radius: 4px; transition: background-color 0.2s; }
+        .option:hover { background: #f0f0f0; }
+        .option.selected-correct { background: #a5d6a7 !important; color: black !important; cursor: default; border: 1px solid #66bb6a; }
+        .option.selected-incorrect { background: #ef9a9a !important; color: black !important; cursor: default; border: 1px solid #e57373; }
+        .option.correct-answer { background: #a5d6a7 !important; color: black !important; cursor: default; border: 1px solid #66bb6a; }
+        .option.disabled { cursor: default; }
+        .results { padding: 20px; margin-top: 30px; text-align: center; font-size: 18px; font-weight: bold; color: black; border: 1px solid #ccc; border-radius: 8px; background-color: #f5f5f5;}
+        .results.hidden { display: none; }
+        
+        /* Modal pre vysvetlenie */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 8px; max-width: 600px; width: 90%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .modal-header { font-weight: bold; font-size: 18px; margin-bottom: 15px; color: #2e7d32; }
+        .modal-text { margin-bottom: 20px; line-height: 1.5; color: black; }
+        .modal-button { background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; float: right; }
+        .modal-button:hover { background: #45a049; }
+        
+        @media print { .results, .question .options, .modal-overlay { display: none; } .question { border: none; } }
+    </style>
+</head>
+<body>
+    <h1>Test - Francúzske náboženské vojny</h1>
+    
+    <div class="question">
+        <div class="question-text">1. Kto boli hlavní mocenskí súperi Francúzska v 16. storočí, s ktorými viedli králi František I. a Henrich II. zápas?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 1, 'a', false, 'Text spomína, že Francúzsko v boji proti Habsburgovcom neváhalo spojiť s Osmanskou ríšou, čo ich stavia do pozície spojencov, nie hlavných súperov. Hlavným protivníkom boli Habsburgovci, ktorí ovládali rozsiahle územia okolo Francúzska.')">Osmanská ríša a Anglicko</div>
+            <div class="option" onclick="selectAnswer(this, 1, 'b', true, 'Text jasne uvádza, že francúzski králi viedli mocenský zápas s Habsburgovcami. Habsburgovci v tom čase ovládali Nemecko, Španielsko, severné Taliansko a Nizozemsko, čím predstavovali pre Francúzsko najväčšiu hrozbu.')">Habsburgovci</div>
+            <div class="option" onclick="selectAnswer(this, 1, 'c', false, 'Rod Bourbonovcov bol síce významný, ale bol to francúzsky šľachtický rod, ktorý viedol hugenotov. Nebol teda externým mocenským súperom Francúzska ako štátu, ale interným hráčom v náboženských vojnách.')">Bourbonovci a rod Valois</div>
+            <div class="option" onclick="selectAnswer(this, 1, 'd', false, 'Pápežský štát a Benátska republika neboli v texte uvedené ako hlavní mocenskí súperi Francúzska v tomto období. Konflikt bol primárne zameraný proti dynastii Habsburgovcov a ich rozsiahlym dŕžavám.')">Pápežský štát a Benátska republika</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">2. Ako sa nazývali stúpenci myšlienok reformátora Jána Kalvína vo Francúzsku?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 2, 'a', false, 'Valois bola vládnuca katolícka dynastia vo Francúzsku pred nástupom Bourbonovcov. Neboli teda stúpencami reformácie, ale jej odporcami.')">Valois</div>
+            <div class="option" onclick="selectAnswer(this, 2, 'b', false, 'Puritáni boli stúpenci kalvinizmu v Anglicku, nie vo Francúzsku. Každá krajina mala často svoje vlastné označenie pre protestantské skupiny.')">Puritáni</div>
+            <div class="option" onclick="selectAnswer(this, 2, 'c', true, 'Text explicitne uvádza, že vo Francúzsku sa v 16. storočí ujali myšlienky Jána Kalvína a jeho stúpenci sa nazývali hugenoti. Tento termín je kľúčový pre pochopenie celého konfliktu.')">Hugenoti</div>
+            <div class="option" onclick="selectAnswer(this, 2, 'd', false, 'Guisovci boli vplyvný a bohatý katolícky rod, ktorý stál na opačnej strane konfliktu proti hugenotom. Boli jednými z hlavných iniciátorov prenasledovania hugenotov.')">Guisovci</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">3. Aký bol hlavný cieľ politického sobáša medzi Margarétou z Valois a Henrichom Navarrským, ktorý organizovala Katarína Medicejská?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 3, 'a', true, 'Katarína Medicejská, ako regentka, sa snažila stabilizovať krajinu zmietanú náboženskými konfliktmi. Sobáš jej katolíckej dcéry s vodcom hugenotov mal symbolicky spojiť obe znepriatelené strany a priniesť zmier.')">Zmieriť katolíkov a hugenotov</div>
+            <div class="option" onclick="selectAnswer(this, 3, 'b', false, 'Hoci sobáš prilákal hugenotskú šľachtu do Paríža, pôvodným cieľom Kataríny Medicejskej nebolo ich vyvraždenie, ale zmierenie. K plánu na masaker pristúpila až neskôr v obavách z posilňovania moci hugenotov.')">Vylákať a vyvraždiť hugenotských vodcov</div>
+            <div class="option" onclick="selectAnswer(this, 3, 'c', false, 'Spojenectvo proti Habsburgovcom už existovalo a nebolo primárnym cieľom tohto sobáša. Išlo o riešenie vnútornej náboženskej krízy vo Francúzsku.')">Vytvoriť spojenectvo proti Habsburgovcom</div>
+            <div class="option" onclick="selectAnswer(this, 3, 'd', false, 'Henrich Navarrský sa stal následníkom trónu až po vymretí rodu Valois, čo sa stalo oveľa neskôr. Sobáš mu síce posilnil postavenie, no jeho hlavným účelom bolo politické upokojenie situácie.')">Zabezpečiť Henrichovi Navarrskému nástupníctvo na trón</div>
+        </div>
+    </div>
+    
+    <div class="question">
+        <div class="question-text">4. Ktorá udalosť v roku 1572 viedla k masakru približne 3000 hugenotov v Paríži a obnoveniu náboženských vojen?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 4, 'a', false, 'Vydanie Nantského ediktu v roku 1598 naopak náboženské vojny ukončilo, nie začalo. Edikt garantoval hugenotom náboženské slobody.')">Vydanie Nantského ediktu</div>
+            <div class="option" onclick="selectAnswer(this, 4, 'b', false, 'Korunovácia Henricha IV. sa uskutočnila až po jeho konverzii na katolicizmus, čo bolo po roku 1589. Táto udalosť viedla k ukončeniu vojen, nie k ich eskalácii v roku 1572.')">Korunovácia Henricha IV.</div>
+            <div class="option" onclick="selectAnswer(this, 4, 'c', false, 'Sobáš bol pôvodne plánovaný ako akt zmierenia. Hoci sa stal príležitosťou pre masaker, samotný sobáš nebol tou udalosťou, ale skôr zámienkou.')">Politický sobáš Margaréty a Henricha</div>
+            <div class="option" onclick="selectAnswer(this, 4, 'd', true, 'Text opisuje, ako bola v noci na 24. augusta 1572 (sviatok sv. Bartolomeja) zorganizovaná masová vražda hugenotov zhromaždených v Paríži. Táto udalosť, známa ako Bartolomejská noc, viedla k obnoveniu a ďalšej radikalizácii hugenotských vojen.')">Bartolomejská noc</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">5. Prečo Henrich Navarrský, pôvodne hugenot, konvertoval na katolícku vieru?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 5, 'a', false, 'Jeho konverzia nebola výsledkom duchovného presvedčenia, ale politickej kalkulácie. Bol to pragmatický krok na dosiahnutie vyššieho cieľa.')">Pretože úprimne prijal katolícku vieru</div>
+            <div class="option" onclick="selectAnswer(this, 5, 'b', false, 'Text nespomína žiadny nátlak zo strany Kataríny Medicejskej v súvislosti s konverziou. V čase jeho nároku na trón už Katarína nemala taký vplyv a rod Valois vymrel.')">Na nátlak Kataríny Medicejskej</div>
+            <div class="option" onclick="selectAnswer(this, 5, 'c', true, 'Po vymretí rodu Valois sa Henrich Navarrský stal právoplatným dedičom trónu. Avšak pre katolícku väčšinu obyvateľstva a šľachty bol ako hugenot neprijateľný. Aby získal korunu a ukončil vojny, rozhodol sa prijať katolicizmus, čo vystihuje jeho slávny výrok „Paríž stojí za jednu svätú omšu“.')">Aby si ako právoplatný dedič zabezpečil francúzsku korunu</div>
+            <div class="option" onclick="selectAnswer(this, 5, 'd', false, 'Nantský edikt vydal až ako kráľ Henrich IV. v roku 1598, teda niekoľko rokov po svojej konverzii. Konverzia bola podmienkou pre získanie trónu, nie pre vydanie ediktu.')">Aby mohol vydať Nantský tolerančný edikt</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">6. Čo zaručoval Nantský tolerančný edikt z roku 1598 hugenotom?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 6, 'a', false, 'Edikt nezakazoval katolicizmus, ale naopak, potvrdil ho ako dominantné náboženstvo a zároveň poskytol práva hugenotskej menšine. Cieľom bola koexistencia, nie nahradenie jedného náboženstva druhým.')">Zákaz katolíckeho náboženstva vo Francúzsku</div>
+            <div class="option" onclick="selectAnswer(this, 6, 'b', true, 'Text uvádza, že edikt zrovnoprávňoval hugenotov. Priznal im náboženskú slobodu, možnosť zastávať úrady, zakladať školy a akadémie, a zaručoval im rovnoprávne postavenie s katolíkmi v súdnictve a hospodárstve.')">Náboženskú slobodu a rovnoprávne postavenie s katolíkmi</div>
+            <div class="option" onclick="selectAnswer(this, 6, 'c', false, 'Edikt poskytol hugenotom rozsiahle práva, ale s jednou dôležitou výnimkou. Text na konci uvádza, že "to všetko s výnimkou Paríža", kde boli ich práva obmedzené.')">Úplnú náboženskú slobodu vo všetkých francúzskych mestách vrátane Paríža</div>
+            <div class="option" onclick="selectAnswer(this, 6, 'd', false, 'Henrich Navarrský (Henrich IV.) bol kráľom, ktorý edikt vydal. Edikt neriešil jeho nástupníctvo, ale postavenie hugenotskej menšiny v kráľovstve.')">Potvrdenie Henricha Navarrského ako jediného legitímneho kráľa</div>
+        </div>
+    </div>
+    
+    <div class="question">
+        <div class="question-text">7. Aký bol konečný dôsledok vymretia rodu Valois v roku 1589?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 7, 'a', false, 'Bartolomejská noc sa odohrala v roku 1572, teda 17 rokov pred vymretím rodu Valois. Bola to udalosť, ktorá vojny eskalovala, nie dôsledok dynastickej zmeny.')">Okamžité vypuknutie Bartolomejskej noci</div>
+            <div class="option" onclick="selectAnswer(this, 7, 'b', false, 'Vymretie rodu Valois vojny neukončilo okamžite. Naopak, vyvolalo nástupnícku krízu, pretože legitímnym dedičom bol hugenot Henrich Navarrský, čo viedlo k ďalším bojom, kým nekonvertoval a nebol všeobecne prijatý.')">Automatické a pokojné ukončenie náboženských vojen</div>
+            <div class="option" onclick="selectAnswer(this, 7, 'c', true, 'Po zavraždení bezdetného kráľa Henricha III. z rodu Valois sa podľa následníckeho práva stal dedičom trónu Henrich Navarrský z rodu Bourbonovcov. Jeho nástupom na trón ako Henricha IV. začala vo Francúzsku vládnuť nová dynastia Bourbonovcov.')">Nástup dynastie Bourbonovcov na francúzsky trón</div>
+            <div class="option" onclick="selectAnswer(this, 7, 'd', false, 'Francúzsko sa nerozdelilo. Hoci hrozila ďalšia občianska vojna, Henrichovi IV. sa podarilo krajinu zjednotiť, a to práve vďaka jeho konverzii a následnému vydaniu Nantského ediktu.')">Rozdelenie Francúzska na katolícke a hugenotské kráľovstvo</div>
+        </div>
+    </div>
+
+    <div class="results hidden" id="results"></div>
+
+    <!-- Modal pre vysvetlenie -->
+    <div class="modal-overlay" id="explanationModal">
+        <div class="modal-content">
+            <div class="modal-header">Vysvetlenie</div>
+            <div class="modal-text" id="explanationText"></div>
+            <button class="modal-button" onclick="closeExplanation()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        let answers = {};
+        let correctAnswers = 0;
+        let totalQuestions = 7;
+        let questionsAnswered = 0;
+
+        function selectAnswer(element, questionNum, option, isCorrect, explanation) {
+            if (answers[questionNum] !== undefined) return;
+            
+            let allOptions = element.parentNode.querySelectorAll('.option');
+            allOptions.forEach(opt => {
+                opt.classList.add('disabled');
+                opt.onclick = null;
+            });
+
+            if (isCorrect) {
+                element.classList.add('selected-correct');
+                correctAnswers++;
+            } else {
+                element.classList.add('selected-incorrect');
+                // Nájdi správnu odpoveď
+                allOptions.forEach(opt => {
+                    let onclickStr = opt.getAttribute('onclick');
+                    if (onclickStr && onclickStr.includes('true')) {
+                        opt.classList.add('correct-answer');
+                    }
+                });
+                // Zobraz vysvetlenie
+                showExplanation(explanation);
+            }
+
+            answers[questionNum] = { option: option, correct: isCorrect };
+            questionsAnswered++;
+
+            if (questionsAnswered === totalQuestions) {
+                showResults();
+            }
+        }
+
+        function showExplanation(text) {
+            document.getElementById('explanationText').textContent = text;
+            document.getElementById('explanationModal').style.display = 'flex';
+        }
+
+        function closeExplanation() {
+            document.getElementById('explanationModal').style.display = 'none';
+        }
+
+        function showResults() {
+            let percentage = Math.round((correctAnswers / totalQuestions) * 100);
+            let grade = '';
+            
+            if (percentage >= 90) grade = 'Výborný';
+            else if (percentage >= 80) grade = 'Veľmi dobrý';
+            else if (percentage >= 70) grade = 'Dobrý';
+            else if (percentage >= 60) grade = 'Dostačujúci';
+            else grade = 'Nedostačujúci';
+
+            document.getElementById('results').innerHTML = `
+                <div>Výsledok: ${correctAnswers}/${totalQuestions} (${percentage}%)</div>
+                <div>Hodnotenie: ${grade}</div>
+            `;
+            document.getElementById('results').classList.remove('hidden');
+        }
+
+        // Zatvor modal kliknutím mimo obsah
+        document.getElementById('explanationModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeExplanation();
+            }
+        });
+    </script>
+</body>
+</html>

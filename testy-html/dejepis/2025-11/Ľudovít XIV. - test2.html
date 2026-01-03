@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <title>Test B - Ľudovít XIV. a Vojna o španielske dedičstvo</title>
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background: #f9f9f9; color: #333; max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+        h1 { text-align: center; margin-bottom: 40px; color: #2c3e50; border-bottom: 2px solid #2c3e50; padding-bottom: 10px; }
+        .question { background: white; margin: 20px 0; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .question-text { font-weight: bold; font-size: 1.1em; margin-bottom: 15px; color: #2c3e50; }
+        .options { display: flex; flex-direction: column; gap: 10px; }
+        .option { padding: 12px 15px; cursor: pointer; user-select: none; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; transition: background 0.2s; }
+        .option:hover:not(.disabled) { background: #e9ecef; }
+        .option.selected-correct { background: #d4edda !important; color: #155724 !important; border-color: #c3e6cb; cursor: default; }
+        .option.selected-incorrect { background: #f8d7da !important; color: #721c24 !important; border-color: #f5c6cb; cursor: default; }
+        .option.correct-answer { background: #d4edda !important; color: #155724 !important; border-color: #c3e6cb; cursor: default; }
+        .option.disabled { cursor: default; opacity: 0.9; }
+        .results { padding: 20px; margin-top: 30px; text-align: center; font-size: 1.2em; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .results.hidden { display: none; }
+        
+        /* Modal styles */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; backdrop-filter: blur(2px); }
+        .modal-content { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 12px; max-width: 600px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: fadeIn 0.3s; }
+        .modal-header { font-weight: bold; font-size: 20px; margin-bottom: 15px; color: #2e7d32; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .modal-text { margin-bottom: 25px; line-height: 1.6; color: #444; font-size: 16px; }
+        .modal-button { background: #2e7d32; color: white; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-size: 16px; transition: background 0.3s; display: block; margin: 0 auto; }
+        .modal-button:hover { background: #1b5e20; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translate(-50%, -55%); } to { opacity: 1; transform: translate(-50%, -50%); } }
+        @media print { .results, .modal-overlay { display: none !important; } }
+    </style>
+</head>
+<body>
+    <h1>Test B - Ľudovít XIV. a Vojna o španielske dedičstvo</h1>
+    
+    <div class="question">
+        <div class="question-text">1. Kedy boli naposledy zvolané generálne stavy (parlament) pred nástupom absolutizmu Ľudovíta XIV.?</div>
+        <div class="options">
+            <div class="option" data-correct="true" data-explanation="Generálne stavy neboli zvolané od roku 1614. Absolutistickí panovníci vládli bez nich." onclick="selectAnswer(this, 1)">a) V roku 1614.</div>
+            <div class="option" data-correct="false" data-explanation="V roku 1648 sa skončila 30-ročná vojna, nešlo o zvolanie parlamentu." onclick="selectAnswer(this, 1)">b) V roku 1648.</div>
+            <div class="option" data-correct="false" data-explanation="Rok 1685 sa spája so zrušením nantského ediktu." onclick="selectAnswer(this, 1)">c) V roku 1685.</div>
+            <div class="option" data-correct="false" data-explanation="V roku 1715 zomrel Ľudovít XIV." onclick="selectAnswer(this, 1)">d) V roku 1715.</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">2. V akom postavení sa ocitlo Francúzsko po skončení 30-ročnej vojny?</div>
+        <div class="options">
+            <div class="option" data-correct="false" data-explanation="Francúzsko bolo na strane víťazov a posilnilo si pozíciu." onclick="selectAnswer(this, 2)">a) Bolo zničené a stalo sa vazalom Španielska.</div>
+            <div class="option" data-correct="false" data-explanation="Francúzsko sa stalo katolíckou veľmocou, neprešlo na protestantizmus." onclick="selectAnswer(this, 2)">b) Stratilo väčšinu územia a stalo sa protestantskou krajinou.</div>
+            <div class="option" data-correct="true" data-explanation="Vďaka víťazným vojnám a Vestfálskemu mieru sa Francúzsko stalo najsilnejšou kontinentálnou krajinou." onclick="selectAnswer(this, 2)">c) Stalo sa najsilnejšou kontinentálnou krajinou.</div>
+            <div class="option" data-correct="false" data-explanation="Francúzsko zostalo v Európe a nezameralo sa výlučne na kolónie." onclick="selectAnswer(this, 2)">d) Izolovalo sa od Európy a zameralo sa len na zámorie.</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">3. Kým Ľudovít XIV. nahrádzal starú dvorskú šľachtu v štátnych úradoch?</div>
+        <div class="options">
+            <div class="option" data-correct="false" data-explanation="Ľudovít XIV. duchovenstvo (prvý stav) do administratívy masovo neumiestňoval namiesto šľachty." onclick="selectAnswer(this, 3)">a) Výlučne duchovenstvom a biskupmi.</div>
+            <div class="option" data-correct="false" data-explanation="Cudzincov kráľ do vysokých funkcií spravidla nevolal, preferoval domácich lojálnych ľudí." onclick="selectAnswer(this, 3)">b) Zahraničnými odborníkmi z Talianska a Španielska.</div>
+            <div class="option" data-correct="false" data-explanation="Vysokú šľachtu (dvorskú) sa snažil odstaviť, aby ho neohrozovala." onclick="selectAnswer(this, 3)">c) Členmi svojej rodiny a vysokou šľachtou.</div>
+            <div class="option" data-correct="true" data-explanation="Nahrádzal ju tzv. úradníckou šľachtou (nižšia šľachta), ktorá mu bola verná a vďačná za spoločenský vzostup." onclick="selectAnswer(this, 3)">d) Nižšou, tzv. úradníckou šľachtou, ktorá mu bola verná.</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">4. Čo znamená slávny výrok Ľudovíta XIV. „Štát som ja“?</div>
+        <div class="options">
+            <div class="option" data-correct="true" data-explanation="Vyjadruje podstatu absolutizmu: Kráľ sústredil všetku moc (zákonodarnú, výkonnú, súdnu) do svojich rúk a nikomu sa nezodpovedal." onclick="selectAnswer(this, 4)">a) Vyjadrenie absolutistickej moci, kde kráľ sústredil všetku moc a nikomu sa nezodpovedal.</div>
+            <div class="option" data-correct="false" data-explanation="Ľudovít XIV. sa považoval za vládcu z Božej vôle, nie za služobníka ľudu." onclick="selectAnswer(this, 4)">b) Že kráľ je len prvým služobníkom občanov.</div>
+            <div class="option" data-correct="false" data-explanation="Výrok neznamená osobnú zodpovednosť za dlhy, ale stotožnenie štátnej moci s osobou panovníka." onclick="selectAnswer(this, 4)">c) Že kráľ osobne zaplatí všetky štátne dlhy zo svojho majetku.</div>
+            <div class="option" data-correct="false" data-explanation="Výrok znamená opak demokracie – vládu jedinca." onclick="selectAnswer(this, 4)">d) Že štát tvorí všetok ľud a vládne sa demokraticky.</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">5. Kde sa nachádzala francúzska kolónia Louisiana, pomenovaná po Ľudovítovi XIV.?</div>
+        <div class="options">
+            <div class="option" data-correct="false" data-explanation="V Južnej Amerike mali kolónie skôr Španieli a Portugalci." onclick="selectAnswer(this, 5)">a) V Južnej Amerike.</div>
+            <div class="option" data-correct="true" data-explanation="Louisiana bola rozsiahla francúzska kolónia v Severnej Amerike." onclick="selectAnswer(this, 5)">b) V Severnej Amerike.</div>
+            <div class="option" data-correct="false" data-explanation="Madagaskar bol tiež francúzskou kolóniou, ale nie je to Louisiana." onclick="selectAnswer(this, 5)">c) V Afrike (Madagaskar).</div>
+            <div class="option" data-correct="false" data-explanation="Indočína bola v Ázii, Louisiana v Amerike." onclick="selectAnswer(this, 5)">d) V Ázii (Indočína).</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">6. Čo je podstatou „galikanizmu“, ktorý presadzoval Ľudovít XIV.?</div>
+        <div class="options">
+            <div class="option" data-correct="false" data-explanation="Galikanizmus obmedzoval moc pápeža, nezvyšoval ju." onclick="selectAnswer(this, 6)">a) Úplné podriadenie kráľa pápežovi vo všetkých otázkach.</div>
+            <div class="option" data-correct="false" data-explanation="Galikanizmus neznamenal prechod na protestantizmus, Francúzsko ostalo katolícke." onclick="selectAnswer(this, 6)">b) Zavedenie protestantizmu ako štátneho náboženstva.</div>
+            <div class="option" data-correct="true" data-explanation="Išlo o obmedzenie moci pápeža vo Francúzsku v prospech kráľa a biskupov. Cirkevných hodnostárov dosadzoval štát." onclick="selectAnswer(this, 6)">c) Obmedzenie pápežskej moci vo Francúzsku v prospech kráľa a štátu.</div>
+            <div class="option" data-correct="false" data-explanation="Hugenoti boli prenasledovaní (zrušenie nantského ediktu), galikanizmus sa týkal katolíckej cirkvi." onclick="selectAnswer(this, 6)">d) Podpora hugenotov a náboženská sloboda.</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">7. Aký geografický cieľ sledoval Ľudovít XIV. v zahraničnej politike?</div>
+        <div class="options">
+            <div class="option" data-correct="false" data-explanation="Britské ostrovy neboli cieľom územnej expanzie Francúzska." onclick="selectAnswer(this, 7)">a) Dobytie Britských ostrovov.</div>
+            <div class="option" data-correct="true" data-explanation="Snažil sa získať tzv. prirodzené hranice Francúzska, ktoré tvorili rieka Rýn a pohorie Pyreneje." onclick="selectAnswer(this, 7)">b) Získanie prirodzených hraníc (Rýn a Pyreneje).</div>
+            <div class="option" data-correct="false" data-explanation="Jeho ambície smerovali primárne na kontinentálnu Európu a hranice, nie do Afriky (okrem kolónií)." onclick="selectAnswer(this, 7)">c) Kolonizáciu celej Afriky.</div>
+            <div class="option" data-correct="false" data-explanation="Rusko bolo príliš ďaleko a nebolo cieľom francúzskej expanzie." onclick="selectAnswer(this, 7)">d) Ovládnutie Ruska.</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">8. Za akej podmienky určil španielsky kráľ Karol II. vo svojom závete za dediča Filipa z Anjou?</div>
+        <div class="options">
+            <div class="option" data-correct="true" data-explanation="Podmienkou bolo, že sa Filip musí zriecť nároku na francúzsky trón, aby sa zabránilo spojeniu Francúzska a Španielska." onclick="selectAnswer(this, 8)">a) Musel sa zriecť nároku na francúzsky trón.</div>
+            <div class="option" data-correct="false" data-explanation="Podmienka bola politická (oddelenie trónov), nie finančná." onclick="selectAnswer(this, 8)">b) Musel zaplatiť Anglicku obrovské odškodné.</div>
+            <div class="option" data-correct="false" data-explanation="Manželstvo s anglickou kráľovnou nebolo podmienkou." onclick="selectAnswer(this, 8)">c) Musel sa oženiť s anglickou kráľovnou.</div>
+            <div class="option" data-correct="false" data-explanation="Podmienka znela, že sa ríša nesmie deliť, Filip mal dostať všetko." onclick="selectAnswer(this, 8)">d) Musel prenechať kolónie Holandsku.</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">9. Ktoré štáty tvorili protifrancúzsku „Veľkú alianciu“ vo vojne o španielske dedičstvo?</div>
+        <div class="options">
+            <div class="option" data-correct="false" data-explanation="Rusko a Osmanská ríša v tomto konflikte nebojovali." onclick="selectAnswer(this, 9)">a) Francúzsko, Španielsko a Bavorsko.</div>
+            <div class="option" data-correct="true" data-explanation="Proti Francúzsku sa spojili Anglicko, Severné Nizozemsko, Cisár (Habsburgovci) a kurfirst braniborský (Prusko)." onclick="selectAnswer(this, 9)">b) Anglicko, Severné Nizozemsko, Cisár (Habsburgovci) a Prusko.</div>
+            <div class="option" data-correct="false" data-explanation="Španielsko (pod Filipom) bolo spojencom Francúzska." onclick="selectAnswer(this, 9)">c) Španielsko, Taliansko a Poľsko.</div>
+            <div class="option" data-correct="false" data-explanation="USA vtedy ešte neexistovali a Rusko bojovalo v Severnej vojne." onclick="selectAnswer(this, 9)">d) Anglicko, USA a Rusko.</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">10. Kto bol slávny rakúsky vojvodca, ktorý zastavil nápor francúzskych vojsk?</div>
+        <div class="options">
+            <div class="option" data-correct="false" data-explanation="Napoleon žil až o storočie neskôr." onclick="selectAnswer(this, 10)">a) Napoleon Bonaparte.</div>
+            <div class="option" data-correct="false" data-explanation="Viliam III. Oranžský bol anglický kráľ/miestodržiteľ Nizozemska, nie rakúsky generál." onclick="selectAnswer(this, 10)">b) Viliam III. Oranžský.</div>
+            <div class="option" data-correct="true" data-explanation="Evžen Savojský bol vynikajúci vojvodca v službách Habsburgovcov, ktorý úspešne bojoval proti Francúzom." onclick="selectAnswer(this, 10)">c) Evžen Savojský.</div>
+            <div class="option" data-correct="false" data-explanation="Albrecht z Valdštejna bojoval v 30-ročnej vojne, nie vo vojne o španielske dedičstvo." onclick="selectAnswer(this, 10)">d) Albrecht z Valdštejna.</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">11. Čo získali rakúski Habsburgovci výsledkom vojny o španielske dedičstvo?</div>
+        <div class="options">
+            <div class="option" data-correct="true" data-explanation="Habsburgovci získali sever Talianska (Milánsko), Neapolsko, Sardíniu a Južné Nizozemsko (dnešné Belgicko)." onclick="selectAnswer(this, 11)">a) Severné Taliansko (Milánsko), Neapolsko, Sardíniu a Južné Nizozemsko.</div>
+            <div class="option" data-correct="false" data-explanation="Španielsko ostalo Filipovi z Anjou (Bourbonovcom)." onclick="selectAnswer(this, 11)">b) Celé Španielsko a jeho kolónie.</div>
+            <div class="option" data-correct="false" data-explanation="Gibraltár získalo Anglicko." onclick="selectAnswer(this, 11)">c) Gibraltár a Menorku.</div>
+            <div class="option" data-correct="false" data-explanation="Alsasko a Lotrinsko boli predmetom iných sporov, tu získali územia v Taliansku a Nizozemsku." onclick="selectAnswer(this, 11)">d) Alsasko a Lotrinsko.</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">12. Akú významnú zmenu pre Braniborsko priniesol koniec vojny?</div>
+        <div class="options">
+            <div class="option" data-correct="false" data-explanation="Braniborsko sa nestalo republikou, ale kráľovstvom." onclick="selectAnswer(this, 12)">a) Zánik Braniborska a vznik republiky.</div>
+            <div class="option" data-correct="false" data-explanation="Braniborsko bolo na strane víťazov, nestratilo územia." onclick="selectAnswer(this, 12)">b) Stratu nezávislosti a pripojenie k Poľsku.</div>
+            <div class="option" data-correct="true" data-explanation="Kurfirstovi Fridrichovi bol potvrdený titul pruského kráľa, čím vzniklo Pruské kráľovstvo." onclick="selectAnswer(this, 12)">c) Kurfirstovi Fridrichovi bol potvrdený kráľovský titul – vznik Pruska.</div>
+            <div class="option" data-correct="false" data-explanation="Fridrich sa stal pruským kráľom, nie cisárom Svätej ríše rímskej (tým bol Karol VI.)." onclick="selectAnswer(this, 12)">d) Kurfirst Fridrich sa stal cisárom Svätej ríše rímskej.</div>
+        </div>
+    </div>
+    
+    <div class="results hidden" id="results"></div>
+
+    <!-- Modal pre vysvetlenie -->
+    <div class="modal-overlay" id="explanationModal">
+        <div class="modal-content">
+            <div class="modal-header">Vysvetlenie</div>
+            <div class="modal-text" id="explanationText"></div>
+            <button class="modal-button" onclick="closeExplanation()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        let answers = {};
+        let correctAnswers = 0;
+        let totalQuestions = 12;
+        let questionsAnswered = 0;
+
+        function selectAnswer(element, questionNum) {
+            if (answers[questionNum] !== undefined) return;
+            
+            let isCorrect = element.dataset.correct === 'true';
+            let explanation = element.dataset.explanation;
+
+            let allOptions = element.parentNode.querySelectorAll('.option');
+            allOptions.forEach(opt => {
+                opt.classList.add('disabled');
+                opt.onclick = null;
+            });
+
+            if (isCorrect) {
+                element.classList.add('selected-correct');
+                correctAnswers++;
+            } else {
+                element.classList.add('selected-incorrect');
+                allOptions.forEach(opt => {
+                    if (opt.dataset.correct === 'true') {
+                        opt.classList.add('correct-answer');
+                    }
+                });
+                showExplanation(explanation);
+            }
+
+            answers[questionNum] = { correct: isCorrect };
+            questionsAnswered++;
+
+            if (questionsAnswered === totalQuestions) {
+                showResults();
+            }
+        }
+
+        function showExplanation(text) {
+            document.getElementById('explanationText').textContent = text;
+            document.getElementById('explanationModal').style.display = 'block';
+        }
+
+        function closeExplanation() {
+            document.getElementById('explanationModal').style.display = 'none';
+        }
+
+        function showResults() {
+            let percentage = Math.round((correctAnswers / totalQuestions) * 100);
+            let grade = '';
+            
+            if (percentage >= 90) grade = 'Výborný';
+            else if (percentage >= 80) grade = 'Veľmi dobrý';
+            else if (percentage >= 70) grade = 'Dobrý';
+            else if (percentage >= 60) grade = 'Dostačujúci';
+            else grade = 'Nedostačujúci';
+
+            document.getElementById('results').innerHTML = `
+                <div>Výsledok: ${correctAnswers}/${totalQuestions} (${percentage}%)</div>
+                <div>Hodnotenie: ${grade}</div>
+            `;
+            document.getElementById('results').classList.remove('hidden');
+        }
+
+        document.getElementById('explanationModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeExplanation();
+            }
+        });
+    </script>
+</body>
+</html>

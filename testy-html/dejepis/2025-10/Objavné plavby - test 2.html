@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <title>Test - Objavné plavby (2. časť)</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.4; background: white; color: black; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; margin-bottom: 30px; color: black; }
+        .question { margin: 20px 0; padding: 15px; border-top: 1px solid #eee; }
+        .question-text { font-weight: bold; margin-bottom: 10px; color: black; font-size: 1.1em; }
+        .options { margin-left: 25px; }
+        .option { margin: 8px 0; padding: 10px; cursor: pointer; user-select: none; color: black; background: white; border: 1px solid #ddd; border-radius: 4px; transition: background-color 0.2s; }
+        .option:hover { background: #f0f0f0; }
+        .option.selected-correct { background: #a5d6a7 !important; color: black !important; cursor: default; border: 1px solid #66bb6a; }
+        .option.selected-incorrect { background: #ef9a9a !important; color: black !important; cursor: default; border: 1px solid #e57373; }
+        .option.correct-answer { background: #a5d6a7 !important; color: black !important; cursor: default; border: 1px solid #66bb6a; }
+        .option.disabled { cursor: default; opacity: 0.8; }
+        .results { padding: 20px; margin-top: 30px; text-align: center; font-size: 18px; font-weight: bold; color: black; background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 8px;}
+        .results.hidden { display: none; }
+        
+        /* Modal pre vysvetlenie */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 8px; max-width: 600px; width: 90%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .modal-header { font-weight: bold; font-size: 18px; margin-bottom: 15px; color: #d32f2f; }
+        .modal-text { margin-bottom: 20px; line-height: 1.5; color: black; }
+        .modal-button { background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; float: right; }
+        .modal-button:hover { background: #45a049; }
+        
+        @media print { .results { display: none; } .modal-overlay { display: none !important; } }
+    </style>
+</head>
+<body>
+    <h1>Test - Objavné plavby (2. časť)</h1>
+    
+    <div class="question">
+        <div class="question-text">1. Ktorá udalosť z roku 1415 je podľa textu považovaná za oficiálny začiatok éry zámorských objavov?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 1, 'a', false, 'Vynález karavely bol dôležitým technickým predpokladom, ale začiatok éry objavov sa viaže ku konkrétnej vojensko-politickej udalosti. Tou bolo dobytie severoafrického mesta Ceuta Portugalcami.')">a) Vynález lode typu karavela</div>
+            <div class="option" onclick="selectAnswer(this, 1, 'b', false, 'Henrich Moreplavec plavby výrazne podporoval, ale začiatok objavov sa spája s vojenskou akciou kráľa Jána I. z dynastie Avizovcov, ktorou bolo dobytie mesta Ceuta.')">b) Založenie námornej školy Henrichom Moreplavcom</div>
+            <div class="option" onclick="selectAnswer(this, 1, 'c', true, 'Text explicitne uvádza: "V roku 1415 Portugalci dobyli severoafrické mesto Ceutu, touto udalosťou začali objavné plavby." Išlo o začiatok expanzívnej politiky Portugalska voči Maurom v severnej Afrike.')">c) Dobytie mesta Ceuta Portugalcami</div>
+            <div class="option" onclick="selectAnswer(this, 1, 'd', false, 'Bartolomeo Diaz doplával k juhu Afriky až v roku 1489. Hoci išlo o kľúčový objav, éra objavných plavieb začala už o niekoľko desaťročí skôr dobytím Ceuty v roku 1415.')">d) Doplávanie Bartolomea Diaza k Mysu dobrej nádeje</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">2. Ktoré dve kľúčové navigačné pomôcky, jedna pôvodom z Číny a druhá zdokonalená Arabmi, boli technickým predpokladom objavov?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 2, 'a', false, 'Námornícke mapy boli dôležité, ale ďalekohľad nebol v rannej fáze objavov kľúčovou navigačnou pomôckou. Správnou dvojicou sú kompas a astroláb.')">a) Námornícke mapy a ďalekohľad</div>
+            <div class="option" onclick="selectAnswer(this, 2, 'b', false, 'Sextant je presnejší prístroj, ktorý sa rozšíril až neskôr a nahradil astroláb. V počiatočnej fáze objavov sa používal kompas a astroláb.')">b) Sextant a chronometer</div>
+            <div class="option" onclick="selectAnswer(this, 2, 'c', false, 'Astronomické tabuľky boli nevyhnutné pre výpočty, ale samotnými prístrojmi na meranie boli kompas (smer) a astroláb (poloha hviezd).')">c) Presýpacie hodiny a astronomické tabuľky</div>
+            <div class="option" onclick="selectAnswer(this, 2, 'd', true, 'Text uvádza, že sa začal používať kompas (vynález z Číny) na určovanie smeru a astroláb (zdokonalili ho Arabi), ktorý slúžil na určovanie polohy slnka a hviezd, a teda aj zemepisnej šírky.')">d) Kompas a astroláb</div>
+        </div>
+    </div>
+    
+    <div class="question">
+        <div class="question-text">3. Prečo sa Kastília (Španielsko) rozhodla podporiť plavbu Krištofa Kolumba, hoci ju predtým portugalský kráľ odmietol?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 3, 'a', true, 'Text uvádza, že "Z konkurenčných dôvodov Kastília súhlasila s plavbou Janovčana Krištofa Kolumba". Úspechy Portugalska v objavovaní Afriky motivovali Španielsko, aby hľadalo vlastnú cestu k bohatstvu Východu a nezaostalo za svojím rivalom.')">a) Z konkurenčných dôvodov voči Portugalsku</div>
+            <div class="option" onclick="selectAnswer(this, 3, 'b', false, 'Kolumbus bol Janovčan (Talian), nie Španiel. Podporu získal vďaka svojej vytrvalosti a vďaka tomu, že Španielsko chcelo konkurovať Portugalsku.')">b) Pretože Kolumbus bol významný španielsky šľachtic</div>
+            <div class="option" onclick="selectAnswer(this, 3, 'c', false, 'Hoci šírenie viery bolo jedným z dôsledkov, hlavným motívom pre financovanie drahej a riskantnej výpravy bola snaha predbehnúť Portugalsko v honbe za obchodom a bohatstvom.')">c) Na základe priameho príkazu od pápeža</div>
+            <div class="option" onclick="selectAnswer(this, 3, 'd', false, 'Španieli v tej dobe nemali lepšie mapy; práve naopak, Kolumbov plán bol založený na nesprávnom výpočte obvodu Zeme. Rozhodujúca bola politická a ekonomická rivalita s Portugalskom.')">d) Pretože mali nové, presnejšie mapy Ázie</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">4. Koľko lodí sa z pôvodných piatich vrátilo z prvej plavby okolo sveta, ktorú viedol Fernão de Magalhães?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 4, 'a', false, 'Expedícia utrpela obrovské straty na lodiach aj posádke. Do cieľa nedorazili ani tri lode.')">a) Tri lode</div>
+            <div class="option" onclick="selectAnswer(this, 4, 'b', true, 'Text jasne hovorí: "Vyplával s 5 loďami, avšak vrátila sa iba jedna." Táto náročná plavba dokázala, že Zem je guľatá, ale za cenu straty väčšiny expedície, vrátane samotného Magalhãesa.')">b) Iba jedna loď</div>
+            <div class="option" onclick="selectAnswer(this, 4, 'c', false, 'Návrat piatich lodí by znamenal úplný úspech, čo sa nestalo. Plavba bola extrémne nebezpečná a väčšina lodí bola zničená alebo opustená.')">c) Všetkých päť lodí</div>
+            <div class="option" onclick="selectAnswer(this, 4, 'd', false, 'Z expedície sa nevrátili dve lode, ale iba jedna jediná. Zvyšné štyri boli stratené počas cesty.')">d) Dve lode</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">5. Ktorá z nasledujúcich možností NAJLEPŠIE vystihuje prínos moreplavca Jamesa Cooka v 18. storočí?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 5, 'a', false, 'Prvú plavbu okolo sveta viedol Magalhães v 16. storočí. James Cook žil a pôsobil o 250 rokov neskôr.')">a) Uskutočnil prvú plavbu okolo sveta.</div>
+            <div class="option" onclick="selectAnswer(this, 5, 'b', false, 'Obchodné spoločnosti vznikali hlavne v 17. storočí na podporu obchodu s Áziou a Amerikou. Cook bol prieskumník a kartograf, nie zakladateľ obchodnej spoločnosti.')">b) Založil Východoindickú obchodnú spoločnosť.</div>
+            <div class="option" onclick="selectAnswer(this, 5, 'c', true, 'Text uvádza, že James Cook "troma výpravami zmapoval Pacifik". Preskúmal pobrežie Nového Zélandu, Austrálie, objavil Havajské ostrovy a dostal sa až k Antarktíde. Jeho prínos bol teda hlavne v detailnom mapovaní Tichomoria.')">c) Systematicky zmapoval rozsiahle oblasti Tichého oceánu.</div>
+            <div class="option" onclick="selectAnswer(this, 5, 'd', false, 'Cestu do Indie oboplávaním Afriky našiel Vasco da Gama už v roku 1498. Cookove výpravy sa sústredili na Tichý oceán.')">d) Našiel námornú cestu do Indie okolo Afriky.</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">6. Aký bol jeden z negatívnych sociálnych dôsledkov zámorských objavov, ktorý je spomenutý v texte?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 6, 'a', false, 'Prílev zlata spôsobil cenovú revolúciu (ekonomický dôsledok), nie sociálny kolaps. Európske kráľovstvá naopak posilnili svoju moc.')">a) Spôsobil sociálny kolaps európskych kráľovstiev.</div>
+            <div class="option" onclick="selectAnswer(this, 6, 'b', false, 'Objavy viedli k šíreniu európskych chorôb do Ameriky, ale text tento dôsledok nespomína. Zameriava sa na obchod s otrokmi a vznik kolónií.')">b) Rozšíril nové choroby po celej Európe.</div>
+            <div class="option" onclick="selectAnswer(this, 6, 'c', true, 'V časti "Dôsledky zámorských objavov" text explicitne uvádza, že "Začal obchod s africkými otrokmi". Išlo o jeden z najtragickejších dôsledkov, keďže kolonizácia nových území vytvorila dopyt po lacnej pracovnej sile.')">c) Začiatok rozsiahleho obchodu s africkými otrokmi.</div>
+            <div class="option" onclick="selectAnswer(this, 6, 'd', false, 'Objavy a kolonizácia naopak posilnili postavenie cirkvi a viedli k šíreniu kresťanstva prostredníctvom misionárov, nie k jej oslabeniu.')">d) Viedol k oslabeniu vplyvu kresťanskej cirkvi.</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">7. Ktorá vyspelá predkolumbovská civilizácia bola zničená conquistadormi Franciscom Pizarrom a Diegom Almagrom?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 7, 'a', false, 'Ríšu Aztékov na území dnešného Mexika zničil Fernando Cortéz. Pizarro a Almagro pôsobili v Južnej Amerike.')">a) Ríša Aztékov</div>
+            <div class="option" onclick="selectAnswer(this, 7, 'b', true, 'Text uvádza, že "Francisco Pizarro a Diego Almagro zničili ríšu Inkov (Južná Amerika dnešné Peru, Bolívia, Ekvádor, v rokoch 1531 – 1535)". Išlo o rozsiahlu a vyspelú ríšu v Andách.')">b) Ríša Inkov</div>
+            <div class="option" onclick="selectAnswer(this, 7, 'c', false, 'Civilizácia Mayov prežívala svoj úpadok už pred príchodom Španielov, hoci jej pozostatky boli tiež dobyté. Text sa však explicitne zmieňuje o zničení ríše Inkov Pizarrom.')">c) Civilizácia Mayov</div>
+            <div class="option" onclick="selectAnswer(this, 7, 'd', false, 'Maurovia boli moslimskí obyvatelia severnej Afriky, proti ktorým bojovali Portugalci a Španieli. Neboli predkolumbovskou civilizáciou v Amerike.')">d) Ríša Maurov</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">8. Okrem nedostatku drahých kovov a pádu Konštantínopolu, aká bola ďalšia ekonomická príčina zámorských objavov uvedená v texte?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 8, 'a', false, 'Šírenie kresťanstva bolo skôr náboženským a ideologickým dôsledkom, nie primárnou ekonomickou príčinou.')">a) Snaha šíriť kresťanstvo po celom svete.</div>
+            <div class="option" onclick="selectAnswer(this, 8, 'b', true, 'Hneď na začiatku textu v časti "Príčiny zámorských objavov" je uvedená "Snaha nájsť nové odbytiská pre tovar a získavať lacné suroviny". To bol kľúčový motor pre expanziu európskych ekonomík.')">b) Snaha nájsť nové trhy pre tovar a získať lacné suroviny.</div>
+            <div class="option" onclick="selectAnswer(this, 8, 'c', false, 'Hľadanie spojencov proti Turkom bolo skôr politickou motiváciou. Text zdôrazňuje predovšetkým ekonomické príčiny ako nedostatok zlata, nové trhy a prerušenie obchodu.')">c) Potreba nájsť spojencov proti Osmanskej ríši.</div>
+            <div class="option" onclick="selectAnswer(this, 8, 'd', false, 'Preľudnenie nebolo v 15. storočí hlavným problémom Európy, ktorá sa stále spamätávala z demografických strát po morových epidémiách. Primárne išlo o ekonomické, nie demografické dôvody.')">d) Problém s preľudnením v európskych mestách.</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">9. Podľa koho dostal americký kontinent svoje meno?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 9, 'a', false, 'Krištof Kolumbus bol presvedčený, že doplával do Indie, a nikdy neuznal, že objavil nový kontinent. Preto kontinent nemohol byť pomenovaný po ňom.')">a) Krištof Kolumbus</div>
+            <div class="option" onclick="selectAnswer(this, 9, 'b', false, 'Izabela Kastílska financovala Kolumbovu plavbu, ale jej meno nebolo použité na pomenovanie kontinentu.')">b) Kráľovná Izabela Kastílska</div>
+            <div class="option" onclick="selectAnswer(this, 9, 'c', true, 'Text uvádza, že taliansky moreplavec Amerigo Vespucci "vyslovil presvedčenie, že ide o nový kontinent. Podľa jeho mena ho nazvali Amerikou." On bol prvý, kto správne identifikoval objavené územia ako "Nový svet".')">c) Amerigo Vespucci</div>
+            <div class="option" onclick="selectAnswer(this, 9, 'd', false, 'Sir Francis Drake bol anglický pirát a moreplavec, ktorý oboplával svet ako druhý, ale s pomenovaním Ameriky nemal nič spoločné.')">d) Sir Francis Drake</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <div class="question-text">10. Čo bolo hlavným účelom tzv. "holandskej flauty", spomenutej v texte?</div>
+        <div class="options">
+            <div class="option" onclick="selectAnswer(this, 10, 'a', false, 'Holandská flauta (fluyt) bola navrhnutá pre maximálnu nosnosť a efektívnu prevádzku s malou posádkou. Nebola to primárne vojnová loď, ale obchodná.')">a) Bola to rýchla a obratná vojnová loď.</div>
+            <div class="option" onclick="selectAnswer(this, 10, 'b', true, 'Text spomína, že Nizozemsko bohatlo zo zámorského obchodu a malo "vynikajúcu obchodnú loď tzv. holandskú flautu". Tento typ lode bol špeciálne navrhnutý na prepravu veľkého množstva tovaru s nízkymi nákladmi.')">b) Bola to efektívna obchodná loď na prepravu tovaru.</div>
+            <div class="option" onclick="selectAnswer(this, 10, 'c', false, 'Hoci lode slúžili aj na prepravu kolonistov, špecifický dizajn "flauty" bol optimalizovaný pre náklad, nie pre pasažierov.')">c) Bola to loď určená výhradne na prepravu kolonistov.</div>
+            <div class="option" onclick="selectAnswer(this, 10, 'd', false, 'Na prieskumné plavby sa používali skôr menšie a obratnejšie lode ako karavely. Flauta bola veľkokapacitná nákladná loď určená pre zavedené obchodné trasy.')">d) Bola to malá prieskumná loď do neznámych vôd.</div>
+        </div>
+    </div>
+    
+    <div class="results hidden" id="results"></div>
+
+    <!-- Modal pre vysvetlenie -->
+    <div class="modal-overlay" id="explanationModal">
+        <div class="modal-content">
+            <div class="modal-header">Vysvetlenie</div>
+            <div class="modal-text" id="explanationText"></div>
+            <button class="modal-button" onclick="closeExplanation()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        let answers = {};
+        let correctAnswers = 0;
+        let totalQuestions = 10;
+        let questionsAnswered = 0;
+
+        function selectAnswer(element, questionNum, option, isCorrect, explanation) {
+            if (answers[questionNum] !== undefined) return;
+            
+            let allOptions = element.parentNode.querySelectorAll('.option');
+            allOptions.forEach(opt => {
+                opt.classList.add('disabled');
+                opt.onclick = null;
+            });
+
+            if (isCorrect) {
+                element.classList.add('selected-correct');
+                correctAnswers++;
+            } else {
+                element.classList.add('selected-incorrect');
+                // Nájdi správnu odpoveď
+                allOptions.forEach(opt => {
+                    let onclickStr = opt.getAttribute('onclick');
+                    if (onclickStr && onclickStr.includes('true')) {
+                        opt.classList.add('correct-answer');
+                    }
+                });
+                // Zobraz vysvetlenie
+                showExplanation(explanation);
+            }
+
+            answers[questionNum] = { option: option, correct: isCorrect };
+            questionsAnswered++;
+
+            if (questionsAnswered === totalQuestions) {
+                showResults();
+            }
+        }
+
+        function showExplanation(text) {
+            document.getElementById('explanationText').textContent = text;
+            document.getElementById('explanationModal').style.display = 'flex';
+        }
+
+        function closeExplanation() {
+            document.getElementById('explanationModal').style.display = 'none';
+        }
+
+        function showResults() {
+            let percentage = Math.round((correctAnswers / totalQuestions) * 100);
+            let grade = '';
+            
+            if (percentage >= 90) grade = 'Výborný';
+            else if (percentage >= 80) grade = 'Veľmi dobrý';
+            else if (percentage >= 70) grade = 'Dobrý';
+            else if (percentage >= 60) grade = 'Dostačujúci';
+            else grade = 'Nedostačujúci';
+
+            document.getElementById('results').innerHTML = `
+                <div>Výsledok: ${correctAnswers}/${totalQuestions} (${percentage}%)</div>
+                <div>Hodnotenie: ${grade}</div>
+            `;
+            document.getElementById('results').classList.remove('hidden');
+        }
+
+        // Zatvor modal kliknutím mimo obsah
+        document.getElementById('explanationModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeExplanation();
+            }
+        });
+    </script>
+</body>
+</html>

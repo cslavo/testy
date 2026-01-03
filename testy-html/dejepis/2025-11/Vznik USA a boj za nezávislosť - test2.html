@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <title>Test B - Vznik USA a Boj za nezávislosť</title>
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.4; background: white; color: black; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; margin-bottom: 30px; color: black; }
+        .question { margin: 20px 0; padding: 15px; border-bottom: 1px solid #eee; }
+        .question-text { font-weight: bold; margin-bottom: 15px; color: black; font-size: 1.1em; }
+        .options { margin-left: 15px; }
+        .option { margin: 8px 0; padding: 12px; cursor: pointer; user-select: none; color: black; background: white; border: 1px solid #ccc; border-radius: 4px; transition: background 0.2s; }
+        .option:hover { background: #f5f5f5; }
+        .option.selected-correct { background: #a5d6a7 !important; color: black !important; cursor: default; border-color: #388e3c; font-weight: bold; }
+        .option.selected-incorrect { background: #ef9a9a !important; color: black !important; cursor: default; border-color: #d32f2f; }
+        .option.correct-answer { background: #a5d6a7 !important; color: black !important; cursor: default; border-color: #388e3c; font-weight: bold; }
+        .option.disabled { cursor: default; pointer-events: none; color: #555; }
+        .results { padding: 20px; margin-top: 30px; text-align: center; font-size: 20px; font-weight: bold; color: black; background: #f9f9f9; border-radius: 8px; }
+        .results.hidden { display: none; }
+        
+        /* Modal pre vysvetlenie */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; }
+        .modal-content { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 8px; max-width: 600px; width: 90%; box-shadow: 0 4px 20px rgba(0,0,0,0.2); border-left: 5px solid #d32f2f; }
+        .modal-header { font-weight: bold; font-size: 18px; margin-bottom: 15px; color: #d32f2f; }
+        .modal-text { margin-bottom: 25px; line-height: 1.6; color: #333; }
+        .modal-button { background: #d32f2f; color: white; border: none; padding: 10px 25px; border-radius: 4px; cursor: pointer; font-size: 16px; float: right; }
+        .modal-button:hover { background: #b71c1c; }
+    </style>
+</head>
+<body>
+    <h1>Test B - Vznik USA a Boj za nezávislosť</h1>
+    
+    <!-- Otázka 1: Rozdiel Francúzi vs Angličania -->
+    <div class="question">
+        <div class="question-text">1. Aký bol hlavný rozdiel medzi anglickými a francúzskymi kolonistami v Severnej Amerike?</div>
+        <div class="options">
+            <div class="option" data-correct="false" data-explanation="To platilo skôr pre Angličanov. Francúzi sa sústredili na obchod." onclick="selectAnswer(this, 1)">a) Francúzi zakladali veľké mestá a univerzity, zatiaľ čo Angličania len obchodovali.</div>
+            <div class="option" data-correct="true" data-explanation="Správne. Angličania sa trvalo usádzali, bohatli a budovali mestá, zatiaľ čo Francúzi tam trávili len časť roka a obchodovali s Indiánmi." onclick="selectAnswer(this, 1)">b) Angličania sa trvalo usádzali a budovali školy, Francúzi sa venovali hlavne obchodu s Indiánmi.</div>
+            <div class="option" data-correct="false" data-explanation="Obe mocnosti mali záujem o územie, rozdiel bol v spôsobe osídlenia." onclick="selectAnswer(this, 1)">c) Francúzi nemali v Severnej Amerike žiadne územné nároky.</div>
+            <div class="option" data-correct="false" data-explanation="Angličania boli prevažne protestanti (puritáni), Francúzi katolíci." onclick="selectAnswer(this, 1)">d) Angličania boli katolíci a Francúzi protestanti.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 2: Typy kolónií -->
+    <div class="question">
+        <div class="question-text">2. Ako nazývame typ kolónie, ktorú kráľ daroval svojim priateľom (napr. Pensylvánia)?</div>
+        <div class="options">
+            <div class="option" data-correct="false" data-explanation="Samosprávne kolónie (napr. Massachusetts) mali iný štatút." onclick="selectAnswer(this, 2)">a) Samosprávna kolónia.</div>
+            <div class="option" data-correct="false" data-explanation="Korunné kolónie (napr. Virgínia) patrili priamo korune." onclick="selectAnswer(this, 2)">b) Korunná (kráľovská) kolónia.</div>
+            <div class="option" data-correct="true" data-explanation="Správne. Pensylvánia bola 'vlastnícka' kolónia, kráľ ju daroval, aby sa mohol sústrediť na záležitosti v Anglicku." onclick="selectAnswer(this, 2)">c) Vlastnícka kolónia.</div>
+            <div class="option" data-correct="false" data-explanation="Tento pojem sa v texte nepoužíva pre klasifikáciu kolónií." onclick="selectAnswer(this, 2)">d) Vojenská kolónia.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 3: Britský centralizmus -->
+    <div class="question">
+        <div class="question-text">3. Čo znamenal „britský centralizmus“ zavedený po 7-ročnej vojne vo vzťahu k pôde?</div>
+        <div class="options">
+            <div class="option" data-correct="true" data-explanation="Správne. Zakazoval kolonistom zaberať pôdu na západ od Apalačského pohoria a vyhlásil ju za majetok koruny." onclick="selectAnswer(this, 3)">a) Zákaz zaberať pôdu na západ od Apalačského pohoria.</div>
+            <div class="option" data-correct="false" data-explanation="Naopak, obmedzoval ich expanziu." onclick="selectAnswer(this, 3)">b) Príkaz kolonistom osídliť čo najviac územia na západe.</div>
+            <div class="option" data-correct="false" data-explanation="Pôda bola vyhlásená za majetok kráľovstva, nie rozdaná zadarmo." onclick="selectAnswer(this, 3)">c) Bezplatné rozdávanie pôdy každému novému prisťahovalcovi.</div>
+            <div class="option" data-correct="false" data-explanation="Indiánom pôdu nevracali, vyhlásili ju za kráľovskú." onclick="selectAnswer(this, 3)">d) Vrátenie všetkej pôdy pôvodným obyvateľom – Indiánom.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 4: Zákon z roku 1766 -->
+    <div class="question">
+        <div class="question-text">4. Čo tvrdil tzv. Výslovný zákon (Declaratory Act) prijatý britským parlamentom v roku 1766?</div>
+        <div class="options">
+            <div class="option" data-correct="false" data-explanation="Tento zákon práve potvrdzoval nadradenosť britského parlamentu." onclick="selectAnswer(this, 4)">a) Že kolónie majú právo na vlastný parlament nezávislý od Anglicka.</div>
+            <div class="option" data-correct="false" data-explanation="Zákon hovoril o legislatívnej moci, nie o daniach na čaj (to bol iný zákon)." onclick="selectAnswer(this, 4)">b) Že sa rušia všetky dane okrem dane na čaj.</div>
+            <div class="option" data-correct="true" data-explanation="Správne. Zákon stanovil, že zákony prijaté anglickým parlamentom platia aj v kolóniách, hoci tam kolonisti nemali zástupcov." onclick="selectAnswer(this, 4)">c) Že zákony anglického parlamentu sú záväzné aj pre kolónie.</div>
+            <div class="option" data-correct="false" data-explanation="Zákon sa netýkal armády, ale platnosti legislatívy." onclick="selectAnswer(this, 4)">d) Že britskí vojaci musia opustiť kolónie.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 5: Boston Tea Party - príčina -->
+    <div class="question">
+        <div class="question-text">5. Aká bola bezprostredná príčina Bostonského pitia čaju (1773)?</div>
+        <div class="options">
+            <div class="option" data-correct="true" data-explanation="Správne. Zákon o čaji zrušil dovozné clá, ale zaviedol vysoké clo priamo na čaj, čo vyvolalo bojkot." onclick="selectAnswer(this, 5)">a) Prijatie Zákona o čaji, ktorý zaviedol vysoké clo na čaj.</div>
+            <div class="option" data-correct="false" data-explanation="Tento zákon (Stamp Act) bol prijatý skôr a týkal sa papiera, nie priamo čaju." onclick="selectAnswer(this, 5)">b) Prijatie Kolkového zákona.</div>
+            <div class="option" data-correct="false" data-explanation="Masaker sa stal skôr, ale priamym spúšťačom Tea Party bol Zákon o čaji." onclick="selectAnswer(this, 5)">c) Bostonský masaker, pri ktorom zahynuli civilisti.</div>
+            <div class="option" data-correct="false" data-explanation="Zákaz pitia čaju neexistoval, problémom bolo jeho zdanenie." onclick="selectAnswer(this, 5)">d) Úplný zákaz dovozu čaju do Ameriky.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 6: Autor deklarácie -->
+    <div class="question">
+        <div class="question-text">6. Kto bol hlavným autorom Deklarácie nezávislosti USA?</div>
+        <div class="options">
+            <div class="option" data-correct="false" data-explanation="Washington bol generálom a prvým prezidentom, nie autorom textu Deklarácie." onclick="selectAnswer(this, 6)">a) George Washington</div>
+            <div class="option" data-correct="true" data-explanation="Správne. Text Deklarácie nezávislosti zostavil Thomas Jefferson." onclick="selectAnswer(this, 6)">b) Thomas Jefferson</div>
+            <div class="option" data-correct="false" data-explanation="Franklin bol diplomat a revidoval text, ale hlavným autorom bol Jefferson." onclick="selectAnswer(this, 6)">c) Benjamin Franklin</div>
+            <div class="option" data-correct="false" data-explanation="Kráľ Juraj III. bol britský panovník, proti ktorému bola Deklarácia namierená." onclick="selectAnswer(this, 6)">d) Juraj III.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 7: Koniec vojny -->
+    <div class="question">
+        <div class="question-text">7. Ktorá bitka v roku 1781 znamenala definitívnu porážku Britov na americkom území?</div>
+        <div class="options">
+            <div class="option" data-correct="false" data-explanation="Saratoga (1777) bola bodom obratu, nie koncom vojny." onclick="selectAnswer(this, 7)">a) Bitka pri Saratoge.</div>
+            <div class="option" data-correct="false" data-explanation="Gettysburg je bitka z Občianskej vojny (19. storočie), nie z vojny o nezávislosť." onclick="selectAnswer(this, 7)">b) Bitka pri Gettysburgu.</div>
+            <div class="option" data-correct="false" data-explanation="Philadelphia bola miestom kongresov, nie záverečnej bitky." onclick="selectAnswer(this, 7)">c) Bitka o Philadelphiu.</div>
+            <div class="option" data-correct="true" data-explanation="Správne. V bitke pri Yorktowne (1781) boli Briti definitívne porazení." onclick="selectAnswer(this, 7)">d) Bitka pri Yorktowne.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 8: Mierová zmluva -->
+    <div class="question">
+        <div class="question-text">8. Čo bolo výsledkom mierovej zmluvy podpísanej v Paríži v roku 1783?</div>
+        <div class="options">
+            <div class="option" data-correct="true" data-explanation="Správne. Británia oficiálne uznala nezávislosť USA." onclick="selectAnswer(this, 8)">a) Británia uznala nezávislosť USA.</div>
+            <div class="option" data-correct="false" data-explanation="Francúzsko získalo územia späť skôr alebo inak, hlavným bodom 1783 bola nezávislosť USA." onclick="selectAnswer(this, 8)">b) Francúzsko získalo späť Kanadu.</div>
+            <div class="option" data-correct="false" data-explanation="USA zostali republikou, nestali sa súčasťou Commonwealthu." onclick="selectAnswer(this, 8)">c) USA sa stali súčasťou britského Commonwealthu.</div>
+            <div class="option" data-correct="false" data-explanation="Španielsko bolo spojencom USA, nie porazeným, ktorý by strácal územia." onclick="selectAnswer(this, 8)">d) Španielsko muselo odstúpiť Floridu Británii.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 9: Federácia -->
+    <div class="question">
+        <div class="question-text">9. Čo znamená, že sa USA podľa Ústavy z roku 1787 stali federáciou?</div>
+        <div class="options">
+            <div class="option" data-correct="false" data-explanation="To by bola konfederácia. Federácia má silnú centrálnu moc." onclick="selectAnswer(this, 9)">a) Že každý štát mal vlastnú armádu a menu a centrálna vláda neexistovala.</div>
+            <div class="option" data-correct="true" data-explanation="Správne. Federácia znamená silnú centrálnu moc, ale zároveň zachovanú mieru samosprávy pre jednotlivé štáty." onclick="selectAnswer(this, 9)">b) Existuje silná centrálna moc, ale štáty si ponechávajú časť samosprávy.</div>
+            <div class="option" data-correct="false" data-explanation="Monarchia je vláda kráľa, USA sú republika." onclick="selectAnswer(this, 9)">c) Že hlavou štátu je kráľ, ale parlament rozhoduje o zákonoch.</div>
+            <div class="option" data-correct="false" data-explanation="Ústava USA zaviedla sekulárny štát, nie teokraciu." onclick="selectAnswer(this, 9)">d) Že všetky zákony musí schváliť cirkev.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 10: Checks and balances -->
+    <div class="question">
+        <div class="question-text">10. Čo vyjadruje systém „Checks and balances“ (kontroly a rovnováhy) v Ústave USA?</div>
+        <div class="options">
+            <div class="option" data-correct="false" data-explanation="Ústava práveže rozdeľuje moc na tri zložky." onclick="selectAnswer(this, 10)">a) Absolútnu moc prezidenta nad súdmi a kongresom.</div>
+            <div class="option" data-correct="false" data-explanation="Ekonomická rovnováha nie je primárnym významom tohto politického termínu." onclick="selectAnswer(this, 10)">b) Rovnováhu medzi exportom a importom tovaru.</div>
+            <div class="option" data-correct="true" data-explanation="Správne. Žiadna z troch mocí (výkonná, zákonodarná, súdna) nemôže vládnuť samostatne a sú na sebe závislé." onclick="selectAnswer(this, 10)">c) Vzájomnú kontrolu výkonnej, zákonodarnej a súdnej moci.</div>
+            <div class="option" data-correct="false" data-explanation="Tento systém rieši vnútornú moc, nie vzťah s Britániou." onclick="selectAnswer(this, 10)">d) Kontrolu britského kráľa nad americkým parlamentom.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 11: Výkonná moc -->
+    <div class="question">
+        <div class="question-text">11. Akú právomoc má prezident USA vo vzťahu k zákonom prijatým Kongresom?</div>
+        <div class="options">
+            <div class="option" data-correct="false" data-explanation="Prezident nemôže zákony písať, to robí legislatíva." onclick="selectAnswer(this, 11)">a) Môže ich ľubovoľne meniť a prepisovať.</div>
+            <div class="option" data-correct="true" data-explanation="Správne. Prezident má právo veta – môže zákon odmietnuť podpísať (hoci to Kongres môže prehlasovať 2/3 väčšinou)." onclick="selectAnswer(this, 11)">b) Má právo veta – môže zákon nepodpísať.</div>
+            <div class="option" data-correct="false" data-explanation="Prezident musí zákony rešpektovať, pokiaľ ich nevetuje." onclick="selectAnswer(this, 11)">c) Nemá žiadnu právomoc, musí podpísať všetko.</div>
+            <div class="option" data-correct="false" data-explanation="Prezident nemôže rozpustiť Kongres." onclick="selectAnswer(this, 11)">d) Môže okamžite rozpustiť Kongres, ak sa mu zákon nepáči.</div>
+        </div>
+    </div>
+
+    <!-- Otázka 12: Prvý prezident -->
+    <div class="question">
+        <div class="question-text">12. Kto sa stal prvým prezidentom USA v roku 1789?</div>
+        <div class="options">
+            <div class="option" data-correct="true" data-explanation="Správne. Prvým prezidentom sa stal veliteľ kontinentálnej armády George Washington." onclick="selectAnswer(this, 12)">a) George Washington</div>
+            <div class="option" data-correct="false" data-explanation="Jefferson bol až tretím prezidentom." onclick="selectAnswer(this, 12)">b) Thomas Jefferson</div>
+            <div class="option" data-correct="false" data-explanation="John Adams bol druhým prezidentom." onclick="selectAnswer(this, 12)">c) John Adams</div>
+            <div class="option" data-correct="false" data-explanation="Abraham Lincoln bol prezidentom až počas Občianskej vojny v 19. storočí." onclick="selectAnswer(this, 12)">d) Abraham Lincoln</div>
+        </div>
+    </div>
+
+    <div class="results hidden" id="results"></div>
+
+    <!-- Modal pre vysvetlenie -->
+    <div class="modal-overlay" id="explanationModal">
+        <div class="modal-content">
+            <div class="modal-header">Vysvetlenie</div>
+            <div class="modal-text" id="explanationText"></div>
+            <button class="modal-button" onclick="closeExplanation()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        let answers = {};
+        let correctAnswers = 0;
+        const totalQuestions = 12;
+        let questionsAnswered = 0;
+
+        function selectAnswer(element, questionNum) {
+            if (answers[questionNum] !== undefined) return;
+            
+            let isCorrect = element.dataset.correct === 'true';
+            let explanation = element.dataset.explanation;
+
+            let allOptions = element.parentNode.querySelectorAll('.option');
+            allOptions.forEach(opt => {
+                opt.classList.add('disabled');
+                opt.onclick = null;
+                if (opt.dataset.correct === 'true' && !isCorrect) {
+                    opt.classList.add('correct-answer');
+                }
+            });
+
+            if (isCorrect) {
+                element.classList.add('selected-correct');
+                correctAnswers++;
+            } else {
+                element.classList.add('selected-incorrect');
+                showExplanation(explanation);
+            }
+
+            answers[questionNum] = { correct: isCorrect };
+            questionsAnswered++;
+
+            if (questionsAnswered === totalQuestions) {
+                showResults();
+            }
+        }
+
+        function showExplanation(text) {
+            document.getElementById('explanationText').textContent = text;
+            document.getElementById('explanationModal').style.display = 'block';
+        }
+
+        function closeExplanation() {
+            document.getElementById('explanationModal').style.display = 'none';
+        }
+
+        function showResults() {
+            let percentage = Math.round((correctAnswers / totalQuestions) * 100);
+            let grade = '';
+            
+            if (percentage >= 90) grade = 'Výborný';
+            else if (percentage >= 80) grade = 'Veľmi dobrý';
+            else if (percentage >= 70) grade = 'Dobrý';
+            else if (percentage >= 60) grade = 'Dostačujúci';
+            else grade = 'Nedostačujúci';
+
+            const resultDiv = document.getElementById('results');
+            resultDiv.innerHTML = `
+                <div>Váš výsledok: ${correctAnswers} z ${totalQuestions} (${percentage}%)</div>
+                <div style="margin-top: 10px; font-size: 1.2em; color: #333;">Hodnotenie: ${grade}</div>
+            `;
+            resultDiv.classList.remove('hidden');
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        document.getElementById('explanationModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeExplanation();
+            }
+        });
+    </script>
+</body>
+</html>
