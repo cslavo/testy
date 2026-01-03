@@ -167,44 +167,66 @@
     </div>
 
     <script>
-        // Globálna premenná pre uloženú štruktúru súborov
-        let filesData = null;
+        // Konfigurácia GitHub repozitára
+        const GITHUB_OWNER = 'cslavo';
+        const GITHUB_REPO = 'testy';
+        const BASE_PATH = 'testy-html';
 
         const contentEl = document.getElementById('content');
         const breadcrumbEl = document.getElementById('breadcrumb');
 
+        // Cache pre načítané adresáre
+        const cache = new Map();
+
         // Načítaj obsah pri štarte
-        document.addEventListener('DOMContentLoaded', async () => {
-            await loadFilesData();
+        document.addEventListener('DOMContentLoaded', () => {
             showContent('');
         });
 
-        // Načíta files.json z testy-html adresára
-        async function loadFilesData() {
+        // Načíta obsah adresára z GitHub API
+        async function fetchDirectoryContents(path) {
+            const fullPath = path ? `${BASE_PATH}/${path}` : BASE_PATH;
+
+            // Skontroluj cache
+            if (cache.has(fullPath)) {
+                return cache.get(fullPath);
+            }
+
             try {
-                const response = await fetch('testy-html/files.json');
-                if (!response.ok) throw new Error('Nepodarilo sa načítať testy-html/files.json');
-                filesData = await response.json();
+                const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${fullPath}`;
+                const response = await fetch(apiUrl);
+
+                if (!response.ok) {
+                    throw new Error(`GitHub API error: ${response.status}`);
+                }
+
+                const items = await response.json();
+
+                // Filtruj len adresáre a HTML súbory
+                const folders = items
+                    .filter(item => item.type === 'dir')
+                    .map(item => ({
+                        name: item.name,
+                        path: path ? `${path}/${item.name}` : item.name
+                    }))
+                    .sort((a, b) => a.name.localeCompare(b.name, 'sk'));
+
+                const files = items
+                    .filter(item => item.type === 'file' && item.name.endsWith('.html'))
+                    .map(item => ({
+                        name: item.name,
+                        path: path ? `${path}/${item.name}` : item.name
+                    }))
+                    .sort((a, b) => a.name.localeCompare(b.name, 'sk'));
+
+                const result = { folders, files };
+                cache.set(fullPath, result);
+                return result;
+
             } catch (error) {
-                console.error('Error loading files.json:', error);
-                filesData = { folders: [], files: [] };
+                console.error('Error fetching directory:', error);
+                return { folders: [], files: [] };
             }
-        }
-
-        // Nájde dáta pre danú cestu
-        function getDataForPath(path) {
-            if (!path) return filesData;
-
-            const parts = path.split('/');
-            let current = filesData;
-
-            for (const part of parts) {
-                const folder = current.folders.find(f => f.name === part);
-                if (!folder) return { folders: [], files: [] };
-                current = folder.children;
-            }
-
-            return current;
         }
 
         function updateBreadcrumb(path) {
@@ -231,15 +253,11 @@
             breadcrumbEl.innerHTML = html;
         }
 
-        function showContent(path) {
+        async function showContent(path) {
             updateBreadcrumb(path);
+            contentEl.innerHTML = '<div class="loading">Načítavam...</div>';
 
-            if (!filesData) {
-                contentEl.innerHTML = '<div class="loading">Načítavam...</div>';
-                return;
-            }
-
-            const data = getDataForPath(path);
+            const data = await fetchDirectoryContents(path);
             const folders = data.folders || [];
             const files = data.files || [];
 
@@ -266,11 +284,10 @@
             if (folders.length > 0) {
                 html += '<div class="card-grid">';
                 folders.forEach(folder => {
-                    const description = folder.description || 'Kliknite pre zobrazenie obsahu';
                     html += `
                         <div class="card" onclick="showContent('${folder.path}')">
                             <h2><span class="card-icon folder-icon"></span>${capitalizeFirst(folder.name)}</h2>
-                            <p>${description}</p>
+                            <p>Kliknite pre zobrazenie obsahu</p>
                         </div>
                     `;
                 });
@@ -290,7 +307,7 @@
 
                     html += `
                         <li>
-                            <a href="testy-html/${file.path}">
+                            <a href="${BASE_PATH}/${file.path}">
                                 <span class="card-icon file-icon"></span>
                                 <span>${displayName}</span>
                             </a>
