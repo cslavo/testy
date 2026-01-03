@@ -179,11 +179,11 @@
             showContent('');
         });
 
-        // Načíta files.json
+        // Načíta files.json z testy-html adresára
         async function loadFilesData() {
             try {
-                const response = await fetch('files.json');
-                if (!response.ok) throw new Error('Nepodarilo sa načítať files.json');
+                const response = await fetch('testy-html/files.json');
+                if (!response.ok) throw new Error('Nepodarilo sa načítať testy-html/files.json');
                 filesData = await response.json();
             } catch (error) {
                 console.error('Error loading files.json:', error);
@@ -290,7 +290,7 @@
 
                     html += `
                         <li>
-                            <a href="${file.path}">
+                            <a href="testy-html/${file.path}">
                                 <span class="card-icon file-icon"></span>
                                 <span>${displayName}</span>
                             </a>
