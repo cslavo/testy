@@ -156,11 +156,7 @@
             <p>Zbierka testovacích HTML súborov pre rôzne účely</p>
         </header>
 
-        <div id="breadcrumb" class="breadcrumb" style="display: none;">
-            <a href="#" onclick="showFolders(); return false;">Domov</a>
-            <span>/</span>
-            <span id="current-folder"></span>
-        </div>
+        <div id="breadcrumb" class="breadcrumb" style="display: none;"></div>
 
         <div id="content">
             <div class="loading">Načítavam...</div>
@@ -186,17 +182,11 @@
 
         // Popis adresárov (voliteľné)
         const FOLDER_DESCRIPTIONS = {
-            'forms': 'Testovanie formulárových prvkov a validácie',
-            'tables': 'Ukážky tabuliek s rôznymi štýlmi',
-            'animations': 'CSS animácie a interaktívne efekty'
+            'fyzika': 'Testy z fyziky'
         };
 
         const contentEl = document.getElementById('content');
         const breadcrumbEl = document.getElementById('breadcrumb');
-        const currentFolderEl = document.getElementById('current-folder');
-
-        // Aktuálna cesta (relatívna k ROOT_PATH)
-        let currentPath = '';
 
         // Načítaj obsah pri štarte
         document.addEventListener('DOMContentLoaded', () => {
@@ -224,12 +214,10 @@
                 }
             });
 
-            currentFolderEl.innerHTML = '';
             breadcrumbEl.innerHTML = html;
         }
 
         async function showContent(path) {
-            currentPath = path;
             updateBreadcrumb(path);
             contentEl.innerHTML = '<div class="loading">Načítavam...</div>';
 
@@ -334,15 +322,6 @@
                 `;
                 contentEl.innerHTML = html;
             }
-        }
-
-        // Zachovanie spätnej kompatibility
-        function showFolders() {
-            showContent('');
-        }
-
-        function showFiles(folderName) {
-            showContent(folderName);
         }
 
         function capitalizeFirst(str) {
