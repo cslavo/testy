@@ -1,0 +1,29 @@
+{
+  "folders": [
+    {
+      "name": "fyzika",
+      "path": "fyzika",
+      "description": "Testy z fyziky",
+      "children": {
+        "folders": [
+          {
+            "name": "2026-01",
+            "path": "fyzika/2026-01",
+            "description": "Január 2026",
+            "children": {
+              "folders": [],
+              "files": [
+                {"name": "2.6 Ideálny plyn a jeho tlak - Test A.html", "path": "fyzika/2026-01/2.6 Ideálny plyn a jeho tlak - Test A.html"},
+                {"name": "2.6 Ideálny plyn a jeho tlak - Test B.html", "path": "fyzika/2026-01/2.6 Ideálny plyn a jeho tlak - Test B.html"},
+                {"name": "2.7 Teplota a tlak ideálneho plynu - Test A.html", "path": "fyzika/2026-01/2.7 Teplota a tlak ideálneho plynu - Test A.html"},
+                {"name": "2.7 Teplota a tlak ideálneho plynu - Test B.html", "path": "fyzika/2026-01/2.7 Teplota a tlak ideálneho plynu - Test B.html"}
+              ]
+            }
+          }
+        ],
+        "files": []
+      }
+    }
+  ],
+  "files": []
+}
