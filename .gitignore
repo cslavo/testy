@@ -7,5 +7,8 @@
 # Okrem HTML súborov
 !*.html
 
+# A okrem files.json pre dynamické načítanie
+!files.json
+
 # A okrem samotného .gitignore
 !.gitignore
