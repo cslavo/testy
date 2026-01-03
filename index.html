@@ -175,7 +175,8 @@
         // Konfigurácia repozitára
         const REPO_OWNER = 'cslavo';
         const REPO_NAME = 'testy';
-        const GITHUB_API = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents`;
+        const ROOT_PATH = 'testy-html';
+        const GITHUB_API = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${ROOT_PATH}`;
 
         // Adresáre, ktoré sa majú ignorovať
         const IGNORED_DIRS = ['.git', '.github', 'node_modules'];
@@ -194,17 +195,48 @@
         const breadcrumbEl = document.getElementById('breadcrumb');
         const currentFolderEl = document.getElementById('current-folder');
 
-        // Načítaj adresáre pri štarte
+        // Aktuálna cesta (relatívna k ROOT_PATH)
+        let currentPath = '';
+
+        // Načítaj obsah pri štarte
         document.addEventListener('DOMContentLoaded', () => {
-            showFolders();
+            showContent('');
         });
 
-        async function showFolders() {
-            breadcrumbEl.style.display = 'none';
-            contentEl.innerHTML = '<div class="loading">Načítavam adresáre...</div>';
+        function updateBreadcrumb(path) {
+            if (!path) {
+                breadcrumbEl.style.display = 'none';
+                return;
+            }
+
+            breadcrumbEl.style.display = 'block';
+            const parts = path.split('/');
+            let html = '<a href="#" onclick="showContent(\'\'); return false;">Domov</a>';
+
+            let buildPath = '';
+            parts.forEach((part, index) => {
+                buildPath += (buildPath ? '/' : '') + part;
+                html += '<span>/</span>';
+                if (index === parts.length - 1) {
+                    html += `<span>${capitalizeFirst(part)}</span>`;
+                } else {
+                    html += `<a href="#" onclick="showContent('${buildPath}'); return false;">${capitalizeFirst(part)}</a>`;
+                }
+            });
+
+            currentFolderEl.innerHTML = '';
+            breadcrumbEl.innerHTML = html;
+        }
+
+        async function showContent(path) {
+            currentPath = path;
+            updateBreadcrumb(path);
+            contentEl.innerHTML = '<div class="loading">Načítavam...</div>';
+
+            const apiUrl = path ? `${GITHUB_API}/${path}` : GITHUB_API;
 
             try {
-                const response = await fetch(GITHUB_API);
+                const response = await fetch(apiUrl);
 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}`);
@@ -212,34 +244,87 @@
 
                 const items = await response.json();
 
-                // Filtruj len adresáre
+                // Rozdeľ na adresáre a HTML súbory
                 const folders = items.filter(item =>
                     item.type === 'dir' && !IGNORED_DIRS.includes(item.name)
                 );
 
-                if (folders.length === 0) {
-                    contentEl.innerHTML = '<div class="error">Žiadne adresáre neboli nájdené.</div>';
+                const htmlFiles = items.filter(item =>
+                    item.type === 'file' &&
+                    item.name.endsWith('.html') &&
+                    !IGNORED_FILES.includes(item.name)
+                );
+
+                if (folders.length === 0 && htmlFiles.length === 0) {
+                    let html = '';
+                    if (path) {
+                        const parentPath = path.includes('/') ? path.substring(0, path.lastIndexOf('/')) : '';
+                        html += `<a href="#" onclick="showContent('${parentPath}'); return false;" class="back-btn">← Späť</a>`;
+                    }
+                    html += '<div class="error">Žiadny obsah nebol nájdený.</div>';
+                    contentEl.innerHTML = html;
                     return;
                 }
 
-                let html = '<div class="card-grid">';
+                let html = '';
 
-                folders.forEach(folder => {
-                    const description = FOLDER_DESCRIPTIONS[folder.name] || 'Kliknite pre zobrazenie súborov';
-                    html += `
-                        <div class="card" onclick="showFiles('${folder.name}')">
-                            <h2><span class="card-icon folder-icon"></span>${capitalizeFirst(folder.name)}</h2>
-                            <p>${description}</p>
-                        </div>
-                    `;
-                });
+                // Tlačidlo späť
+                if (path) {
+                    const parentPath = path.includes('/') ? path.substring(0, path.lastIndexOf('/')) : '';
+                    html += `<a href="#" onclick="showContent('${parentPath}'); return false;" class="back-btn">← Späť</a>`;
+                }
 
-                html += '</div>';
+                // Zobraziť adresáre ako karty
+                if (folders.length > 0) {
+                    html += '<div class="card-grid">';
+                    folders.forEach(folder => {
+                        const folderPath = path ? `${path}/${folder.name}` : folder.name;
+                        const description = FOLDER_DESCRIPTIONS[folder.name] || 'Kliknite pre zobrazenie obsahu';
+                        html += `
+                            <div class="card" onclick="showContent('${folderPath}')">
+                                <h2><span class="card-icon folder-icon"></span>${capitalizeFirst(folder.name)}</h2>
+                                <p>${description}</p>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+
+                // Zobraziť HTML súbory ako zoznam
+                if (htmlFiles.length > 0) {
+                    if (folders.length > 0) {
+                        html += '<h3 style="color: white; margin: 30px 0 15px 0;">Súbory</h3>';
+                    }
+                    html += '<ul class="file-list">';
+                    htmlFiles.forEach(file => {
+                        const displayName = file.name
+                            .replace('.html', '')
+                            .replace(/-/g, ' ')
+                            .replace(/^test\s*/i, '');
+
+                        const filePath = path ? `${ROOT_PATH}/${path}/${file.name}` : `${ROOT_PATH}/${file.name}`;
+                        html += `
+                            <li>
+                                <a href="${filePath}">
+                                    <span class="card-icon file-icon"></span>
+                                    <span>${capitalizeFirst(displayName) || file.name}</span>
+                                </a>
+                            </li>
+                        `;
+                    });
+                    html += '</ul>';
+                }
+
                 contentEl.innerHTML = html;
 
             } catch (error) {
                 console.error('Error:', error);
-                contentEl.innerHTML = `
+                let html = '';
+                if (path) {
+                    const parentPath = path.includes('/') ? path.substring(0, path.lastIndexOf('/')) : '';
+                    html += `<a href="#" onclick="showContent('${parentPath}'); return false;" class="back-btn">← Späť</a>`;
+                }
+                html += `
                     <div class="error">
                         <p>Nepodarilo sa načítať obsah.</p>
                         <p style="font-size: 0.9rem; margin-top: 10px; opacity: 0.8;">
@@ -247,69 +332,17 @@
                         </p>
                     </div>
                 `;
+                contentEl.innerHTML = html;
             }
         }
 
-        async function showFiles(folderName) {
-            breadcrumbEl.style.display = 'block';
-            currentFolderEl.textContent = capitalizeFirst(folderName);
-            contentEl.innerHTML = '<div class="loading">Načítavam súbory...</div>';
+        // Zachovanie spätnej kompatibility
+        function showFolders() {
+            showContent('');
+        }
 
-            try {
-                const response = await fetch(`${GITHUB_API}/${folderName}`);
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-
-                const items = await response.json();
-
-                // Filtruj len HTML súbory
-                const htmlFiles = items.filter(item =>
-                    item.type === 'file' &&
-                    item.name.endsWith('.html') &&
-                    !IGNORED_FILES.includes(item.name)
-                );
-
-                if (htmlFiles.length === 0) {
-                    contentEl.innerHTML = `
-                        <a href="#" onclick="showFolders(); return false;" class="back-btn">← Späť</a>
-                        <div class="error">Žiadne HTML súbory neboli nájdené v tomto adresári.</div>
-                    `;
-                    return;
-                }
-
-                let html = `<a href="#" onclick="showFolders(); return false;" class="back-btn">← Späť na prehľad</a>`;
-                html += '<ul class="file-list">';
-
-                htmlFiles.forEach(file => {
-                    const displayName = file.name
-                        .replace('.html', '')
-                        .replace(/-/g, ' ')
-                        .replace(/^test\s*/i, '');
-
-                    html += `
-                        <li>
-                            <a href="${folderName}/${file.name}">
-                                <span class="card-icon file-icon"></span>
-                                <span>${capitalizeFirst(displayName) || file.name}</span>
-                            </a>
-                        </li>
-                    `;
-                });
-
-                html += '</ul>';
-                contentEl.innerHTML = html;
-
-            } catch (error) {
-                console.error('Error:', error);
-                contentEl.innerHTML = `
-                    <a href="#" onclick="showFolders(); return false;" class="back-btn">← Späť</a>
-                    <div class="error">
-                        <p>Nepodarilo sa načítať obsah adresára.</p>
-                    </div>
-                `;
-            }
+        function showFiles(folderName) {
+            showContent(folderName);
         }
 
         function capitalizeFirst(str) {

@@ -1,0 +1,11 @@
+# Ignorovať všetko
+*
+
+# Ale nie adresáre (aby sme mohli prechádzať štruktúru)
+!*/
+
+# Okrem HTML súborov
+!*.html
+
+# A okrem samotného .gitignore
+!.gitignore
