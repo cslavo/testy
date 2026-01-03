@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktívny Test A - Ideálny plyn</title>
+    <!-- MathJax pre vzorce -->
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.5; background: #f9f9f9; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+        .question-container { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .question-text { font-weight: 600; font-size: 1.1em; margin-bottom: 15px; color: #2c3e50; }
+        .option { display: block; width: 100%; padding: 12px 15px; margin: 8px 0; background: #fff; border: 2px solid #e0e0e0; border-radius: 6px; cursor: pointer; text-align: left; transition: all 0.2s; font-size: 0.95em; box-sizing: border-box; }
+        .option:hover:not(.disabled) { background: #f0f7ff; border-color: #2196F3; }
+        
+        /* Stavy odpovedí */
+        .option.correct { background: #d4edda !important; border-color: #28a745 !important; color: #155724; cursor: default; }
+        .option.incorrect { background: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; cursor: default; }
+        .option.disabled { cursor: default; opacity: 0.7; pointer-events: none; }
+        
+        .results { text-align: center; padding: 20px; margin-top: 20px; font-size: 1.2em; font-weight: bold; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: none; }
+        
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; animation: fadeIn 0.3s; }
+        .modal-content { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-header { font-weight: bold; color: #dc3545; margin-bottom: 10px; font-size: 1.1em; }
+        .modal-body { margin-bottom: 20px; color: #555; }
+        .btn-close { background: #2c3e50; color: white; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-size: 1em; }
+        .btn-close:hover { background: #1a252f; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <h1 id="testTitle">2.6 Ideálny plyn a jeho tlak - Test A</h1>
+    <div id="quiz-container"></div>
+    <div id="results" class="results"></div>
+
+    <!-- Modal pre feedback -->
+    <div class="modal-overlay" id="feedbackModal">
+        <div class="modal-content">
+            <div class="modal-header">Nesprávna odpoveď</div>
+            <div class="modal-body" id="feedbackText"></div>
+            <button class="btn-close" onclick="closeModal()">Rozumiem</button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // DÁTA TESTU (SADA A)
+        // ==========================================
+        const questionsData = [
+            {
+                text: "Aký je predpoklad pre rozmery molekúl ideálneho plynu?",
+                options: [
+                    { text: "Sú zanedbateľne malé v porovnaní s ich strednou vzdialenosťou.", isCorrect: true, feedback: "" },
+                    { text: "Sú veľké a zaberajú polovicu objemu nádoby.", isCorrect: false, feedback: "Vlastný objem molekúl ideálneho plynu je vzhľadom na objem plynu zanedbateľný." },
+                    { text: "Ich veľkosť sa mení v závislosti od tlaku.", isCorrect: false, feedback: "Rozmery molekúl sú považované za stále a zanedbateľne malé." },
+                    { text: "Sú rovnaké ako rozmery stien nádoby.", isCorrect: false, feedback: "Molekuly sú mikroskopické častice, ich rozmery sú zanedbateľné voči nádobe." }
+                ]
+            },
+            {
+                text: "Pôsobia na seba molekuly ideálneho plynu navzájom silami?",
+                options: [
+                    { text: "Nie, s výnimkou zrážok.", isCorrect: true, feedback: "" },
+                    { text: "Áno, neustále sa priťahujú gravitačnou silou.", isCorrect: false, feedback: "Model ideálneho plynu zanedbáva medzimolekulové sily okrem momentu zrážky." },
+                    { text: "Áno, pôsobia na seba silnými odpudivými silami aj na diaľku.", isCorrect: false, feedback: "Odpudivé sily pôsobia len pri samotných zrážkach (pružných odrazoch)." },
+                    { text: "Áno, ale iba ak je plyn stlačený na maximum.", isCorrect: false, feedback: "V modeli ideálneho plynu sa predpokladá, že medzimolekulové sily nepôsobia (s výnimkou zrážok)." }
+                ]
+            },
+            {
+                text: "Čomu sa rovná vnútorná energia $U$ ideálneho plynu?",
+                options: [
+                    { text: "Celkovej kinetickej energii molekúl $E_k$.", isCorrect: true, feedback: "" },
+                    { text: "Súčtu kinetickej a potenciálnej energie molekúl.", isCorrect: false, feedback: "Keďže zanedbávame silové pôsobenie medzi molekulami, potenciálna energia je nulová." },
+                    { text: "Iba potenciálnej energii molekúl.", isCorrect: false, feedback: "Ideálny plyn nemá potenciálnu energiu väzieb, iba kinetickú energiu pohybu." },
+                    { text: "Vnútorná energia ideálneho plynu je vždy nulová.", isCorrect: false, feedback: "Nie je nulová, molekuly sa neustále pohybujú a majú kinetickú energiu." }
+                ]
+            },
+            {
+                text: "Čo vyjadruje veličina hustota molekúl $N_V$?",
+                options: [
+                    { text: "Počet molekúl $N$ v jednotkovom objeme.", isCorrect: true, feedback: "" },
+                    { text: "Celkovú hmotnosť plynu v nádobe.", isCorrect: false, feedback: "To by bola hustota látky (kg/m³), $N_V$ sa týka počtu častíc." },
+                    { text: "Objem, ktorý zaberá jedna molekula.", isCorrect: false, feedback: "Ide o počet molekúl na m³, nie objem jednej molekuly." },
+                    { text: "Rýchlosť pohybu molekúl v objeme.", isCorrect: false, feedback: "$N_V$ je skalárna veličina udávajúca hustotu počtu častíc, nie rýchlosť." }
+                ]
+            },
+            {
+                text: "Ako sa prejavuje stav plynu makroskopicky pri nárazoch molekúl na steny nádoby?",
+                options: [
+                    { text: "Ako tlak plynu $p$.", isCorrect: true, feedback: "" },
+                    { text: "Ako teplota plynu $T$.", isCorrect: false, feedback: "Nárazy na steny spôsobujú silové pôsobenie, ktoré vnímame ako tlak." },
+                    { text: "Ako objem plynu $V$.", isCorrect: false, feedback: "Objem je priestor, ktorý plyn vypĺňa, nárazy vytvárajú tlak." },
+                    { text: "Ako zmena skupenstva.", isCorrect: false, feedback: "Samotné nárazy nespôsobujú zmenu skupenstva, ale definujú tlak plynu." }
+                ]
+            },
+            {
+                text: "Ktorá rovnica predstavuje základnú rovnicu pre tlak ideálneho plynu?",
+                options: [
+                    { text: "$p = \\frac{2}{3} N_V E_{ks}$", isCorrect: true, feedback: "" },
+                    { text: "$p = N_V E_{ks}$", isCorrect: false, feedback: "V základnej rovnici tlaku musí vystupovať koeficient 2/3." },
+                    { text: "$p = \\frac{1}{3} N E_{ks}$", isCorrect: false, feedback: "Nesprávny koeficient a chýba objem (alebo použitie $N_V$)." },
+                    { text: "$p = \\frac{3}{2} \\frac{N}{V} E_{ks}$", isCorrect: false, feedback: "Zlomok je opačne, správne má byť 2/3." }
+                ]
+            },
+            {
+                text: "Akú hodnotu má normálny tlak vzduchu $p_n$ spomínaný v texte?",
+                options: [
+                    { text: "101 325 Pa", isCorrect: true, feedback: "" },
+                    { text: "100 000 Pa", isCorrect: false, feedback: "Text uvádza presnú hodnotu 101 325 Pa." },
+                    { text: "90 500 Pa", isCorrect: false, feedback: "Toto nie je hodnota normálneho tlaku uvedená v texte." },
+                    { text: "120 000 Pa", isCorrect: false, feedback: "Normálny tlak je definovaný ako 101 325 Pa." }
+                ]
+            },
+            {
+                text: "Čo vyplýva zo základnej rovnice pre tlak plynu o závislosti tlaku a objemu (pri konštantnej teplote)?",
+                options: [
+                    { text: "Tlak plynu $p$ je nepriamo úmerný jeho objemu $V$.", isCorrect: true, feedback: "" },
+                    { text: "Tlak plynu $p$ je priamo úmerný jeho objemu $V$.", isCorrect: false, feedback: "Ak by bol priamo úmerný, zväčšením objemu by rástol tlak, čo odporuje skúsenosti." },
+                    { text: "Tlak plynu nezávisí od objemu.", isCorrect: false, feedback: "Tlak sa mení so zmenou objemu (v injekčnej striekačke to možno overiť)." },
+                    { text: "Tlak rastie s druhou mocninou objemu.", isCorrect: false, feedback: "Ide o lineárnu nepriamu úmernosť ($p \\sim 1/V$)." }
+                ]
+            },
+            {
+                text: "Aký matematický vzťah platí pre plyn pri stálej teplote (podľa praktického cvičenia)?",
+                options: [
+                    { text: "$pV = \\text{konšt.}$", isCorrect: true, feedback: "" },
+                    { text: "$p/V = \\text{konšt.}$", isCorrect: false, feedback: "Podiel $p/V$ by znamenal priamu úmernosť, tu platí súčin $pV = \\text{konšt.}$" },
+                    { text: "$p + V = \\text{konšt.}$", isCorrect: false, feedback: "Súčet tlaku a objemu nie je konštantný." },
+                    { text: "$V - p = 0$", isCorrect: false, feedback: "Tento vzťah nepopisuje správanie plynu pri stálej teplote." }
+                ]
+            }
+        ];
+
+        // ==========================================
+        // LOGIKA APLIKÁCIE
+        // ==========================================
+        let currentScore = 0;
+        let answeredCount = 0;
+        const totalQuestions = questionsData.length;
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function initQuiz() {
+            const container = document.getElementById('quiz-container');
+            shuffleArray(questionsData);
+
+            questionsData.forEach((q, index) => {
+                let currentOptions = [...q.options];
+                shuffleArray(currentOptions);
+
+                const qDiv = document.createElement('div');
+                qDiv.className = 'question-container';
+                qDiv.id = `q-${index}`;
+
+                let optionsHtml = '';
+                currentOptions.forEach((opt) => {
+                    const safeFeedback = opt.feedback.replace(/"/g, '&quot;');
+                    // Pridáme data-is-correct pre neskoršiu identifikáciu
+                    optionsHtml += `
+                        <button class="option" 
+                            onclick="handleAnswer(this, ${opt.isCorrect}, '${safeFeedback}')"
+                            data-is-correct="${opt.isCorrect}">
+                            ${opt.text}
+                        </button>
+                    `;
+                });
+
+                qDiv.innerHTML = `
+                    <div class="question-text">${index + 1}. ${q.text}</div>
+                    <div class="options-grid">${optionsHtml}</div>
+                `;
+                container.appendChild(qDiv);
+            });
+            
+            if (window.MathJax) {
+                window.MathJax.typesetPromise();
+            }
+        }
+
+        function handleAnswer(btn, isCorrect, feedback) {
+            const parent = btn.parentElement;
+            if (parent.dataset.locked === "true") return;
+            
+            parent.dataset.locked = "true";
+            
+            const buttons = parent.querySelectorAll('.option');
+            buttons.forEach(b => b.classList.add('disabled'));
+
+            if (isCorrect) {
+                btn.classList.add('correct');
+                currentScore++;
+            } else {
+                btn.classList.add('incorrect');
+                // Vizuálne označiť správnu odpoveď
+                const correctBtn = parent.querySelector('.option[data-is-correct="true"]');
+                if (correctBtn) correctBtn.classList.add('correct');
+                
+                showModal(feedback);
+            }
+
+            answeredCount++;
+            if (answeredCount === totalQuestions) {
+                showResults();
+            }
+        }
+
+        function showModal(text) {
+            if (!text) return;
+            document.getElementById('feedbackText').innerHTML = text;
+            document.getElementById('feedbackModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('feedbackModal').style.display = 'none';
+        }
+
+        function showResults() {
+            const percentage = Math.round((currentScore / totalQuestions) * 100);
+            let grade = '';
+            if (percentage >= 90) grade = 'Výborný';
+            else if (percentage >= 80) grade = 'Veľmi dobrý';
+            else if (percentage >= 70) grade = 'Dobrý';
+            else if (percentage >= 60) grade = 'Dostačujúci';
+            else grade = 'Nedostačujúci';
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `
+                Výsledok: ${currentScore} / ${totalQuestions} (${percentage}%)<br>
+                <span style="color: #2c3e50; font-size: 1.1em">${grade}</span>
+            `;
+            resultsDiv.scrollIntoView({behavior: "smooth"});
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('feedbackModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        initQuiz();
+    </script>
+</body>
+</html>
