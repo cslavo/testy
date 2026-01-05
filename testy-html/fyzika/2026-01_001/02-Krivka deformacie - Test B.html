@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Krivka deformácie - Test B</title>
+    <!-- MathJax pre vzorce -->
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.5; background: #f9f9f9; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+        .question-container { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .question-text { font-weight: 600; font-size: 1.1em; margin-bottom: 15px; color: #2c3e50; }
+        .option { display: block; width: 100%; padding: 12px 15px; margin: 8px 0; background: #fff; border: 2px solid #e0e0e0; border-radius: 6px; cursor: pointer; text-align: left; transition: all 0.2s; font-size: 0.95em; box-sizing: border-box; }
+        .option:hover:not(.disabled) { background: #f0f7ff; border-color: #2196F3; }
+        
+        /* Stavy odpovedí */
+        .option.correct { background: #d4edda !important; border-color: #28a745 !important; color: #155724; cursor: default; }
+        .option.incorrect { background: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; cursor: default; }
+        .option.disabled { cursor: default; opacity: 0.7; pointer-events: none; }
+        
+        .results { text-align: center; padding: 20px; margin-top: 20px; font-size: 1.2em; font-weight: bold; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: none; }
+        
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; animation: fadeIn 0.3s; }
+        .modal-content { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-header { font-weight: bold; color: #dc3545; margin-bottom: 10px; font-size: 1.1em; }
+        .modal-body { margin-bottom: 20px; color: #555; }
+        .btn-close { background: #2c3e50; color: white; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-size: 1em; }
+        .btn-close:hover { background: #1a252f; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <h1 id="testTitle">Krivka deformácie - Test B</h1>
+    <div id="quiz-container"></div>
+    <div id="results" class="results"></div>
+
+    <!-- Modal pre feedback -->
+    <div class="modal-overlay" id="feedbackModal">
+        <div class="modal-content">
+            <div class="modal-header">Nesprávna odpoveď</div>
+            <div class="modal-body" id="feedbackText"></div>
+            <button class="btn-close" onclick="closeModal()">Rozumiem</button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // DÁTA TESTU (GENEROVANÉ AI - TEST B)
+        // ==========================================
+        const questionsData = [
+            {
+                text: "Aký je vzorec pre výpočet absolútneho predĺženia $\\Delta l$?",
+                options: [
+                    { text: "$\\Delta l = l - l_0$", isCorrect: true, feedback: "" },
+                    { text: "$\\Delta l = l + l_0$", isCorrect: false, feedback: "Dĺžky sa nemôžu sčítavať, hľadáme rozdiel." },
+                    { text: "$\\Delta l = \\frac{l}{l_0}$", isCorrect: false, feedback: "Toto je pomer, nie absolútna zmena dĺžky." },
+                    { text: "$\\Delta l = E \\cdot l_0$", isCorrect: false, feedback: "Absolútne predĺženie nie je súčin modulu pružnosti a dĺžky." }
+                ]
+            },
+            {
+                text: "Čo vyjadruje relatívne predĺženie slovne?",
+                options: [
+                    { text: "Predĺženie pripadajúce na jednotku dĺžky telesa", isCorrect: true, feedback: "" },
+                    { text: "Celkovú zmenu dĺžky v metroch", isCorrect: false, feedback: "To by bolo absolútne predĺženie ($\\Delta l$)." },
+                    { text: "Silu pôsobiacu na prierez telesa", isCorrect: false, feedback: "Toto je definícia normálového napätia, nie predĺženia." },
+                    { text: "Čas, za ktorý sa teleso predĺži", isCorrect: false, feedback: "Relatívne predĺženie je bezrozmerná veličina deformácie, nesúvisí s časom." }
+                ]
+            },
+            {
+                text: "Vypočítajte: Ak je $\\Delta l = 0,05\\,\\text{m}$ a pôvodná dĺžka $l_0 = 5\\,\\text{m}$, aké je relatívne predĺženie $\\varepsilon$?",
+                options: [
+                    { text: "1 % (0,01)", isCorrect: true, feedback: "" },
+                    { text: "10 % (0,1)", isCorrect: false, feedback: "Výpočet je $0,05 : 5 = 0,01$." },
+                    { text: "5 % (0,05)", isCorrect: false, feedback: "Nesprávny výpočet, $\\varepsilon = \\Delta l / l_0$." },
+                    { text: "0,1 % (0,001)", isCorrect: false, feedback: "Výpočet je $0,05 : 5 = 0,01$." }
+                ]
+            },
+            {
+                text: "Čo znamená symbol $E$ a akú má jednotku?",
+                options: [
+                    { text: "Modul pružnosti v ťahu, jednotka Pascal [Pa]", isCorrect: true, feedback: "" },
+                    { text: "Normálové napätie, jednotka Newton [N]", isCorrect: false, feedback: "Napätie sa značí $\\sigma_n$ a má jednotku Pa." },
+                    { text: "Relatívne predĺženie, bez jednotky", isCorrect: false, feedback: "To je symbol $\\varepsilon$." },
+                    { text: "Hustota materiálu, [kg/m³]", isCorrect: false, feedback: "Hustota v krivke deformácie priamo nevystupuje ako $E$." }
+                ]
+            },
+            {
+                text: "Čo predstavuje bod B na krivke deformácie označený ako $\\sigma_d$?",
+                options: [
+                    { text: "Medza pružnosti", isCorrect: true, feedback: "" },
+                    { text: "Medza úmernosti", isCorrect: false, feedback: "Medza úmernosti je bod A (pred bodom B)." },
+                    { text: "Medza klzu", isCorrect: false, feedback: "Medza klzu je bod C (za bodom B)." },
+                    { text: "Medza pevnosti", isCorrect: false, feedback: "Medza pevnosti je maximum grafu (bod E)." }
+                ]
+            },
+            {
+                text: "Čo sa deje v oblasti CD (medza klzu)?",
+                options: [
+                    { text: "Oblasť tečenia materiálu - malej zmene napätia zodpovedá veľká zmena predĺženia", isCorrect: true, feedback: "" },
+                    { text: "Materiál sa okamžite vráti do pôvodného tvaru", isCorrect: false, feedback: "To platí len pre pružnú deformáciu (úsek OA)." },
+                    { text: "Materiál sa spevňuje a kladie väčší odpor", isCorrect: false, feedback: "Spevnenie materiálu nastáva až v úseku DE." },
+                    { text: "Tyč sa pretrhne", isCorrect: false, feedback: "K pretrhnutiu dochádza až po prekročení bodu E." }
+                ]
+            },
+            {
+                text: "Čo sa deje s materiálom v oblasti DE (za oblasťou tečenia)?",
+                options: [
+                    { text: "Oblasť spevnenia materiálu", isCorrect: true, feedback: "" },
+                    { text: "Dopružovanie", isCorrect: false, feedback: "Dopružovanie je jav v oblasti AB." },
+                    { text: "Pružná deformácia", isCorrect: false, feedback: "Pružná deformácia je len na začiatku grafu." },
+                    { text: "Tečenie materiálu", isCorrect: false, feedback: "Tečenie prebehlo v predchádzajúcej fáze (CD)." }
+                ]
+            },
+            {
+                text: "Ako definujeme pružné látky na základe krivky deformácie?",
+                options: [
+                    { text: "Pre veľké $\\varepsilon$ platí $\\sigma_u < \\sigma_p$ (napr. oceľ)", isCorrect: true, feedback: "" },
+                    { text: "Látky, ktoré sa okamžite zlomia bez deformácie", isCorrect: false, feedback: "To sú krehké látky." },
+                    { text: "Látky, kde medza úmernosti splýva s medzou pevnosti", isCorrect: false, feedback: "Toto je definícia pre krehké látky." },
+                    { text: "Látky, ktoré nemajú medzu úmernosti", isCorrect: false, feedback: "Každá pevná látka má aspoň malú oblasť pružnosti." }
+                ]
+            },
+            {
+                text: "Ktoré z nasledujúcich materiálov patria medzi krehké látky?",
+                options: [
+                    { text: "Liatina, sklo, porcelán, mramor", isCorrect: true, feedback: "" },
+                    { text: "Oceľ, meď, hliník", isCorrect: false, feedback: "Tieto kovy sú typicky pružné a húževnaté." },
+                    { text: "Guma, kaučuk", isCorrect: false, feedback: "Tieto materiály sú vysoko elastické, nie krehké." },
+                    { text: "Drevo a papier", isCorrect: false, feedback: "V kontexte prezentácie boli ako príklady uvedené liatina a sklo." }
+                ]
+            }
+        ];
+
+        // ==========================================
+        // LOGIKA APLIKÁCIE
+        // ==========================================
+        let currentScore = 0;
+        let answeredCount = 0;
+        const totalQuestions = questionsData.length;
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function initQuiz() {
+            const container = document.getElementById('quiz-container');
+            shuffleArray(questionsData);
+
+            questionsData.forEach((q, index) => {
+                let currentOptions = [...q.options];
+                shuffleArray(currentOptions);
+
+                const qDiv = document.createElement('div');
+                qDiv.className = 'question-container';
+                qDiv.id = `q-${index}`;
+
+                let optionsHtml = '';
+                currentOptions.forEach((opt, i) => {
+                    const safeFeedback = opt.feedback.replace(/"/g, '&quot;');
+                    optionsHtml += `
+                        <button class="option" 
+                            onclick="handleAnswer(this, ${opt.isCorrect}, '${safeFeedback}', ${index})"
+                            data-answered="false">
+                            ${opt.text}
+                        </button>
+                    `;
+                });
+
+                qDiv.innerHTML = `
+                    <div class="question-text">${index + 1}. ${q.text}</div>
+                    <div class="options-grid">${optionsHtml}</div>
+                `;
+                container.appendChild(qDiv);
+            });
+            
+            if (window.MathJax) {
+                window.MathJax.typesetPromise();
+            }
+        }
+
+        function handleAnswer(btn, isCorrect, feedback, qIndex) {
+            const parent = btn.parentElement;
+            if (parent.dataset.locked === "true") return;
+            
+            parent.dataset.locked = "true";
+            
+            const buttons = parent.querySelectorAll('.option');
+            buttons.forEach(b => b.classList.add('disabled'));
+
+            if (isCorrect) {
+                btn.classList.add('correct');
+                currentScore++;
+            } else {
+                btn.classList.add('incorrect');
+                showModal(feedback);
+            }
+
+             buttons.forEach(b => {
+                if (b.getAttribute('onclick').includes('true,')) {
+                    b.classList.add('correct');
+                }
+            });
+
+            answeredCount++;
+            if (answeredCount === totalQuestions) {
+                showResults();
+            }
+        }
+
+        function showModal(text) {
+            if (!text) return;
+            document.getElementById('feedbackText').innerHTML = text;
+            document.getElementById('feedbackModal').style.display = 'block';
+            if (window.MathJax) {
+                window.MathJax.typesetPromise();
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('feedbackModal').style.display = 'none';
+        }
+
+        function showResults() {
+            const percentage = Math.round((currentScore / totalQuestions) * 100);
+            let grade = '';
+            if (percentage >= 90) grade = 'Výborný';
+            else if (percentage >= 80) grade = 'Veľmi dobrý';
+            else if (percentage >= 70) grade = 'Dobrý';
+            else if (percentage >= 60) grade = 'Dostačujúci';
+            else grade = 'Nedostačujúci';
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `
+                Výsledok: ${currentScore} / ${totalQuestions} (${percentage}%)<br>
+                <span style="color: #2c3e50; font-size: 1.1em">${grade}</span>
+            `;
+            resultsDiv.scrollIntoView({behavior: "smooth"});
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('feedbackModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        initQuiz();
+    </script>
+</body>
+</html>
