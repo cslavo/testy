@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stavová rovnica ideálneho plynu - Test A</title>
+    <!-- MathJax pre vzorce -->
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.5; background: #f9f9f9; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+        .question-container { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .question-text { font-weight: 600; font-size: 1.1em; margin-bottom: 15px; color: #2c3e50; }
+        .option { display: block; width: 100%; padding: 12px 15px; margin: 8px 0; background: #fff; border: 2px solid #e0e0e0; border-radius: 6px; cursor: pointer; text-align: left; transition: all 0.2s; font-size: 0.95em; box-sizing: border-box; }
+        .option:hover:not(.disabled) { background: #f0f7ff; border-color: #2196F3; }
+        
+        /* Stavy odpovedí */
+        .option.correct { background: #d4edda !important; border-color: #28a745 !important; color: #155724; cursor: default; }
+        .option.incorrect { background: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; cursor: default; }
+        .option.disabled { cursor: default; opacity: 0.7; pointer-events: none; }
+        
+        .results { text-align: center; padding: 20px; margin-top: 20px; font-size: 1.2em; font-weight: bold; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: none; }
+        
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; animation: fadeIn 0.3s; }
+        .modal-content { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-header { font-weight: bold; color: #dc3545; margin-bottom: 10px; font-size: 1.1em; }
+        .modal-body { margin-bottom: 20px; color: #555; }
+        .btn-close { background: #2c3e50; color: white; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-size: 1em; }
+        .btn-close:hover { background: #1a252f; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <h1 id="testTitle">Stavová rovnica - Test A</h1>
+    <div id="quiz-container"></div>
+    <div id="results" class="results"></div>
+
+    <!-- Modal pre feedback -->
+    <div class="modal-overlay" id="feedbackModal">
+        <div class="modal-content">
+            <div class="modal-header">Nesprávna odpoveď</div>
+            <div class="modal-body" id="feedbackText"></div>
+            <button class="btn-close" onclick="closeModal()">Rozumiem</button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // DÁTA TESTU (GENEROVANÉ AI)
+        // ==========================================
+        const questionsData = [
+            {
+                text: "Čo charakterizujú stavové veličiny podľa úvodu prezentácie?",
+                options: [
+                    { text: "Plyn v rovnovážnom stave", isCorrect: true, feedback: "" },
+                    { text: "Plyn počas chemickej reakcie", isCorrect: false, feedback: "Stavové veličiny opisujú plyn v rovnovážnom stave, nie počas prebiehajúcich chemických zmien." },
+                    { text: "Iba plyn, ktorý mení svoje skupenstvo", isCorrect: false, feedback: "Stavové veličiny opisujú stav plynu, nie proces zmeny skupenstva." },
+                    { text: "Rýchlosť jednotlivých molekúl", isCorrect: false, feedback: "Stavové veličiny opisujú makroskopický stav plynu ako celku (tlak, teplota, objem), nie rýchlosť konkrétnej molekuly." }
+                ]
+            },
+            {
+                text: "Ktorá veličina sa v stavovej rovnici označuje symbolom $n$?",
+                options: [
+                    { text: "Látkové množstvo", isCorrect: true, feedback: "" },
+                    { text: "Počet molekúl", isCorrect: false, feedback: "Počet molekúl sa označuje veľkým písmenom $N$." },
+                    { text: "Hmotnosť plynu", isCorrect: false, feedback: "Hmotnosť plynu sa označuje písmenom $m$." },
+                    { text: "Koncentrácia častíc", isCorrect: false, feedback: "Symbol $n$ je v tomto kontexte vyhradený pre látkové množstvo." }
+                ]
+            },
+            {
+                text: "Aký vzťah platí pre výpočet počtu častíc $N$ pomocou látkového množstva?",
+                options: [
+                    { text: "$N = n \\cdot N_A$", isCorrect: true, feedback: "" },
+                    { text: "$N = n / N_A$", isCorrect: false, feedback: "Počet častíc vypočítame ako súčin látkového množstva a Avogadrovej konštanty, nie ich podiel." },
+                    { text: "$N = m \\cdot M_m$", isCorrect: false, feedback: "Tento vzťah nespája počet častíc s látkovým množstvom správne." },
+                    { text: "$N = N_A / m$", isCorrect: false, feedback: "Toto je rozmerovo nesprávny vzťah." }
+                ]
+            },
+            {
+                text: "Ktorá z nasledujúcich rovníc je správnym vyjadrením stavovej rovnice ideálneho plynu pomocou Boltzmannovej konštanty?",
+                options: [
+                    { text: "$pV = NkT$", isCorrect: true, feedback: "" },
+                    { text: "$pV = nkT$", isCorrect: false, feedback: "Pri použití Boltzmannovej konštanty $k$ musíme použiť počet častíc $N$, nie látkové množstvo $n$." },
+                    { text: "$p/V = NkT$", isCorrect: false, feedback: "Na ľavej strane rovnice musí byť súčin tlaku a objemu ($pV$), nie podiel." },
+                    { text: "$pV = N / (kT)$", isCorrect: false, feedback: "Súčin $NkT$ musí byť v čitateli, nedelíme ním." }
+                ]
+            },
+            {
+                text: "Ako je definovaná mólová plynová konštanta $R_m$ pomocou iných konštánt?",
+                options: [
+                    { text: "$R_m = N_A \\cdot k$", isCorrect: true, feedback: "" },
+                    { text: "$R_m = N_A / k$", isCorrect: false, feedback: "$R_m$ je súčinom Avogadrovej konštanty a Boltzmannovej konštanty." },
+                    { text: "$R_m = k / N_A$", isCorrect: false, feedback: "Mólová plynová konštanta vznikne vynásobením, nie delením $k$ a $N_A$." },
+                    { text: "$R_m = N_A + k$", isCorrect: false, feedback: "Ide o súčin konštánt, nie ich súčet." }
+                ]
+            },
+            {
+                text: "Akú hodnotu dosadíme za výraz $\\frac{1}{2}m_0 v_k^2$ pri odvodzovaní stavovej rovnice?",
+                options: [
+                    { text: "$\\frac{3}{2}kT$", isCorrect: true, feedback: "" },
+                    { text: "$\\frac{1}{2}kT$", isCorrect: false, feedback: "Stredná kinetická energia molekuly plynu je rovná $\\frac{3}{2}kT$." },
+                    { text: "$kT$", isCorrect: false, feedback: "Energia na jeden stupeň voľnosti je $\\frac{1}{2}kT$, pre tri stupne voľnosti je to $\\frac{3}{2}kT$." },
+                    { text: "$3kT$", isCorrect: false, feedback: "Správny koeficient je $\\frac{3}{2}$, nie 3." }
+                ]
+            },
+            {
+                text: "Aká je podmienka pre platnosť vzťahu $\\frac{pV}{T} = \\text{konšt.}$ pri porovnávaní dvoch stavov?",
+                options: [
+                    { text: "Stála hmotnosť plynu", isCorrect: true, feedback: "" },
+                    { text: "Stály tlak plynu", isCorrect: false, feedback: "Tlak sa môže meniť; podmienkou je, aby neunikali častice (stála hmotnosť)." },
+                    { text: "Stála teplota plynu", isCorrect: false, feedback: "Teplota sa môže meniť; ide o všeobecnú stavovú zmenu pri stálej hmotnosti." },
+                    { text: "Nulový objem", isCorrect: false, feedback: "Objem plynu nemôže byť nulový." }
+                ]
+            },
+            {
+                text: "Ktorý tvar stavovej rovnice využijeme, ak poznáme látkové množstvo $n$?",
+                options: [
+                    { text: "$pV = nR_mT$", isCorrect: true, feedback: "" },
+                    { text: "$pV = NR_mT$", isCorrect: false, feedback: "Ak použijeme $R_m$, musíme použiť látkové množstvo $n$, nie počet častíc $N$." },
+                    { text: "$p = nVT$", isCorrect: false, feedback: "Táto rovnica je fyzikálne nesprávna (nesedia jednotky ani vzťahy)." },
+                    { text: "$pV = n/T$", isCorrect: false, feedback: "Teplota $T$ musí byť v čitateli na pravej strane rovnice." }
+                ]
+            }
+        ];
+
+        // ==========================================
+        // LOGIKA APLIKÁCIE
+        // ==========================================
+        let currentScore = 0;
+        let answeredCount = 0;
+        const totalQuestions = questionsData.length;
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function initQuiz() {
+            const container = document.getElementById('quiz-container');
+            shuffleArray(questionsData);
+
+            questionsData.forEach((q, index) => {
+                let currentOptions = [...q.options];
+                shuffleArray(currentOptions);
+
+                const qDiv = document.createElement('div');
+                qDiv.className = 'question-container';
+                qDiv.id = `q-${index}`;
+
+                let optionsHtml = '';
+                currentOptions.forEach((opt, i) => {
+                    const safeFeedback = opt.feedback.replace(/"/g, '&quot;');
+                    optionsHtml += `
+                        <button class="option" 
+                            onclick="handleAnswer(this, ${opt.isCorrect}, '${safeFeedback}', ${index})"
+                            data-answered="false">
+                            ${opt.text}
+                        </button>
+                    `;
+                });
+
+                qDiv.innerHTML = `
+                    <div class="question-text">${index + 1}. ${q.text}</div>
+                    <div class="options-grid">${optionsHtml}</div>
+                `;
+                container.appendChild(qDiv);
+            });
+            
+            if (window.MathJax) {
+                window.MathJax.typesetPromise();
+            }
+        }
+
+        function handleAnswer(btn, isCorrect, feedback, qIndex) {
+            const parent = btn.parentElement;
+            if (parent.dataset.locked === "true") return;
+            
+            parent.dataset.locked = "true";
+            
+            const buttons = parent.querySelectorAll('.option');
+            buttons.forEach(b => b.classList.add('disabled'));
+
+            if (isCorrect) {
+                btn.classList.add('correct');
+                currentScore++;
+            } else {
+                btn.classList.add('incorrect');
+                showModal(feedback);
+            }
+
+             buttons.forEach(b => {
+                if (b.getAttribute('onclick').includes('true,')) {
+                    b.classList.add('correct');
+                }
+            });
+
+            answeredCount++;
+            if (answeredCount === totalQuestions) {
+                showResults();
+            }
+        }
+
+        function showModal(text) {
+            if (!text) return;
+            document.getElementById('feedbackText').innerHTML = text;
+            document.getElementById('feedbackModal').style.display = 'block';
+            if (window.MathJax) {
+                window.MathJax.typesetPromise();
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('feedbackModal').style.display = 'none';
+        }
+
+        function showResults() {
+            const percentage = Math.round((currentScore / totalQuestions) * 100);
+            let grade = '';
+            if (percentage >= 90) grade = 'Výborný';
+            else if (percentage >= 80) grade = 'Veľmi dobrý';
+            else if (percentage >= 70) grade = 'Dobrý';
+            else if (percentage >= 60) grade = 'Dostačujúci';
+            else grade = 'Nedostačujúci';
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `
+                Výsledok: ${currentScore} / ${totalQuestions} (${percentage}%)<br>
+                <span style="color: #2c3e50; font-size: 1.1em">${grade}</span>
+            `;
+            resultsDiv.scrollIntoView({behavior: "smooth"});
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('feedbackModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        initQuiz();
+    </script>
+</body>
+</html>
