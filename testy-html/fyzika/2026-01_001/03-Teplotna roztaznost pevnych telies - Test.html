@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teplotná rozťažnosť pevných telies - Test</title>
+    <!-- MathJax pre vzorce -->
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.5; background: #f9f9f9; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+        .question-container { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .question-text { font-weight: 600; font-size: 1.1em; margin-bottom: 15px; color: #2c3e50; }
+        .option { display: block; width: 100%; padding: 12px 15px; margin: 8px 0; background: #fff; border: 2px solid #e0e0e0; border-radius: 6px; cursor: pointer; text-align: left; transition: all 0.2s; font-size: 0.95em; box-sizing: border-box; }
+        .option:hover:not(.disabled) { background: #f0f7ff; border-color: #2196F3; }
+        
+        /* Stavy odpovedí */
+        .option.correct { background: #d4edda !important; border-color: #28a745 !important; color: #155724; cursor: default; }
+        .option.incorrect { background: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; cursor: default; }
+        .option.disabled { cursor: default; opacity: 0.7; pointer-events: none; }
+        
+        .results { text-align: center; padding: 20px; margin-top: 20px; font-size: 1.2em; font-weight: bold; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: none; }
+        
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; animation: fadeIn 0.3s; }
+        .modal-content { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-header { font-weight: bold; color: #dc3545; margin-bottom: 10px; font-size: 1.1em; }
+        .modal-body { margin-bottom: 20px; color: #555; }
+        .btn-close { background: #2c3e50; color: white; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-size: 1em; }
+        .btn-close:hover { background: #1a252f; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <h1 id="testTitle">Teplotná rozťažnosť pevných telies</h1>
+    <div id="quiz-container"></div>
+    <div id="results" class="results"></div>
+
+    <!-- Modal pre feedback -->
+    <div class="modal-overlay" id="feedbackModal">
+        <div class="modal-content">
+            <div class="modal-header">Nesprávna odpoveď</div>
+            <div class="modal-body" id="feedbackText"></div>
+            <button class="btn-close" onclick="closeModal()">Rozumiem</button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // DÁTA TESTU (EXTRAHOVANÉ Z PDF)
+        // ==========================================
+        const questionsData = [
+            {
+                text: "Teplotná rozťažnosť je jav, keď sa pri zmene teploty pevného telesa:",
+                options: [
+                    { text: "menia jeho rozmery", isCorrect: true, feedback: "" },
+                    { text: "mení jeho štruktúra", isCorrect: false, feedback: "Zmena teploty v rámci teplotnej rozťažnosti nemení kryštalickú štruktúru, iba vzdialenosti medzi časticami." },
+                    { text: "mení jeho zloženie", isCorrect: false, feedback: "Chemické zloženie telesa sa pri fyzikálnom jave teplotnej rozťažnosti nemení." },
+                    { text: "mení jeho skupenstvo", isCorrect: false, feedback: "Zmena skupenstva je fázová premena, ktorá nastáva až pri dosiahnutí špecifickej teploty (topenia/varu), nie pri bežnej teplotnej rozťažnosti." }
+                ]
+            },
+            {
+                text: "Ak sa pri zmene teploty pevného telesa – tyče - mení jej dĺžka, jej predĺženie je:",
+                options: [
+                    { text: "priamo úmerné začiatočnej dĺžke a prírastku teploty", isCorrect: true, feedback: "" },
+                    { text: "nepriamo úmerné začiatočnej dĺžke a prírastku teploty", isCorrect: false, feedback: "Predĺženie je priamo úmerné. Čím dlhšia tyč a čím väčšie zohriatie, tým väčšie predĺženie." },
+                    { text: "nepriamo úmerné začiatočnej teplote a prírastku jej dĺžky", isCorrect: false, feedback: "Toto tvrdenie fyzikálne nedáva zmysel. Predĺženie závisí priamo od zmeny teploty a pôvodnej dĺžky." },
+                    { text: "priamo úmerné začiatočnej teplote a prírastku jej dĺžky", isCorrect: false, feedback: "Dôležitá je zmena teploty (prírastok), nie samotná počiatočná teplota, a predĺženie je výsledok, nie vstupná veličina." }
+                ]
+            },
+            {
+                text: "Predĺženie tyče pri zmene jej teploty môžeme vyjadriť vzťahom:",
+                options: [
+                    { text: "$\\Delta l = \\alpha l_0 \\Delta t$", isCorrect: true, feedback: "" },
+                    { text: "$\\Delta l = \\alpha t_2$", isCorrect: false, feedback: "Vzorec musí obsahovať pôvodnú dĺžku a zmenu teploty (rozdiel teplôt), nie len konečnú teplotu." },
+                    { text: "$\\Delta l = \\alpha t_1 l_0$", isCorrect: false, feedback: "Vzorec musí pracovať so zmenou teploty ($\\Delta t$), nie s počiatočnou teplotou $t_1$." },
+                    { text: "$\\Delta l = l_0 \\Delta t$", isCorrect: false, feedback: "V tomto vzorci chýba súčiniteľ teplotnej dĺžkovej rozťažnosti ($\\alpha$), ktorý charakterizuje materiál." }
+                ]
+            },
+            {
+                text: "Objem telesa po zmene jeho teploty je vyjadrený vzťahom:",
+                options: [
+                    { text: "$V = V_1(1 + \\beta \\Delta t)$", isCorrect: true, feedback: "" },
+                    { text: "$V = V_1(1 + \\beta t_1)$", isCorrect: false, feedback: "Rozťažnosť závisí od zmeny teploty ($\\Delta t$), nie od počiatočnej teploty $t_1$." },
+                    { text: "$\\Delta V = V_1(1 + \\beta \\Delta t)$", isCorrect: false, feedback: "Ľavá strana rovnice by mala vyjadrovať konečný objem $V$, nie zmenu objemu $\\Delta V$." },
+                    { text: "$V = V_1(1 + \\alpha \\Delta t)$", isCorrect: false, feedback: "Pri objemovej rozťažnosti sa používa súčiniteľ objemovej rozťažnosti $\\beta$ (kde $\\beta \\approx 3\\alpha$), nie dĺžkovej $\\alpha$." }
+                ]
+            }
+        ];
+
+        // ==========================================
+        // LOGIKA APLIKÁCIE
+        // ==========================================
+        let currentScore = 0;
+        let answeredCount = 0;
+        const totalQuestions = questionsData.length;
+
+        // Fisher-Yates Shuffle
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function initQuiz() {
+            const container = document.getElementById('quiz-container');
+            
+            // 1. Náhodné poradie otázok
+            shuffleArray(questionsData);
+
+            questionsData.forEach((q, index) => {
+                // 2. Náhodné poradie odpovedí pre každú otázku
+                let currentOptions = [...q.options];
+                shuffleArray(currentOptions);
+
+                const qDiv = document.createElement('div');
+                qDiv.className = 'question-container';
+                qDiv.id = `q-${index}`;
+
+                // Vytvorenie HTML pre otázku
+                let optionsHtml = '';
+                currentOptions.forEach((opt, i) => {
+                    // Escapovanie úvodzoviek pre bezpečné vloženie do onclick
+                    const safeFeedback = opt.feedback.replace(/"/g, '&quot;').replace(/'/g, "\\'");
+                    
+                    optionsHtml += `
+                        <button class="option" 
+                            onclick="handleAnswer(this, ${opt.isCorrect}, '${safeFeedback}', ${index})"
+                            data-answered="false">
+                            ${opt.text}
+                        </button>
+                    `;
+                });
+
+                qDiv.innerHTML = `
+                    <div class="question-text">${index + 1}. ${q.text}</div>
+                    <div class="options-grid">${optionsHtml}</div>
+                `;
+                container.appendChild(qDiv);
+            });
+            
+            // Re-render MathJax pre statický obsah
+            if (window.MathJax) {
+                window.MathJax.typesetPromise();
+            }
+        }
+
+        function handleAnswer(btn, isCorrect, feedback, qIndex) {
+            const parent = btn.parentElement;
+            if (parent.dataset.locked === "true") return;
+            
+            parent.dataset.locked = "true"; // Zamkneme otázku
+            
+            const buttons = parent.querySelectorAll('.option');
+            buttons.forEach(b => b.classList.add('disabled'));
+
+            if (isCorrect) {
+                btn.classList.add('correct');
+                currentScore++;
+            } else {
+                btn.classList.add('incorrect');
+                showModal(feedback);
+            }
+
+            // Ukážeme správnu odpoveď, ak bola vybratá nesprávna
+            buttons.forEach(b => {
+                // Hľadáme tlačidlo, ktoré má v onclick 'true' (isCorrect)
+                // Poznámka: Toto je zjednodušená kontrola pre tento konkrétny generátor
+                if (b.getAttribute('onclick').includes('true,')) {
+                    b.classList.add('correct');
+                }
+            });
+
+            answeredCount++;
+            if (answeredCount === totalQuestions) {
+                showResults();
+            }
+        }
+
+        function showModal(text) {
+            if (!text) return;
+            document.getElementById('feedbackText').innerHTML = text;
+            document.getElementById('feedbackModal').style.display = 'block';
+            // UPDATE: Re-render MathJax pre dynamický obsah v modále
+            if (window.MathJax) {
+                window.MathJax.typesetPromise();
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('feedbackModal').style.display = 'none';
+        }
+
+        function showResults() {
+            const percentage = Math.round((currentScore / totalQuestions) * 100);
+            let grade = '';
+            if (percentage >= 90) grade = 'Výborný';
+            else if (percentage >= 80) grade = 'Veľmi dobrý';
+            else if (percentage >= 70) grade = 'Dobrý';
+            else if (percentage >= 60) grade = 'Dostačujúci';
+            else grade = 'Nedostačujúci';
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `
+                Výsledok: ${currentScore} / ${totalQuestions} (${percentage}%)<br>
+                <span style="color: #2c3e50; font-size: 1.1em">${grade}</span>
+            `;
+            resultsDiv.scrollIntoView({behavior: "smooth"});
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('feedbackModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        initQuiz();
+    </script>
+</body>
+</html>
