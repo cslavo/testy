@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tepelné deje s ideálnym plynom</title>
+    <!-- MathJax pre vzorce -->
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background: #f0f2f5; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 10px; }
+        h2 { text-align: center; color: #7f8c8d; font-size: 1rem; margin-top: 0; margin-bottom: 30px; font-weight: normal; }
+        
+        .question-container { background: white; padding: 25px; margin-bottom: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e1e4e8; }
+        .question-text { font-weight: 700; font-size: 1.15em; margin-bottom: 20px; color: #2c3e50; }
+        
+        .option { display: block; width: 100%; padding: 15px 20px; margin: 10px 0; background: #fff; border: 2px solid #e9ecef; border-radius: 8px; cursor: pointer; text-align: left; transition: all 0.2s; font-size: 1em; color: #495057; position: relative; }
+        .option:hover:not(.disabled) { background: #f8f9fa; border-color: #3498db; transform: translateY(-1px); }
+        .option:active:not(.disabled) { transform: translateY(0); }
+        
+        /* Stavy odpovedí */
+        .option.correct { background: #d4edda !important; border-color: #28a745 !important; color: #155724; cursor: default; }
+        .option.incorrect { background: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; cursor: default; }
+        .option.disabled { cursor: default; opacity: 0.7; pointer-events: none; }
+        
+        /* Results */
+        .results { text-align: center; padding: 30px; margin-top: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none; animation: slideUp 0.5s ease; }
+        .score-circle { display: inline-flex; align-items: center; justify-content: center; width: 120px; height: 120px; border-radius: 50%; background: #2c3e50; color: white; font-size: 2.5em; font-weight: bold; margin-bottom: 15px; }
+        
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; backdrop-filter: blur(2px); animation: fadeIn 0.2s; }
+        .modal-content { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 16px; max-width: 500px; width: 90%; box-shadow: 0 15px 35px rgba(0,0,0,0.25); border-top: 5px solid #dc3545; }
+        .modal-header { font-weight: 800; color: #dc3545; margin-bottom: 15px; font-size: 1.2em; display: flex; align-items: center; gap: 10px; }
+        .modal-body { margin-bottom: 25px; color: #555; line-height: 1.6; }
+        .btn-close { background: #2c3e50; color: white; border: none; padding: 12px 30px; border-radius: 6px; cursor: pointer; font-size: 1em; font-weight: 600; transition: background 0.2s; width: 100%; }
+        .btn-close:hover { background: #34495e; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <h1>TEPELNÉ DEJE S IDEÁLNYM PLYNOM</h1>
+    <h2>Interaktívny test (podľa P. Benušku)</h2>
+    
+    <div id="quiz-container"></div>
+    <div id="results" class="results"></div>
+
+    <!-- Modal pre feedback -->
+    <div class="modal-overlay" id="feedbackModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>⚠️ Nesprávna odpoveď</span>
+            </div>
+            <div class="modal-body" id="feedbackText"></div>
+            <button class="btn-close" onclick="closeModal()">Rozumiem</button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // DÁTA TESTU (EXTRAHOVANÉ Z PDF)
+        // ==========================================
+        const questionsData = [
+            {
+                text: "Podľa Boyle-Mariottovho zákona pri izotermickom deji s ideálnym plynom so stálou hmotnosťou:",
+                options: [
+                    { 
+                        text: "je súčin tlaku a objemu plynu stály,", 
+                        isCorrect: true, 
+                        feedback: "" 
+                    },
+                    { 
+                        text: "je súčin teploty a objemu plynu stály,", 
+                        isCorrect: false, 
+                        feedback: "Toto neplatí. Pri izotermickom deji je teplota konštantná, takže sa mení tlak a objem tak, že ich súčin je stály ($pV = \\text{konšt}$)." 
+                    },
+                    { 
+                        text: "je podiel tlaku a objemu plynu stály,", 
+                        isCorrect: false, 
+                        feedback: "Nesprávne. Podiel tlaku a objemu nie je pri izotermickom deji stály. Stály je ich súčin." 
+                    },
+                    { 
+                        text: "je podiel teploty a objemu plynu stály,", 
+                        isCorrect: false, 
+                        feedback: "Toto nie je správne znenie zákona. Pri izotermickom deji sa nemení teplota." 
+                    }
+                ]
+            },
+            {
+                text: "Podľa Charlovho zákona pri izochorickom deji s ideálnym plynom so stálou hmotnosťou:",
+                options: [
+                    { 
+                        text: "je tlak plynu priamo úmerný jeho termodynamickej teplote,", 
+                        isCorrect: true, 
+                        feedback: "" 
+                    },
+                    { 
+                        text: "je objem plynu priamo úmerný jeho termodynamickej teplote,", 
+                        isCorrect: false, 
+                        feedback: "Toto je definícia izobarického deja (Gay-Lussacov zákon), nie izochorického." 
+                    },
+                    { 
+                        text: "je teplota plynu priamo úmerná jeho objemu,", 
+                        isCorrect: false, 
+                        feedback: "Pri izochorickom deji je objem konštantný, takže sa nemôže meniť priamo úmerne s teplotou." 
+                    },
+                    { 
+                        text: "je tlak plynu nepriamo úmerný jeho termodynamickej teplote.", 
+                        isCorrect: false, 
+                        feedback: "Nesprávne. Pri zohrievaní plynu v uzavretej nádobe (stály objem) tlak rastie, čiže ide o priamu úmeru." 
+                    }
+                ]
+            },
+            {
+                text: "Podľa Gay-Lussacovho zákona pri izobarickom deji s ideálnym plynom so stálou hmotnosťou:",
+                options: [
+                    { 
+                        text: "je objem plynu priamo úmerný jeho termodynamickej teplote.", 
+                        isCorrect: true, 
+                        feedback: "" 
+                    },
+                    { 
+                        text: "je tlak plynu priamo úmerný jeho termodynamickej teplote,", 
+                        isCorrect: false, 
+                        feedback: "Toto platí pre izochorický dej (stály objem), nie pre izobarický." 
+                    },
+                    { 
+                        text: "je teplota plynu priamo úmerná jeho objemu,", 
+                        isCorrect: false, 
+                        feedback: "Hoci matematicky podobné, fyzikálna definícia hovorí o závislosti objemu od teploty ($V \\sim T$). Formulácia v správnej odpovedi je presnejšia." 
+                    },
+                    { 
+                        text: "je objem plynu nepriamo úmerný jeho termodynamickej teplote,", 
+                        isCorrect: false, 
+                        feedback: "Nesprávne. Ak plyn pri stálom tlaku zohrievame, jeho objem sa zväčšuje (priama úmera), nezmenšuje sa." 
+                    }
+                ]
+            },
+            {
+                text: "Teplo prijaté ideálnym plynom pri izotermickom deji s ideálnym plynom so stálou hmotnosťou:",
+                options: [
+                    { 
+                        text: "sa rovná práci, ktorú plyn pri tomto deji vykoná,", 
+                        isCorrect: true, 
+                        feedback: "" 
+                    },
+                    { 
+                        text: "sa rovná úbytku jeho vnútornej energie,", 
+                        isCorrect: false, 
+                        feedback: "Pri izotermickom deji je teplota stála, preto sa vnútorná energia nemení ($\\Delta U = 0$)." 
+                    },
+                    { 
+                        text: "sa rovná súčtu prírastku jeho vnútornej energie a práce, ktorú plyn vykoná,", 
+                        isCorrect: false, 
+                        feedback: "Toto je všeobecné znenie 1. termodynamického zákona, ale pri izotermickom deji je prírastok vnútornej energie nulový." 
+                    },
+                    { 
+                        text: "sa rovná prírastku jeho vnútornej energie.", 
+                        isCorrect: false, 
+                        feedback: "Toto platí pre izochorický dej. Pri izotermickom deji sa všetko teplo spotrebuje na prácu." 
+                    }
+                ]
+            },
+            {
+                text: "Teplo prijaté ideálnym plynom pri izobarickom deji s ideálnym plynom so stálou hmotnosťou:",
+                options: [
+                    { 
+                        text: "sa rovná súčtu prírastku jeho vnútornej energie a práce, ktorú plyn vykoná,", 
+                        isCorrect: true, 
+                        feedback: "" 
+                    },
+                    { 
+                        text: "sa rovná úbytku jeho vnútornej energie,", 
+                        isCorrect: false, 
+                        feedback: "Prijatím tepla sa vnútorná energia zvyšuje, nie znižuje." 
+                    },
+                    { 
+                        text: "sa rovná práci, ktorú plyn pri tomto deji vykoná,", 
+                        isCorrect: false, 
+                        feedback: "Toto platí len pre izotermický dej. Pri izobarickom sa časť tepla spotrebuje aj na ohrev plynu (zvýšenie $U$)." 
+                    },
+                    { 
+                        text: "sa rovná prírastku jeho vnútornej energie.", 
+                        isCorrect: false, 
+                        feedback: "Toto platí len pre izochorický dej ($W=0$). Pri izobarickom sa plyn rozpína a koná aj prácu." 
+                    }
+                ]
+            },
+            {
+                text: "Teplo prijaté ideálnym plynom pri izochorickom deji s ideálnym plynom so stálou hmotnosťou:",
+                options: [
+                    { 
+                        text: "sa rovná prírastku jeho vnútornej energie.", 
+                        isCorrect: true, 
+                        feedback: "" 
+                    },
+                    { 
+                        text: "sa rovná úbytku jeho vnútornej energie,", 
+                        isCorrect: false, 
+                        feedback: "Ak plyn prijíma teplo, jeho vnútorná energia rastie, neklesá." 
+                    },
+                    { 
+                        text: "sa rovná súčtu prírastku jeho vnútornej energie a práce, ktorú plyn vykoná,", 
+                        isCorrect: false, 
+                        feedback: "Pri izochorickom deji je objem stály, preto plyn nekoná prácu ($W=0$). Člen práce tu teda nemá byť." 
+                    },
+                    { 
+                        text: "sa rovná práci, ktorú plyn pri tomto deji vykoná,", 
+                        isCorrect: false, 
+                        feedback: "Pri stálom objeme plyn nekoná prácu. Všetko teplo ide na zvýšenie teploty." 
+                    }
+                ]
+            }
+        ];
+
+        // ==========================================
+        // LOGIKA APLIKÁCIE
+        // ==========================================
+        let currentScore = 0;
+        let answeredCount = 0;
+        const totalQuestions = questionsData.length;
+
+        // Fisher-Yates Shuffle
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function initQuiz() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = '';
+            
+            // Náhodné poradie otázok
+            shuffleArray(questionsData);
+
+            questionsData.forEach((q, index) => {
+                // Náhodné poradie odpovedí
+                let currentOptions = [...q.options];
+                shuffleArray(currentOptions);
+
+                const qDiv = document.createElement('div');
+                qDiv.className = 'question-container';
+                qDiv.id = `q-${index}`;
+
+                // Vytvorenie HTML pre možnosti
+                let optionsHtml = '';
+                currentOptions.forEach((opt) => {
+                    const safeFeedback = opt.feedback.replace(/"/g, '&quot;');
+                    
+                    optionsHtml += `
+                        <button class="option" 
+                            onclick="handleAnswer(this, ${opt.isCorrect}, '${safeFeedback}')">
+                            ${opt.text}
+                        </button>
+                    `;
+                });
+
+                qDiv.innerHTML = `
+                    <div class="question-text">${index + 1}. ${q.text}</div>
+                    <div class="options-grid">${optionsHtml}</div>
+                `;
+                container.appendChild(qDiv);
+            });
+            
+            if (window.MathJax) {
+                window.MathJax.typesetPromise();
+            }
+        }
+
+        function handleAnswer(btn, isCorrect, feedback) {
+            const parent = btn.parentElement;
+            
+            // Ak už bolo odpovedané, ignoruj kliknutie
+            if (parent.dataset.locked === "true") return;
+            parent.dataset.locked = "true";
+            
+            // Nájdi všetky tlačidlá v tejto otázke
+            const buttons = parent.querySelectorAll('.option');
+            
+            // Vizuálne označenie
+            if (isCorrect) {
+                btn.classList.add('correct');
+                currentScore++;
+            } else {
+                btn.classList.add('incorrect');
+                showModal(feedback);
+                
+                // Nájdi a označ správnu odpoveď (tá, čo má v onclick 'true')
+                buttons.forEach(b => {
+                    if (b.getAttribute('onclick').includes('true,')) {
+                        b.classList.add('correct');
+                    }
+                });
+            }
+
+            // Deaktivuj všetky tlačidlá pre túto otázku
+            buttons.forEach(b => b.classList.add('disabled'));
+
+            answeredCount++;
+            if (answeredCount === totalQuestions) {
+                setTimeout(showResults, 800);
+            }
+        }
+
+        function showModal(text) {
+            if (!text) return;
+            document.getElementById('feedbackText').innerHTML = text;
+            document.getElementById('feedbackModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('feedbackModal').style.display = 'none';
+        }
+
+        function showResults() {
+            const percentage = Math.round((currentScore / totalQuestions) * 100);
+            let gradeText = '';
+            let gradeColor = '';
+
+            if (percentage >= 90) { gradeText = 'Výborný (1)'; gradeColor = '#28a745'; }
+            else if (percentage >= 75) { gradeText = 'Chválitebný (2)'; gradeColor = '#17a2b8'; }
+            else if (percentage >= 50) { gradeText = 'Dobrý (3)'; gradeColor = '#ffc107'; }
+            else if (percentage >= 30) { gradeText = 'Dostatočný (4)'; gradeColor = '#fd7e14'; }
+            else { gradeText = 'Nedostatočný (5)'; gradeColor = '#dc3545'; }
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `
+                <div class="score-circle">${currentScore}/${totalQuestions}</div>
+                <div style="font-size: 1.5em; font-weight: bold; margin-bottom: 10px;">Úspešnosť: ${percentage}%</div>
+                <div style="font-size: 1.2em; color: ${gradeColor}; font-weight: bold;">${gradeText}</div>
+                <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 25px; background: #2c3e50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em;">Spustiť znovu</button>
+            `;
+            
+            resultsDiv.scrollIntoView({ behavior: "smooth" });
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('feedbackModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        initQuiz();
+    </script>
+</body>
+</html>
