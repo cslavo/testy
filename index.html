@@ -147,6 +147,44 @@
         .back-btn:hover {
             background: rgba(255,255,255,0.3);
         }
+        .refresh-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            background: rgba(255,255,255,0.1);
+            padding: 10px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: white;
+            font-size: 0.9rem;
+        }
+        .refresh-hint {
+            opacity: 0.85;
+        }
+        .refresh-hint kbd {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .refresh-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .refresh-btn:hover {
+            background: rgba(255,255,255,0.35);
+        }
     </style>
 </head>
 <body>
@@ -154,6 +192,11 @@
         <header>
             <h1>Testy</h1>
         </header>
+
+        <div class="refresh-bar">
+            <span class="refresh-hint">Nevidíte nový obsah? Skúste <kbd>Ctrl+F5</kbd> alebo kliknite na tlačidlo</span>
+            <button class="refresh-btn" onclick="forceRefresh()">🔄 Obnoviť zoznam</button>
+        </div>
 
         <div id="breadcrumb" class="breadcrumb" style="display: none;"></div>
 
@@ -177,6 +220,31 @@
 
         // Cache pre načítané adresáre
         const cache = new Map();
+
+        // Čas posledného načítania cache (pre automatické obnovenie)
+        let lastCacheTime = Date.now();
+        const CACHE_MAX_AGE = 60 * 60 * 1000; // 1 hodina v milisekundách
+
+        // Aktuálna zobrazená cesta
+        let currentPath = '';
+
+        // Vymaže cache a znovu načíta aktuálny obsah
+        function forceRefresh() {
+            cache.clear();
+            lastCacheTime = Date.now();
+            showContent(currentPath);
+        }
+
+        // Skontroluje či je cache stará a ak áno, vymaže ju
+        function checkCacheAge() {
+            const now = Date.now();
+            if (now - lastCacheTime > CACHE_MAX_AGE) {
+                cache.clear();
+                lastCacheTime = now;
+                return true; // cache bola obnovená
+            }
+            return false;
+        }
 
         // Načítaj obsah pri štarte
         document.addEventListener('DOMContentLoaded', () => {
@@ -254,6 +322,12 @@
         }
 
         async function showContent(path) {
+            // Ulož aktuálnu cestu
+            currentPath = path;
+
+            // Skontroluj či je cache stará - ak áno, automaticky ju obnoví
+            checkCacheAge();
+
             updateBreadcrumb(path);
             contentEl.innerHTML = '<div class="loading">Načítavam...</div>';
 
