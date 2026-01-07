@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elektrický náboj - Test A</title>
+    <title>Interaktívny Test A</title>
     <!-- MathJax pre vzorce -->
     <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
     <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
@@ -14,15 +14,10 @@
         .question-text { font-weight: 600; font-size: 1.1em; margin-bottom: 15px; color: #2c3e50; }
         .option { display: block; width: 100%; padding: 12px 15px; margin: 8px 0; background: #fff; border: 2px solid #e0e0e0; border-radius: 6px; cursor: pointer; text-align: left; transition: all 0.2s; font-size: 0.95em; box-sizing: border-box; }
         .option:hover:not(.disabled) { background: #f0f7ff; border-color: #2196F3; }
-        
-        /* Stavy odpovedí */
         .option.correct { background: #d4edda !important; border-color: #28a745 !important; color: #155724; cursor: default; }
         .option.incorrect { background: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; cursor: default; }
         .option.disabled { cursor: default; opacity: 0.7; pointer-events: none; }
-        
         .results { text-align: center; padding: 20px; margin-top: 20px; font-size: 1.2em; font-weight: bold; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: none; }
-        
-        /* Modal */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; animation: fadeIn 0.3s; }
         .modal-content { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .modal-header { font-weight: bold; color: #dc3545; margin-bottom: 10px; font-size: 1.1em; }
@@ -38,7 +33,6 @@
     <div id="quiz-container"></div>
     <div id="results" class="results"></div>
 
-    <!-- Modal pre feedback -->
     <div class="modal-overlay" id="feedbackModal">
         <div class="modal-content">
             <div class="modal-header">Nesprávna odpoveď</div>
@@ -48,87 +42,99 @@
     </div>
 
     <script>
-        // ==========================================
-        // DÁTA TESTU A (UNIKÁTNA SADA)
-        // ==========================================
         const questionsData = [
             {
-                text: "Aká je značka veličiny elektrický náboj a jeho základná jednotka?",
+                text: "Aká je značka fyzikálnej veličiny elektrický náboj a jej hlavná jednotka?",
                 options: [
-                    { text: "Značka Q, jednotka coulomb (C)", isCorrect: true, feedback: "" },
-                    { text: "Značka I, jednotka ampér (A)", isCorrect: false, feedback: "I je značka pre elektrický prúd a ampér je jeho jednotka." },
-                    { text: "Značka U, jednotka volt (V)", isCorrect: false, feedback: "U je značka pre elektrické napätie a volt je jeho jednotka." },
-                    { text: "Značka E, jednotka joule (J)", isCorrect: false, feedback: "E sa často používa pre energiu, ktorej jednotkou je joule." }
+                    { text: "Značka $Q$, jednotka coulomb (C)", isCorrect: true, feedback: "" },
+                    { text: "Značka $I$, jednotka ampér (A)", isCorrect: false, feedback: "Značka $I$ a jednotka ampér patria elektrickému prúdu." },
+                    { text: "Značka $U$, jednotka volt (V)", isCorrect: false, feedback: "Značka $U$ a jednotka volt patria elektrickému napätiu." },
+                    { text: "Značka $E$, jednotka newton (N)", isCorrect: false, feedback: "Newton je jednotka sily, nie elektrického náboja." }
                 ]
             },
             {
-                text: "Ako na seba silovo pôsobia dve telesá so <b>súhlasnými</b> elektrickými nábojmi (napr. plus a plus)?",
+                text: "Ako na seba pôsobia dve telesá, ktoré sú nabité súhlasným elektrickým nábojom (napríklad obe kladne)?",
                 options: [
                     { text: "Navzájom sa odpudzujú", isCorrect: true, feedback: "" },
-                    { text: "Navzájom sa priťahujú", isCorrect: false, feedback: "Priťahujú sa len telesá s nesúhlasnými nábojmi (plus a mínus)." },
-                    { text: "Nepôsobia na seba žiadnou silou", isCorrect: false, feedback: "Elektricky nabité telesá na seba vždy silovo pôsobia." },
-                    { text: "Najprv sa pritiahnu a potom vybuchnú", isCorrect: false, feedback: "Fyzikálne zákony hovoria o odpudzovaní súhlasných nábojov, nie o výbuchu." }
+                    { text: "Navzájom sa priťahujú", isCorrect: false, feedback: "Priťahujú sa iba telesá s nesúhlasnými nábojmi (plus a mínus)." },
+                    { text: "Sú k sebe ľahostajné (nepôsobia silou)", isCorrect: false, feedback: "Elektricky nabité telesá na seba vždy pôsobia silou (buď príťažlivou alebo odpudivou)." },
+                    { text: "Najprv sa pritiahnu a potom odpudia", isCorrect: false, feedback: "Súhlasné náboje (plus-plus alebo mínus-mínus) sa trvalo odpudzujú." }
                 ]
             },
             {
-                text: "Čo sa nachádza v <b>jadre</b> atómu z hľadiska elektrického náboja?",
+                text: "Ktorá častica v atóme je nositeľom kladného elektrického náboja?",
                 options: [
-                    { text: "Protóny, ktoré sú nositeľmi kladného náboja", isCorrect: true, feedback: "" },
-                    { text: "Elektróny, ktoré sú nositeľmi záporného náboja", isCorrect: false, feedback: "Elektróny sa nachádzajú v elektrónovom obale, nie v jadre." },
-                    { text: "Iba neutróny bez náboja", isCorrect: false, feedback: "V jadre sú okrem neutrónov aj protóny, ktoré majú kladný náboj." },
-                    { text: "Zmes kladných a záporných iónov", isCorrect: false, feedback: "Jadro atómu obsahuje protóny a neutróny, ióny sú celé atómy s nábojom." }
+                    { text: "Protón", isCorrect: true, feedback: "" },
+                    { text: "Elektrón", isCorrect: false, feedback: "Elektrón je nositeľom záporného elektrického náboja." },
+                    { text: "Neutrón", isCorrect: false, feedback: "Neutrón je bez elektrického náboja." },
+                    { text: "Ión", isCorrect: false, feedback: "Ión je celý atóm, ktorý získal alebo stratil elektróny, nie elementárna častica v jadre." }
                 ]
             },
             {
-                text: "Ako vznikne z neutrálneho atómu <b>kladný ión</b>?",
+                text: "Čo sa stane, ak ebonitovú tyč trieme textilom (vlnou)?",
                 options: [
-                    { text: "Odpútaním elektrónov z obalu", isCorrect: true, feedback: "" },
-                    { text: "Pripojením elektrónov k obalu", isCorrect: false, feedback: "Ak sa pripojí elektrón, vznikne záporný ión (anión), lebo preváži záporný náboj." },
-                    { text: "Pridaním protónu do jadra", isCorrect: false, feedback: "Zmena počtu protónov v jadre by znamenala zmenu prvku (jadrová reakcia), bežne sa ióny tvoria pohybom elektrónov." },
-                    { text: "Rozbitím atómu na dve polovice", isCorrect: false, feedback: "Ióny vznikajú zmenou počtu elektrónov v obale, nie štiepením atómu." }
+                    { text: "Ebonit prijme elektróny a nabije sa záporne", isCorrect: true, feedback: "" },
+                    { text: "Ebonit stratí elektróny a nabije sa kladne", isCorrect: false, feedback: "Ebonit má tendenciu prijímať elektróny, nie ich strácať." },
+                    { text: "Ebonit prijme protóny a nabije sa kladne", isCorrect: false, feedback: "Protóny sú pevne viazané v jadre a pri trení sa neprenášajú." },
+                    { text: "Ebonit zostane elektricky neutrálny", isCorrect: false, feedback: "Trením dochádza k prenosu náboja, takže nezostane neutrálny." }
                 ]
             },
             {
-                text: "Čo platí o <b>vodičoch</b>?",
+                text: "Aká je hodnota elementárneho elektrického náboja $e$?",
                 options: [
-                    { text: "Sú to látky, v ktorých sa náboj ľahko premiestňuje", isCorrect: true, feedback: "" },
-                    { text: "Sú to látky, v ktorých sa náboje nemôžu premiestňovať", isCorrect: false, feedback: "Toto je definícia izolantov." },
-                    { text: "Sú to látky, ktoré nemajú žiadne elektróny", isCorrect: false, feedback: "Všetky látky majú elektróny, ale vodiče majú voľné elektróny umožňujúce pohyb náboja." },
-                    { text: "Sú to výlučne kvapalné látky", isCorrect: false, feedback: "Vodiče sú často kovy (pevné látky), hoci existujú aj vodivé kvapaliny." }
+                    { text: "$1{,}602 \\cdot 10^{-19}$ C", isCorrect: true, feedback: "" },
+                    { text: "$1{,}602 \\cdot 10^{19}$ C", isCorrect: false, feedback: "Exponent musí byť záporný ($-19$), pretože ide o veľmi malú hodnotu." },
+                    { text: "$3{,}14 \\cdot 10^{-9}$ C", isCorrect: false, feedback: "Toto nie je správna hodnota elementárneho náboja." },
+                    { text: "$9{,}81$ C", isCorrect: false, feedback: "Toto je hodnota tiažového zrýchlenia ($g$), nie náboja." }
                 ]
             },
             {
-                text: "Čo sa stane, ak <b>sklenenú tyč</b> trieme kožou?",
+                text: "Čo sú to vodiče?",
                 options: [
-                    { text: "Sklo stratí elektróny a nabije sa kladne", isCorrect: true, feedback: "" },
-                    { text: "Sklo prijme elektróny a nabije sa záporne", isCorrect: false, feedback: "Záporne sa nabíja ebonit pri trení textilom." },
-                    { text: "Sklo stratí protóny a nabije sa záporne", isCorrect: false, feedback: "Protóny sú pevne viazané v jadre, pri trení sa premiestňujú iba elektróny." },
-                    { text: "Nič sa nestane, sklo je izolant", isCorrect: false, feedback: "Aj izolanty sa dajú na povrchu zelektrizovať trením." }
+                    { text: "Látky, v ktorých sa elektrický náboj ľahko premiestňuje", isCorrect: true, feedback: "" },
+                    { text: "Látky, v ktorých sa náboje nemôžu premiestňovať", isCorrect: false, feedback: "Toto je definícia izolantov, nie vodičov." },
+                    { text: "Látky, ktoré nemajú žiadne elektróny", isCorrect: false, feedback: "Každá látka obsahuje elektróny, ale vodiče majú voľné elektróny." },
+                    { text: "Látky, ktoré sa nedajú zelektrizovať trením", isCorrect: false, feedback: "Aj vodiče sa dajú zelektrizovať, ak sú odizolované." }
                 ]
             },
             {
-                text: "Aká je hodnota <b>elementárneho elektrického náboja</b> $e$?",
+                text: "Ako vznikne z neutrálneho atómu záporný ión?",
                 options: [
-                    { text: "$1,602 \\cdot 10^{-19} C$", isCorrect: true, feedback: "" },
-                    { text: "$1,602 \\cdot 10^{19} C$", isCorrect: false, feedback: "Kladný exponent by znamenal obrovský náboj. Elementárny náboj je veľmi malý ($10^{-19}$)." },
-                    { text: "$6,24 \\cdot 10^{18} C$", isCorrect: false, feedback: "Toto číslo vyjadruje počet elementárnych nábojov, ktoré tvoria 1 Coulomb, nie veľkosť jedného náboja." },
-                    { text: "$3,14 \\cdot 10^{-9} C$", isCorrect: false, feedback: "Nesprávna hodnota." }
+                    { text: "Pripojením elektrónov k obalu atómu", isCorrect: true, feedback: "" },
+                    { text: "Odpútaním elektrónov z obalu atómu", isCorrect: false, feedback: "Ak atóm stratí elektróny, prevládne kladný náboj jadra a vznikne kladný ión." },
+                    { text: "Pridaním protónov do jadra", isCorrect: false, feedback: "Počet protónov v jadre sa pri bežných elektrických dejoch nemení." },
+                    { text: "Zmenou neutrónov na elektróny", isCorrect: false, feedback: "Takáto premena pri vzniku iónov nenastáva." }
                 ]
             },
             {
-                text: "Na zistenie prítomnosti elektrického náboja používame prístroj, ktorý po dotyku nabitým telesom ukáže výchylku. Ako sa nazýva?",
+                text: "Prečo je atóm navonok elektricky neutrálny?",
                 options: [
-                    { text: "Elektromer (elektroskop)", isCorrect: true, feedback: "" },
-                    { text: "Voltmeter", isCorrect: false, feedback: "Voltmeter meria elektrické napätie." },
-                    { text: "Ampérmeter", isCorrect: false, feedback: "Ampérmeter meria veľkosť elektrického prúdu." },
-                    { text: "Barometer", isCorrect: false, feedback: "Barometer slúži na meranie atmosférického tlaku." }
+                    { text: "Lebo celkový kladný náboj protónov sa rovná celkovému zápornému náboju elektrónov", isCorrect: true, feedback: "" },
+                    { text: "Lebo neobsahuje žiadne nabité častice", isCorrect: false, feedback: "Atóm obsahuje nabité častice (protóny a elektróny), ale ich účinky sa navzájom rušia." },
+                    { text: "Lebo neutróny v jadre neutralizujú náboj elektrónov", isCorrect: false, feedback: "Neutróny nemajú náboj, neutralita je daná rovnováhou medzi protónmi a elektrónmi." },
+                    { text: "Lebo elektróny majú kladný aj záporný náboj súčasne", isCorrect: false, feedback: "Elektróny majú výhradne záporný náboj." }
+                ]
+            },
+            {
+                text: "Na čo slúži prístroj zvaný elektromer?",
+                options: [
+                    { text: "Na zistenie prítomnosti elektrického náboja", isCorrect: true, feedback: "" },
+                    { text: "Na meranie dĺžky elektrických vodičov", isCorrect: false, feedback: "Názov môže miasť, ale slúži na indikáciu náboja (výchylkou ručičky)." },
+                    { text: "Na výrobu elektrického náboja", isCorrect: false, feedback: "Elektromer náboj nevyrába, iba ho deteguje." },
+                    { text: "Na váženie atómov", isCorrect: false, feedback: "Elektromer reaguje na elektrostatické sily, nie na hmotnosť." }
+                ]
+            },
+            {
+                text: "Prečo sa v kovoch náboj ľahko premiestňuje?",
+                options: [
+                    { text: "Pretože obsahujú voľné elektróny, ktoré sa ľahko odpútajú od jadier", isCorrect: true, feedback: "" },
+                    { text: "Pretože kovy nemajú žiadne atómové jadrá", isCorrect: false, feedback: "Kovy majú kryštalickú mriežku z jadier atómov." },
+                    { text: "Pretože elektróny sú v kovoch veľmi pevne viazané", isCorrect: false, feedback: "Opak je pravdou – najvzdialenejšie elektróny sú viazané malými silami." },
+                    { text: "Pretože kovy sú vždy kvapalné", isCorrect: false, feedback: "Väčšina kovov je pevných, vodivosť spôsobuje štruktúra elektrónového obalu, nie skupenstvo." }
                 ]
             }
         ];
 
-        // ==========================================
-        // LOGIKA APLIKÁCIE (UNIVERSAL SCRIPT)
-        // ==========================================
         let currentScore = 0;
         let answeredCount = 0;
         const totalQuestions = questionsData.length;
@@ -155,14 +161,10 @@
                 let optionsHtml = '';
                 currentOptions.forEach((opt) => {
                     const safeFeedback = opt.feedback.replace(/"/g, '&quot;');
-                    
-                    // Zistenie či je odpoveď správna pre neskoršie vizuálne označenie (hack pre jednoduchosť bez Reactu)
-                    const isCorrectBool = opt.isCorrect; 
-                    
                     optionsHtml += `
                         <button class="option" 
-                            onclick="handleAnswer(this, ${isCorrectBool}, '${safeFeedback}')"
-                            data-correct="${isCorrectBool}">
+                            onclick="handleAnswer(this, ${opt.isCorrect}, '${safeFeedback}', ${index})"
+                            data-answered="false">
                             ${opt.text}
                         </button>
                     `;
@@ -180,27 +182,28 @@
             }
         }
 
-        function handleAnswer(btn, isCorrect, feedback) {
+        function handleAnswer(btn, isCorrect, feedback, qIndex) {
             const parent = btn.parentElement;
             if (parent.dataset.locked === "true") return;
             
             parent.dataset.locked = "true";
             
             const buttons = parent.querySelectorAll('.option');
-            buttons.forEach(b => {
-                b.classList.add('disabled');
-                if (b.dataset.correct === "true") {
-                    b.classList.add('correct');
-                }
-            });
+            buttons.forEach(b => b.classList.add('disabled'));
 
             if (isCorrect) {
-                // btn už má triedu correct z cyklu vyššie
+                btn.classList.add('correct');
                 currentScore++;
             } else {
                 btn.classList.add('incorrect');
                 showModal(feedback);
             }
+
+             buttons.forEach(b => {
+                if (b.getAttribute('onclick').includes('true,')) {
+                    b.classList.add('correct');
+                }
+            });
 
             answeredCount++;
             if (answeredCount === totalQuestions) {
@@ -212,6 +215,9 @@
             if (!text) return;
             document.getElementById('feedbackText').innerHTML = text;
             document.getElementById('feedbackModal').style.display = 'block';
+            if (window.MathJax) {
+                window.MathJax.typesetPromise();
+            }
         }
 
         function closeModal() {
