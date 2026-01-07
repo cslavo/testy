@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elektrický náboj a jeho vlastnosti - Test</title>
+    <!-- MathJax pre vzorce -->
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.5; background: #f9f9f9; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+        .question-container { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .question-text { font-weight: 600; font-size: 1.1em; margin-bottom: 15px; color: #2c3e50; }
+        .option { display: block; width: 100%; padding: 12px 15px; margin: 8px 0; background: #fff; border: 2px solid #e0e0e0; border-radius: 6px; cursor: pointer; text-align: left; transition: all 0.2s; font-size: 0.95em; box-sizing: border-box; }
+        .option:hover:not(.disabled) { background: #f0f7ff; border-color: #2196F3; }
+        
+        /* Stavy odpovedí */
+        .option.correct { background: #d4edda !important; border-color: #28a745 !important; color: #155724; cursor: default; }
+        .option.incorrect { background: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; cursor: default; }
+        .option.disabled { cursor: default; opacity: 0.7; pointer-events: none; }
+        
+        .results { text-align: center; padding: 20px; margin-top: 20px; font-size: 1.2em; font-weight: bold; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: none; }
+        
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; animation: fadeIn 0.3s; }
+        .modal-content { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-header { font-weight: bold; color: #dc3545; margin-bottom: 10px; font-size: 1.1em; }
+        .modal-body { margin-bottom: 20px; color: #555; }
+        .btn-close { background: #2c3e50; color: white; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-size: 1em; }
+        .btn-close:hover { background: #1a252f; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <h1 id="testTitle">Elektrický náboj a jeho vlastnosti</h1>
+    <div id="quiz-container"></div>
+    <div id="results" class="results"></div>
+
+    <!-- Modal pre feedback -->
+    <div class="modal-overlay" id="feedbackModal">
+        <div class="modal-content">
+            <div class="modal-header">Nesprávna odpoveď</div>
+            <div class="modal-body" id="feedbackText"></div>
+            <button class="btn-close" onclick="closeModal()">Rozumiem</button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // DÁTA TESTU (Z PDF)
+        // ==========================================
+        const questionsData = [
+            {
+                text: "Elektrický náboj je:",
+                options: [
+                    { text: "základná vlastnosť častíc,", isCorrect: true, feedback: "" },
+                    { text: "silové pôsobenie medzi časticami,", isCorrect: false, feedback: "Silové pôsobenie je prejavom náboja, nie samotný náboj." },
+                    { text: "elektrón a protón,", isCorrect: false, feedback: "Elektrón a protón sú častice, ktoré majú elektrický náboj, nie samotný náboj." },
+                    { text: "náboj telesa, ktorý vznikne napríklad pri trení telies.", isCorrect: false, feedback: "Toto je popis vzniku zelektrizovaného telesa, definíciou náboja je vlastnosť častíc." }
+                ]
+            },
+            {
+                text: "Zelektrizované alebo elektricky nabité teleso je teleso:",
+                options: [
+                    { text: "teleso, ktoré má elektrický náboj,", isCorrect: true, feedback: "" },
+                    { text: "pripojené k elektrickej sieti,", isCorrect: false, feedback: "Teleso môže byť nabité aj trením (statická elektrina), nemusí byť v sieti." },
+                    { text: "ktoré sa dotýka povrchu Zeme,", isCorrect: false, feedback: "Dotyk so zemou teleso zvyčajne vybije (uzemní)." },
+                    { text: "ktoré sa nedotýka povrchu Zeme.", isCorrect: false, feedback: "To, či sa dotýka zeme, nie je definíciou nabitého telesa." }
+                ]
+            },
+            {
+                text: "Medzi vlastnosti elektrického náboja nepatrí:",
+                options: [
+                    { text: "elektrický náboj nie je deliteľný,", isCorrect: true, feedback: "" }, 
+                    { text: "existujú dva druhy elektrického náboja,", isCorrect: false, feedback: "Toto je pravdivé tvrdenie (kladný a záporný náboj)." },
+                    { text: "elektricky nabité teleso pôsobí silou na iné telesá,", isCorrect: false, feedback: "Toto je pravdivé tvrdenie (elektrická sila)." },
+                    { text: "elektrický náboj sa môže premiestňovať v telese.", isCorrect: false, feedback: "Toto je pravdivé tvrdenie (napr. vo vodičoch)." }
+                ]
+            },
+            {
+                text: "Dve telesá so súhlasnými elektrickými nábojmi:",
+                options: [
+                    { text: "sa navzájom odpudzujú,", isCorrect: true, feedback: "" },
+                    { text: "sa navzájom priťahujú,", isCorrect: false, feedback: "Priťahujú sa len telesá s opačnými (nesúhlasnými) nábojmi." },
+                    { text: "silovo na seba navzájom nepôsobia,", isCorrect: false, feedback: "Vždy na seba silovo pôsobia." },
+                    { text: "sa navzájom priťahujú alebo odpudzujú, v závislosti od ich vzdialenosti.", isCorrect: false, feedback: "Vzdialenosť mení veľkosť sily, ale nie to, či sa priťahujú alebo odpudzujú." }
+                ]
+            },
+            {
+                text: "Dve telesá s nesúhlasnými elektrickými nábojmi:",
+                options: [
+                    { text: "sa navzájom priťahujú,", isCorrect: true, feedback: "" },
+                    { text: "sa navzájom odpudzujú,", isCorrect: false, feedback: "Odpudzujú sa telesá s rovnakými (súhlasnými) nábojmi." },
+                    { text: "silovo na seba navzájom nepôsobia,", isCorrect: false, feedback: "Vždy na seba silovo pôsobia." },
+                    { text: "sa navzájom priťahujú alebo odpudzujú, v závislosti od ich vzdialenosti.", isCorrect: false, feedback: "Druh sily (príťažlivá/odpudivá) závisí od znamienka náboja, nie vzdialenosti." }
+                ]
+            },
+            {
+                text: "Atóm je navonok elektricky neutrálny, lebo:",
+                options: [
+                    { text: "má rovnaký počet elektrónov a protónov,", isCorrect: true, feedback: "" },
+                    { text: "jeho celkový elektrický náboj je rovný nule,", isCorrect: false, feedback: "Toto je výsledok neutrality, ale príčinou je rovnováha počtu častíc (možnosť C)." },
+                    { text: "má rovnaký počet protónov ako neutrónov,", isCorrect: false, feedback: "Počet neutrónov neovplyvňuje elektrický náboj atómu." },
+                    { text: "má rovnaký počet elektrónov a neutrónov.", isCorrect: false, feedback: "Rozhodujúci je pomer protónov (+) a elektrónov (-)." }
+                ]
+            },
+            {
+                text: "V kovoch elektróny tvoria elektrónový plyn, lebo:",
+                options: [
+                    { text: "sa ľahko odpútajú od jadier atómov,", isCorrect: true, feedback: "" },
+                    { text: "sú viazané v elektrónovom obale,", isCorrect: false, feedback: "Práve naopak, v kovoch sú viazané veľmi slabo." },
+                    { text: "pohybujú sa v elektrónovom obale ako molekuly plynu,", isCorrect: false, feedback: "Toto je popis ich pohybu, ale príčinou (lebo) je ich ľahké odpútanie sa od jadra." },
+                    { text: "plyny a kovy majú spoločné vlastnosti.", isCorrect: false, feedback: "Toto nie je fyzikálny dôvod existencie elektrónového plynu." }
+                ]
+            },
+            {
+                text: "Ióny z atómov vzniknú:",
+                options: [
+                    { text: "pridaním elektrónu do obalu atómu,", isCorrect: true, feedback: "" }, /* Anión */
+                    { text: "odobratím elektrónu z obalu atómu,", isCorrect: true, feedback: "" }, /* Katión - obe možnosti sú správne */
+                    { text: "spojením dvoch atómov,", isCorrect: false, feedback: "Spojením atómov vznikajú molekuly." },
+                    { text: "odtrhnutím elektrónového obalu od jadra atómu.", isCorrect: false, feedback: "Ión vzniká zmenou počtu elektrónov, nie úplným odtrhnutím celého obalu." }
+                ]
+            }
+        ];
+
+        // ==========================================
+        // LOGIKA APLIKÁCIE
+        // ==========================================
+        let currentScore = 0;
+        let answeredCount = 0;
+        const totalQuestions = questionsData.length;
+
+        // Fisher-Yates Shuffle
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function initQuiz() {
+            const container = document.getElementById('quiz-container');
+            
+            // 1. Náhodné poradie otázok
+            shuffleArray(questionsData);
+
+            questionsData.forEach((q, index) => {
+                // 2. Náhodné poradie odpovedí pre každú otázku
+                let currentOptions = [...q.options];
+                shuffleArray(currentOptions);
+
+                const qDiv = document.createElement('div');
+                qDiv.className = 'question-container';
+                qDiv.id = `q-${index}`;
+
+                // Vytvorenie HTML pre otázku
+                let optionsHtml = '';
+                currentOptions.forEach((opt, i) => {
+                    const safeFeedback = opt.feedback.replace(/"/g, '&quot;');
+                    
+                    optionsHtml += `
+                        <button class="option" 
+                            onclick="handleAnswer(this, ${opt.isCorrect}, '${safeFeedback}', ${index})"
+                            data-answered="false">
+                            ${opt.text}
+                        </button>
+                    `;
+                });
+
+                qDiv.innerHTML = `
+                    <div class="question-text">${index + 1}. ${q.text}</div>
+                    <div class="options-grid">${optionsHtml}</div>
+                `;
+                container.appendChild(qDiv);
+            });
+            
+            // Re-render MathJax pre statický obsah
+            if (window.MathJax) {
+                window.MathJax.typesetPromise();
+            }
+        }
+
+        function handleAnswer(btn, isCorrect, feedback, qIndex) {
+            const parent = btn.parentElement;
+            if (parent.dataset.locked === "true") return;
+            
+            parent.dataset.locked = "true"; // Zamkneme otázku
+            
+            const buttons = parent.querySelectorAll('.option');
+            buttons.forEach(b => b.classList.add('disabled'));
+
+            if (isCorrect) {
+                btn.classList.add('correct');
+                currentScore++;
+            } else {
+                btn.classList.add('incorrect');
+                showModal(feedback);
+            }
+
+            // Zvýraznenie všetkých správnych odpovedí (pre otázky s viac správnymi možnosťami)
+             buttons.forEach(b => {
+                if (b.getAttribute('onclick').includes('true,')) {
+                    b.classList.add('correct');
+                }
+            });
+
+            answeredCount++;
+            if (answeredCount === totalQuestions) {
+                showResults();
+            }
+        }
+
+        function showModal(text) {
+            if (!text) return;
+            document.getElementById('feedbackText').innerHTML = text;
+            document.getElementById('feedbackModal').style.display = 'block';
+            if (window.MathJax) {
+                window.MathJax.typesetPromise();
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('feedbackModal').style.display = 'none';
+        }
+
+        function showResults() {
+            const percentage = Math.round((currentScore / totalQuestions) * 100);
+            let grade = '';
+            if (percentage >= 90) grade = 'Výborný';
+            else if (percentage >= 80) grade = 'Veľmi dobrý';
+            else if (percentage >= 70) grade = 'Dobrý';
+            else if (percentage >= 60) grade = 'Dostačujúci';
+            else grade = 'Nedostačujúci';
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `
+                Výsledok: ${currentScore} / ${totalQuestions} (${percentage}%)<br>
+                <span style="color: #2c3e50; font-size: 1.1em">${grade}</span>
+            `;
+            resultsDiv.scrollIntoView({behavior: "smooth"});
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('feedbackModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        initQuiz();
+    </script>
+</body>
+</html>
