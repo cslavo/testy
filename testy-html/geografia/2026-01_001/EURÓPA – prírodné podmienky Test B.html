@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EURÓPA – prírodné podmienky - Test B</title>
+    <!-- MathJax pre vzorce -->
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.5; background: #f9f9f9; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+        .question-container { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .question-text { font-weight: 600; font-size: 1.1em; margin-bottom: 15px; color: #2c3e50; }
+        .option { display: block; width: 100%; padding: 12px 15px; margin: 8px 0; background: #fff; border: 2px solid #e0e0e0; border-radius: 6px; cursor: pointer; text-align: left; transition: all 0.2s; font-size: 0.95em; box-sizing: border-box; }
+        .option:hover:not(.disabled) { background: #f0f7ff; border-color: #2196F3; }
+        .option.correct { background: #d4edda !important; border-color: #28a745 !important; color: #155724; cursor: default; }
+        .option.incorrect { background: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; cursor: default; }
+        .option.disabled { cursor: default; opacity: 0.7; pointer-events: none; }
+        .results { text-align: center; padding: 20px; margin-top: 20px; font-size: 1.2em; font-weight: bold; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: none; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; animation: fadeIn 0.3s; }
+        .modal-content { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-header { font-weight: bold; color: #dc3545; margin-bottom: 10px; font-size: 1.1em; }
+        .modal-body { margin-bottom: 20px; color: #555; }
+        .btn-close { background: #2c3e50; color: white; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-size: 1em; }
+        .btn-close:hover { background: #1a252f; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <h1 id="testTitle">EURÓPA – prírodné podmienky (Test B)</h1>
+    <div id="quiz-container"></div>
+    <div id="results" class="results"></div>
+
+    <div class="modal-overlay" id="feedbackModal">
+        <div class="modal-content">
+            <div class="modal-header">Nesprávna odpoveď</div>
+            <div class="modal-body" id="feedbackText"></div>
+            <button class="btn-close" onclick="closeModal()">Rozumiem</button>
+        </div>
+    </div>
+
+    <script>
+        const questionsData = [
+            {
+                text: "Ktorá rieka tvorí súčasť východnej hranice medzi Európou a Áziou?",
+                options: [
+                    { text: "Ural", isCorrect: true, feedback: "" },
+                    { text: "Volga", isCorrect: false, feedback: "Volga sa vlieva do Kaspického mora, ale netvorí hranicu s Áziou." },
+                    { text: "Dneper", isCorrect: false, feedback: "Dneper tečie cez Východoeurópsku nížinu, ďaleko od hranice s Áziou." },
+                    { text: "Don", isCorrect: false, feedback: "Don nie je považovaný za hlavnú hranicu medzi svetadielmi." }
+                ]
+            },
+            {
+                text: "Ktoré ostrovy sú plošne najväčšie v Európe?",
+                options: [
+                    { text: "Britské ostrovy", isCorrect: true, feedback: "" },
+                    { text: "Sicília a Sardínia", isCorrect: false, feedback: "Tieto ostrovy v Stredozemnom mori sú menšie ako Britské ostrovy." },
+                    { text: "Špicbergy", isCorrect: false, feedback: "Špicbergy sú súostrovie v Severnom ľadovom oceáne, ale nie sú najväčšie." },
+                    { text: "Island", isCorrect: false, feedback: "Island je veľký ostrov, ale Britské ostrovy majú väčšiu rozlohu." }
+                ]
+            },
+            {
+                text: "Aká je priemerná nadmorská výška Európy?",
+                options: [
+                    { text: "340 m n.m.", isCorrect: true, feedback: "" },
+                    { text: "800 m n.m.", isCorrect: false, feedback: "To je príliš veľa, Európa je najnižší svetadiel." },
+                    { text: "150 m n.m.", isCorrect: false, feedback: "To by bolo príliš nízko." },
+                    { text: "520 m n.m.", isCorrect: false, feedback: "Nesprávny údaj, priemerná výška je 340 m n.m." }
+                ]
+            },
+            {
+                text: "Ktorá nížina je v Európe najrozsiahlejšia?",
+                options: [
+                    { text: "Východoeurópska nížina", isCorrect: true, feedback: "" },
+                    { text: "Panónska panva", isCorrect: false, feedback: "Panónska panva je významná, ale oveľa menšia." },
+                    { text: "Severonemecká nížina", isCorrect: false, feedback: "Severonemecká nížina je menšia ako Východoeurópska." },
+                    { text: "Pádska nížina", isCorrect: false, feedback: "Pádska nížina sa nachádza v Taliansku a je menšia." }
+                ]
+            },
+            {
+                text: "Ktorý vrch je najvyšší v Európe (Alpy)?",
+                options: [
+                    { text: "Mont Blanc (4807 m)", isCorrect: true, feedback: "" },
+                    { text: "Gerlachovský štít", isCorrect: false, feedback: "Gerlachovský štít (2655 m) je najvyšší v Karpatoch, nie v celej Európe." },
+                    { text: "Elbrus", isCorrect: false, feedback: "Elbrus sa nachádza na Kaukaze, často sa diskutuje o hranici, ale v texte je uvedený Mont Blanc ako najvyšší vrch." },
+                    { text: "Etna", isCorrect: false, feedback: "Etna je najvyššia sopka, nie najvyšší vrch." }
+                ]
+            },
+            {
+                text: "Čo je charakteristické pre subtropické (stredomorské) podnebie?",
+                options: [
+                    { text: "Teplé a suché letá, daždivé mierne zimy", isCorrect: true, feedback: "" },
+                    { text: "Daždivé letá a mrazivé zimy", isCorrect: false, feedback: "Toto je skôr opis mierneho kontinentálneho podnebia." },
+                    { text: "Celoročne dostatok zrážok a mierne teploty", isCorrect: false, feedback: "Toto je charakteristika oceánskeho podnebia." },
+                    { text: "Dlhé mrazivé zimy a krátke studené letá", isCorrect: false, feedback: "Toto platí pre subpolárne pásmo." }
+                ]
+            },
+            {
+                text: "Do ktorého mora sa vlieva rieka Dunaj?",
+                options: [
+                    { text: "Čierne more", isCorrect: true, feedback: "" },
+                    { text: "Severné more", isCorrect: false, feedback: "Do Severného mora sa vlieva napr. Rýn alebo Labe." },
+                    { text: "Kaspické more", isCorrect: false, feedback: "Do Kaspického mora sa vlieva Volga." },
+                    { text: "Jadranské more", isCorrect: false, feedback: "Do Jadranského mora tečie napr. rieka Pád." }
+                ]
+            },
+            {
+                text: "Ktoré jazero je najväčšie v Európe?",
+                options: [
+                    { text: "Ladožské jazero", isCorrect: true, feedback: "" },
+                    { text: "Balatón", isCorrect: false, feedback: "Balatón je najväčšie v strednej Európe, ale nie na celom kontinente." },
+                    { text: "Ženevské jazero", isCorrect: false, feedback: "Ženevské jazero v Alpách je menšie ako Ladožské." },
+                    { text: "Bodamské jazero", isCorrect: false, feedback: "Bodamské jazero je menšie ako Ladožské." }
+                ]
+            },
+            {
+                text: "Aký pôdny typ je typický pre tajgu (ihličnaté lesy)?",
+                options: [
+                    { text: "Podzoly", isCorrect: true, feedback: "" },
+                    { text: "Černozeme", isCorrect: false, feedback: "Černozeme sú úrodné pôdy v stepiach." },
+                    { text: "Kambizeme", isCorrect: false, feedback: "Kambizeme sa viažu na listnaté a zmiešané lesy." },
+                    { text: "Tundrové pôdy", isCorrect: false, feedback: "Tieto sú v pásme tundry (permafrost)." }
+                ]
+            },
+            {
+                text: "Ktorá rastlina je typická pre subtropické pásmo?",
+                options: [
+                    { text: "Korkový dub", isCorrect: true, feedback: "" },
+                    { text: "Smrek", isCorrect: false, feedback: "Smrek je typický pre tajgu a horské polohy." },
+                    { text: "Zakrpatená vŕba", isCorrect: false, feedback: "Zakrpatené dreviny sú typické pre tundru." },
+                    { text: "Buk", isCorrect: false, feedback: "Buk je typický pre mierne pásmo (listnaté lesy)." }
+                ]
+            },
+            {
+                text: "Ktorý živočích je typický pre studené pásmo a arktické ostrovy?",
+                options: [
+                    { text: "Ľadový medveď", isCorrect: true, feedback: "" },
+                    { text: "Medveď hnedý", isCorrect: false, feedback: "Medveď hnedý žije v tajge a zmiešaných lesoch." },
+                    { text: "Diviak", isCorrect: false, feedback: "Diviak žije v listnatých lesoch mierneho pásma." },
+                    { text: "Plazy a obojživelníky", isCorrect: false, feedback: "Tieto živočíchy potrebujú teplo, v studenom pásme nežijú." }
+                ]
+            },
+            {
+                text: "Čo je to fjord (napr. Sognefjord)?",
+                options: [
+                    { text: "Dlhý morský záliv vzniknutý činnosťou ľadovca", isCorrect: true, feedback: "" },
+                    { text: "Typ sopečného krátera", isCorrect: false, feedback: "Fjord nie je sopečného pôvodu." },
+                    { text: "Vysokohorský priesmyk", isCorrect: false, feedback: "Fjord je záliv naplnený morskou vodou." },
+                    { text: "Názov pre piesočnú dunu na pobreží", isCorrect: false, feedback: "Fjord je skalnatý záliv, nie duna." }
+                ]
+            }
+        ];
+
+        let currentScore = 0;
+        let answeredCount = 0;
+        const totalQuestions = questionsData.length;
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function initQuiz() {
+            const container = document.getElementById('quiz-container');
+            shuffleArray(questionsData);
+
+            questionsData.forEach((q, index) => {
+                let currentOptions = [...q.options];
+                shuffleArray(currentOptions);
+
+                const qDiv = document.createElement('div');
+                qDiv.className = 'question-container';
+                qDiv.id = `q-${index}`;
+
+                let optionsHtml = '';
+                currentOptions.forEach((opt, i) => {
+                    const safeFeedback = opt.feedback.replace(/"/g, '&quot;');
+                    optionsHtml += `
+                        <button class="option" 
+                            onclick="handleAnswer(this, ${opt.isCorrect}, '${safeFeedback}', ${index})"
+                            data-answered="false">
+                            ${opt.text}
+                        </button>
+                    `;
+                });
+
+                qDiv.innerHTML = `
+                    <div class="question-text">${index + 1}. ${q.text}</div>
+                    <div class="options-grid">${optionsHtml}</div>
+                `;
+                container.appendChild(qDiv);
+            });
+            
+            if (window.MathJax) window.MathJax.typesetPromise();
+        }
+
+        function handleAnswer(btn, isCorrect, feedback, qIndex) {
+            const parent = btn.parentElement;
+            if (parent.dataset.locked === "true") return;
+            parent.dataset.locked = "true";
+            
+            const buttons = parent.querySelectorAll('.option');
+            buttons.forEach(b => b.classList.add('disabled'));
+
+            if (isCorrect) {
+                btn.classList.add('correct');
+                currentScore++;
+            } else {
+                btn.classList.add('incorrect');
+                showModal(feedback);
+            }
+
+             buttons.forEach(b => {
+                if (b.getAttribute('onclick').includes('true,')) {
+                    b.classList.add('correct');
+                }
+            });
+
+            answeredCount++;
+            if (answeredCount === totalQuestions) {
+                showResults();
+            }
+        }
+
+        function showModal(text) {
+            if (!text) return;
+            document.getElementById('feedbackText').innerHTML = text;
+            document.getElementById('feedbackModal').style.display = 'block';
+            if (window.MathJax) window.MathJax.typesetPromise();
+        }
+
+        function closeModal() {
+            document.getElementById('feedbackModal').style.display = 'none';
+        }
+
+        function showResults() {
+            const percentage = Math.round((currentScore / totalQuestions) * 100);
+            let grade = '';
+            if (percentage >= 90) grade = 'Výborný';
+            else if (percentage >= 80) grade = 'Veľmi dobrý';
+            else if (percentage >= 70) grade = 'Dobrý';
+            else if (percentage >= 60) grade = 'Dostačujúci';
+            else grade = 'Nedostačujúci';
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `
+                Výsledok: ${currentScore} / ${totalQuestions} (${percentage}%)<br>
+                <span style="color: #2c3e50; font-size: 1.1em">${grade}</span>
+            `;
+            resultsDiv.scrollIntoView({behavior: "smooth"});
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('feedbackModal');
+            if (event.target == modal) closeModal();
+        }
+
+        initQuiz();
+    </script>
+</body>
+</html>
