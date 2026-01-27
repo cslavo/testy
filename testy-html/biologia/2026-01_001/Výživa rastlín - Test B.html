@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Výživa rastlín - Test B</title>
+    <!-- MathJax pre vzorce -->
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.5; background: #f9f9f9; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+        .question-container { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .question-text { font-weight: 600; font-size: 1.1em; margin-bottom: 15px; color: #2c3e50; }
+        .option { display: block; width: 100%; padding: 12px 15px; margin: 8px 0; background: #fff; border: 2px solid #e0e0e0; border-radius: 6px; cursor: pointer; text-align: left; transition: all 0.2s; font-size: 0.95em; box-sizing: border-box; }
+        .option:hover:not(.disabled) { background: #f0f7ff; border-color: #2196F3; }
+        
+        /* Stavy odpovedí */
+        .option.correct { background: #d4edda !important; border-color: #28a745 !important; color: #155724; cursor: default; }
+        .option.incorrect { background: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; cursor: default; }
+        .option.disabled { cursor: default; opacity: 0.7; pointer-events: none; }
+        
+        .results { text-align: center; padding: 20px; margin-top: 20px; font-size: 1.2em; font-weight: bold; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: none; }
+        
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; animation: fadeIn 0.3s; }
+        .modal-content { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-header { font-weight: bold; color: #dc3545; margin-bottom: 10px; font-size: 1.1em; }
+        .modal-body { margin-bottom: 20px; color: #555; }
+        .btn-close { background: #2c3e50; color: white; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-size: 1em; }
+        .btn-close:hover { background: #1a252f; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <h1 id="testTitle">Výživa rastlín - Test B</h1>
+    <div id="quiz-container"></div>
+    <div id="results" class="results"></div>
+
+    <!-- Modal pre feedback -->
+    <div class="modal-overlay" id="feedbackModal">
+        <div class="modal-content">
+            <div class="modal-header">Nesprávna odpoveď</div>
+            <div class="modal-body" id="feedbackText"></div>
+            <button class="btn-close" onclick="closeModal()">Rozumiem</button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // DÁTA TESTU B (UNIKÁTNA SADA OTÁZOK)
+        // ==========================================
+        const questionsData = [
+            {
+                text: "Ktorá rovnica správne popisuje fotosyntézu?",
+                options: [
+                    { text: "$6 CO_2 + 12 H_2O \\rightarrow C_6H_{12}O_6 + 6 O_2 + 6 H_2O$", isCorrect: true, feedback: "" },
+                    { text: "$C_6H_{12}O_6 + 6 O_2 \\rightarrow 6 CO_2 + 12 H_2O$", isCorrect: false, feedback: "Toto je rovnica dýchania (opačný proces), nie fotosyntézy." },
+                    { text: "$6 O_2 + 12 CO_2 \\rightarrow C_6H_{12}O_6 + 6 H_2O$", isCorrect: false, feedback: "Vstupné látky sú $CO_2$ a voda, nie kyslík a $CO_2$." },
+                    { text: "$CO_2 + H_2O \\rightarrow CO + H_2O_2$", isCorrect: false, feedback: "Toto je nesprávna chemická reakcia. Produktom musí byť glukóza." }
+                ]
+            },
+            {
+                text: "Aký plyn sa uvoľňuje do atmosféry pri fotosyntéze?",
+                options: [
+                    { text: "Kyslík ($O_2$)", isCorrect: true, feedback: "" },
+                    { text: "Oxid uhličitý ($CO_2$)", isCorrect: false, feedback: "$CO_2$ sa pri fotosyntéze spotrebúva, neuvoľňuje sa." },
+                    { text: "Dusík ($N_2$)", isCorrect: false, feedback: "Dusík sa pri fotosyntéze neuvoľňuje." },
+                    { text: "Metán ($CH_4$)", isCorrect: false, feedback: "Metán nie je produktom fotosyntézy." }
+                ]
+            },
+            {
+                text: "Čo je zdrojom energie pre baktérie, ktoré tvoria organické látky bez slnečného žiarenia?",
+                options: [
+                    { text: "Chemická energia", isCorrect: true, feedback: "" },
+                    { text: "Tepelná energia", isCorrect: false, feedback: "Chemosyntetizujúce baktérie využívajú chemickú energiu väzieb, nie teplo." },
+                    { text: "Mechanická energia", isCorrect: false, feedback: "Mechanická energia sa v metabolizme na tvorbu látok nevyužíva." },
+                    { text: "Jadrová energia", isCorrect: false, feedback: "Biologické procesy nevyužívajú jadrovú energiu." }
+                ]
+            },
+            {
+                text: "Čo je zdrojom organických látok pre saprofyty?",
+                options: [
+                    { text: "Odumreté organizmy", isCorrect: true, feedback: "" },
+                    { text: "Živé hostiteľské rastliny", isCorrect: false, feedback: "Z živých hostiteľov čerpajú látky parazity, nie saprofyty." },
+                    { text: "Slnečné žiarenie", isCorrect: false, feedback: "Saprofyty sú heterotrofné, nevedia využiť slnko na tvorbu látok." },
+                    { text: "Vzdušný dusík", isCorrect: false, feedback: "Dusík nie je zdrojom uhlíkatých organických látok (energie)." }
+                ]
+            },
+            {
+                text: "Aký je ekologický význam saprofytizmu?",
+                options: [
+                    { text: "Zabezpečuje kolobeh látok v prírode (mineralizáciu).", isCorrect: true, feedback: "" },
+                    { text: "Znižuje množstvo kyslíka v atmosfére.", isCorrect: false, feedback: "Hlavnou úlohou je rozklad hmoty a vrátenie minerálov do pôdy." },
+                    { text: "Vytvára nové organické látky z ničoho.", isCorrect: false, feedback: "Saprofyty len rozkladajú existujúcu hmotu na jednoduchšie látky." },
+                    { text: "Spôsobuje vyhynutie hostiteľských rastlín.", isCorrect: false, feedback: "Saprofyty nežijú na živých hostiteľoch, takže ich nehubia." }
+                ]
+            },
+            {
+                text: "Ktorá z uvedených rastlín je úplný parazit?",
+                options: [
+                    { text: "Kukučina", isCorrect: true, feedback: "" },
+                    { text: "Imelo biele", isCorrect: false, feedback: "Imelo je poloparazit (má zelenú farbu a fotosyntetizuje)." },
+                    { text: "Rosička", isCorrect: false, feedback: "Rosička je mäsožravá rastlina (mixotrofia)." },
+                    { text: "Koralica", isCorrect: false, feedback: "Koralica je saprofyt." }
+                ]
+            },
+            {
+                text: "Čo charakterizuje úplného parazita?",
+                options: [
+                    { text: "Odčerpáva organické látky, nemá chlorofyl.", isCorrect: true, feedback: "" },
+                    { text: "Odčerpáva len vodu, organické látky si tvorí sám.", isCorrect: false, feedback: "Toto je definícia poloparazita." },
+                    { text: "Žije v symbióze s koreňmi iných rastlín.", isCorrect: false, feedback: "Parazitizmus nie je symbióza (nie je obojstranne výhodný)." },
+                    { text: "Rozkladá odumreté zvyšky rastlín.", isCorrect: false, feedback: "To robia saprofyty." }
+                ]
+            },
+            {
+                text: "Čo v poľnohospodárstve znamená pojem „zelené hnojenie“?",
+                options: [
+                    { text: "Zaorávanie bôbovitých rastlín do pôdy kvôli dusíku.", isCorrect: true, feedback: "" },
+                    { text: "Hnojenie nezrelým kompostom.", isCorrect: false, feedback: "Ide špecificky o využitie rastlín viažucich dusík (symbióza s baktériami)." },
+                    { text: "Polievanie rastlín zelenou skalicou.", isCorrect: false, feedback: "Zelená skalica je chemikália, zelené hnojenie je biologická metóda." },
+                    { text: "Pestovanie rastlín na zeleno bez kvetov.", isCorrect: false, feedback: "Termín sa týka obohatenia pôdy o živiny zaoraním biomasy." }
+                ]
+            },
+            {
+                text: "Akú úlohu má vyššia rastlina v mykoríze (spolužití s hubou)?",
+                options: [
+                    { text: "Je zásobárňou organických látok pre hubu.", isCorrect: true, feedback: "" },
+                    { text: "Dodáva hube vodu a minerály.", isCorrect: false, feedback: "Vodu a minerály dodáva huba rastline, nie naopak." },
+                    { text: "Chráni hubu pred vyschnutím.", isCorrect: false, feedback: "Huba naopak pomáha rastline s príjmom vody." },
+                    { text: "Rozkladá hubové vlákna.", isCorrect: false, feedback: "V symbióze sa partneri nerozkladajú, ale spolupracujú." }
+                ]
+            },
+            {
+                text: "Ktoré organizmy tvoria telo lišajníka?",
+                options: [
+                    { text: "Huba a riasa (alebo sinica).", isCorrect: true, feedback: "" },
+                    { text: "Huba a koreň stromu.", isCorrect: false, feedback: "Toto je mykoríza, nie lišajník." },
+                    { text: "Riasa a mach.", isCorrect: false, feedback: "Lišajník musí obsahovať hubovú zložku." },
+                    { text: "Dva druhy baktérií.", isCorrect: false, feedback: "Lišajník je zložený organizmus z ríše húb a rastlín/baktérií." }
+                ]
+            },
+            {
+                text: "Prečo sa u niektorých rastlín vyvinula mixotrofia (mäsožravosť)?",
+                options: [
+                    { text: "Rastú na pôdach s deficitom dusíka.", isCorrect: true, feedback: "" },
+                    { text: "Majú nedostatok vody.", isCorrect: false, feedback: "Mäsožravé rastliny často rastú v mokradiach, vody majú dosť, chýba im dusík." },
+                    { text: "Nemajú chlorofyl.", isCorrect: false, feedback: "Mäsožravé rastliny sú zelené a normálne fotosyntetizujú." },
+                    { text: "Aby sa bránili pred bylinožravcami.", isCorrect: false, feedback: "Lapanie hmyzu slúži na výživu, nie na obranu." }
+                ]
+            },
+            {
+                text: "Aké anorganické látky prijímajú mäsožravé rastliny heterotrofne (z hmyzu)?",
+                options: [
+                    { text: "Dusík", isCorrect: true, feedback: "" },
+                    { text: "Cukry", isCorrect: false, feedback: "Cukry sú organické látky a rastlina si ich vyrába sama fotosyntézou." },
+                    { text: "Kyslík", isCorrect: false, feedback: "Kyslík rastliny dýchajú alebo produkujú, nezískavajú ho z potravy." },
+                    { text: "Vápnik", isCorrect: false, feedback: "Kľúčovým prvkom, ktorý im v pôde chýba, je dusík." }
+                ]
+            }
+        ];
+
+        // ==========================================
+        // LOGIKA APLIKÁCIE
+        // ==========================================
+        let currentScore = 0;
+        let answeredCount = 0;
+        const totalQuestions = questionsData.length;
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function initQuiz() {
+            const container = document.getElementById('quiz-container');
+            shuffleArray(questionsData);
+
+            questionsData.forEach((q, index) => {
+                let currentOptions = [...q.options];
+                shuffleArray(currentOptions);
+
+                const qDiv = document.createElement('div');
+                qDiv.className = 'question-container';
+                qDiv.id = `q-${index}`;
+
+                let optionsHtml = '';
+                currentOptions.forEach((opt, i) => {
+                    const safeFeedback = opt.feedback.replace(/"/g, '&quot;');
+                    optionsHtml += `
+                        <button class="option" 
+                            onclick="handleAnswer(this, ${opt.isCorrect}, '${safeFeedback}', ${index})"
+                            data-answered="false">
+                            ${opt.text}
+                        </button>
+                    `;
+                });
+
+                qDiv.innerHTML = `
+                    <div class="question-text">${index + 1}. ${q.text}</div>
+                    <div class="options-grid">${optionsHtml}</div>
+                `;
+                container.appendChild(qDiv);
+            });
+            
+            if (window.MathJax) {
+                window.MathJax.typesetPromise();
+            }
+        }
+
+        function handleAnswer(btn, isCorrect, feedback, qIndex) {
+            const parent = btn.parentElement;
+            if (parent.dataset.locked === "true") return;
+            parent.dataset.locked = "true";
+            
+            const buttons = parent.querySelectorAll('.option');
+            buttons.forEach(b => b.classList.add('disabled'));
+
+            if (isCorrect) {
+                btn.classList.add('correct');
+                currentScore++;
+            } else {
+                btn.classList.add('incorrect');
+                showModal(feedback);
+            }
+            
+            buttons.forEach(b => {
+                if (b.getAttribute('onclick').includes('true,')) {
+                    b.classList.add('correct');
+                }
+            });
+
+            answeredCount++;
+            if (answeredCount === totalQuestions) {
+                showResults();
+            }
+        }
+
+        function showModal(text) {
+            if (!text) return;
+            document.getElementById('feedbackText').innerHTML = text;
+            document.getElementById('feedbackModal').style.display = 'block';
+            if (window.MathJax) {
+                window.MathJax.typesetPromise();
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('feedbackModal').style.display = 'none';
+        }
+
+        function showResults() {
+            const percentage = Math.round((currentScore / totalQuestions) * 100);
+            let grade = '';
+            if (percentage >= 90) grade = 'Výborný';
+            else if (percentage >= 80) grade = 'Veľmi dobrý';
+            else if (percentage >= 70) grade = 'Dobrý';
+            else if (percentage >= 60) grade = 'Dostačujúci';
+            else grade = 'Nedostačujúci';
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `
+                Výsledok: ${currentScore} / ${totalQuestions} (${percentage}%)<br>
+                <span style="color: #2c3e50; font-size: 1.1em">${grade}</span>
+            `;
+            resultsDiv.scrollIntoView({behavior: "smooth"});
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('feedbackModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        initQuiz();
+    </script>
+</body>
+</html>
