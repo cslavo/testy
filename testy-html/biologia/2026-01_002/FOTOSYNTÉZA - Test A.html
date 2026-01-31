@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FOTOSYNTÉZA - Test A</title>
+    <!-- MathJax pre vzorce -->
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.5; background: #f9f9f9; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+        .question-container { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .question-text { font-weight: 600; font-size: 1.1em; margin-bottom: 15px; color: #2c3e50; }
+        .option { display: block; width: 100%; padding: 12px 15px; margin: 8px 0; background: #fff; border: 2px solid #e0e0e0; border-radius: 6px; cursor: pointer; text-align: left; transition: all 0.2s; font-size: 0.95em; box-sizing: border-box; }
+        .option:hover:not(.disabled) { background: #f0f7ff; border-color: #2196F3; }
+        .option.correct { background: #d4edda !important; border-color: #28a745 !important; color: #155724; cursor: default; }
+        .option.incorrect { background: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; cursor: default; }
+        .option.disabled { cursor: default; opacity: 0.7; pointer-events: none; }
+        .results { text-align: center; padding: 20px; margin-top: 20px; font-size: 1.2em; font-weight: bold; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: none; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; animation: fadeIn 0.3s; }
+        .modal-content { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-header { font-weight: bold; color: #dc3545; margin-bottom: 10px; font-size: 1.1em; }
+        .modal-body { margin-bottom: 20px; color: #555; }
+        .btn-close { background: #2c3e50; color: white; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-size: 1em; }
+        .btn-close:hover { background: #1a252f; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <h1 id="testTitle">FOTOSYNTÉZA - Test A</h1>
+    <div id="quiz-container"></div>
+    <div id="results" class="results"></div>
+
+    <div class="modal-overlay" id="feedbackModal">
+        <div class="modal-content">
+            <div class="modal-header">Nesprávna odpoveď</div>
+            <div class="modal-body" id="feedbackText"></div>
+            <button class="btn-close" onclick="closeModal()">Rozumiem</button>
+        </div>
+    </div>
+
+    <script>
+        const questionsData = [
+            {
+                text: "Ktorá z nasledujúcich definícií najpresnejšie vystihuje podstatu fotosyntézy z chemického hľadiska?",
+                options: [
+                    { text: "Premena jednoduchých anorganických látok na látky organické za uvoľňovania kyslíka.", isCorrect: true, feedback: "" },
+                    { text: "Rozklad zložitých organických látok na jednoduché anorganické látky za spotreby kyslíka.", isCorrect: false, feedback: "Toto je definícia dýchania (respirácie), čo je opačný proces k fotosyntéze." },
+                    { text: "Premena chemickej energie ATP na svetelnú energiu v bunkách rastlín.", isCorrect: false, feedback: "Fotosyntéza funguje presne naopak: premieňa svetelnú energiu na energiu chemických väzieb." },
+                    { text: "Proces, pri ktorom sa kyslík viaže na organické látky a vzniká oxid uhličitý.", isCorrect: false, feedback: "Pri fotosyntéze sa oxid uhličitý spotrebúva a kyslík uvoľňuje, nie naopak." }
+                ]
+            },
+            {
+                text: "Fotosyntéza udržiava v atmosfére stály pomer plynov. Aká je koncentrácia oxidu uhličitého ($CO_2$), ktorú tento proces reguluje?",
+                options: [
+                    { text: "0,03 %", isCorrect: true, feedback: "" },
+                    { text: "21 %", isCorrect: false, feedback: "Hodnota 21 % prislúcha koncentrácii kyslíka ($O_2$), nie oxidu uhličitého." },
+                    { text: "0,3 %", isCorrect: false, feedback: "Toto je desaťnásobne vyššia hodnota než uvádza text (správne je 0,03 %)." },
+                    { text: "78 %", isCorrect: false, feedback: "Táto hodnota zhruba zodpovedá zastúpeniu dusíka v atmosfére." }
+                ]
+            },
+            {
+                text: "Ktoré tvrdenie o asimilačných farbivách – chlorofyloch je správne?",
+                options: [
+                    { text: "Chlorofyl <i>a</i> je modrozelený a chlorofyl <i>b</i> je žltozelený.", isCorrect: true, feedback: "" },
+                    { text: "Chlorofyl <i>a</i> je žltozelený a chlorofyl <i>b</i> je modrozelený.", isCorrect: false, feedback: "Farby sú vymenené. Chlorofyl <i>a</i> je tmavší (modrozelený)." },
+                    { text: "Oba typy chlorofylov majú oranžové sfarbenie, rozdiel je len v ich absorpcii.", isCorrect: false, feedback: "Oranžové sfarbenie je typické pre karotény (karotenoidy), nie pre chlorofyly." },
+                    { text: "Chlorofyly absorbujú len zelenú časť spektra, preto sa nám javia ako zelené.", isCorrect: false, feedback: "Rastliny sa javia zelené práve preto, že zelenú časť spektra odrážajú a neabsorbujú." }
+                ]
+            },
+            {
+                text: "Prečo sa chlorofyl <i>a</i> označuje ako 'aktívny chlorofyl'?",
+                options: [
+                    { text: "Pretože ako jediný dokáže energiu fotónov nielen absorbovať, ale ju aj aktívne využiť.", isCorrect: true, feedback: "" },
+                    { text: "Pretože sa nachádza v stróme chloroplastov a priamo sa zúčastňuje syntézy cukrov.", isCorrect: false, feedback: "Chlorofyly sú na membránach (tylakoidoch), v stróme prebieha syntéza cukrov bez priamej účasti farbív." },
+                    { text: "Pretože dokáže absorbovať svetlo aj v noci bez prítomnosti slnečného žiarenia.", isCorrect: false, feedback: "Absorpcia fotónov vyžaduje svetlo; v tme chlorofyl 'nefunguje'." },
+                    { text: "Pretože ako jediný pigment prepúšťa zelené svetlo potrebné pre rast rastliny.", isCorrect: false, feedback: "Vlastnosť 'aktívny' sa vzťahuje na schopnosť transformovať energiu, nie na prepúšťanie farby." }
+                ]
+            },
+            {
+                text: "Kde presne prebiehajú primárne procesy fotosyntézy (svetelná fáza)?",
+                options: [
+                    { text: "Na membránach chloroplastov, v tylakoidoch.", isCorrect: true, feedback: "" },
+                    { text: "V stróme chloroplastov, kde sú uložené enzýmy.", isCorrect: false, feedback: "V stróme prebiehajú sekundárne (tmavé) procesy, nie primárne." },
+                    { text: "V cytoplazme bunky mimo chloroplastov.", isCorrect: false, feedback: "Fotosyntéza je prísne viazaná na chloroplasty." },
+                    { text: "Na vonkajšej membráne mitochondrií.", isCorrect: false, feedback: "Mitochondrie slúžia na dýchanie, fotosyntéza prebieha v chloroplastoch." }
+                ]
+            },
+            {
+                text: "Ktorá rovnica správne popisuje proces fotolýzy vody?",
+                options: [
+                    { text: "$H_2O \\rightarrow 0,5 O_2 + 2 H^+ + 2 e^-$", isCorrect: true, feedback: "" },
+                    { text: "$H_2O + CO_2 \\rightarrow C_6H_{12}O_6 + O_2$", isCorrect: false, feedback: "Toto je zjednodušená celková rovnica fotosyntézy, nie rovnica fotolýzy vody." },
+                    { text: "$2 H^+ + 2 e^- + 0,5 O_2 \\rightarrow H_2O$", isCorrect: false, feedback: "Toto je rovnica vzniku vody (napr. pri dýchaní), fotolýza je jej rozklad." },
+                    { text: "$H_2O \\rightarrow H_2 + O_2$", isCorrect: false, feedback: "Fotolýza v biologických systémoch produkuje protóny ($H^+$) a elektróny, nie molekulárny vodík ($H_2$)." }
+                ]
+            },
+            {
+                text: "Čo sa deje s vodíkom ($H^+$), ktorý vznikne pri fotolýze vody?",
+                options: [
+                    { text: "Viaže sa na koenzým $NADP^+$ a vzniká $NADPH + H^+$ (redukovadlo).", isCorrect: true, feedback: "" },
+                    { text: "Okamžite sa uvoľňuje do atmosféry spolu s kyslíkom.", isCorrect: false, feedback: "Do atmosféry sa uvoľňuje len kyslík. Vodík je potrebný pre ďalšie reakcie." },
+                    { text: "Reaguje priamo s kyslíkom za vzniku molekuly peroxidu vodíka.", isCorrect: false, feedback: "Vodík sa využíva na redukciu koenzýmov, nevytvára peroxid." },
+                    { text: "Spotrebúva sa na tvorbu ATP vo fosforylácii.", isCorrect: false, feedback: "Na tvorbu ATP sa využíva energia elektrónov a gradient, ale vodík ako 'látka' slúži na redukciu $NADP^+$." }
+                ]
+            },
+            {
+                text: "Kde prebiehajú sekundárne procesy (syntetická fáza) a čo je ich podstatou?",
+                options: [
+                    { text: "Prebiehajú v stróme chloroplastov a ide o premenu látok ($CO_2$) na glukózu.", isCorrect: true, feedback: "" },
+                    { text: "Prebiehajú na tylakoidoch a ide o premenu svetelnej energie na chemickú.", isCorrect: false, feedback: "Toto je popis primárnych procesov (svetelná fáza)." },
+                    { text: "Prebiehajú v stróme chloroplastov a ide o rozklad glukózy na $CO_2$.", isCorrect: false, feedback: "Sekundárna fáza glukózu vytvára (syntetizuje), nerozkladá ju." },
+                    { text: "Prebiehajú v bunkovom jadre a ide o syntézu asimilačných farbív.", isCorrect: false, feedback: "Fotosyntéza neprebieha v jadre a sekundárna fáza nerieši tvorbu farbív, ale cukrov." }
+                ]
+            },
+            {
+                text: "Čo sa stane s glukózou, ktorá vznikne v sekundárnej fáze?",
+                options: [
+                    { text: "Rýchlo polymerizuje na škrob (zásobný cukor rastlín).", isCorrect: true, feedback: "" },
+                    { text: "Okamžite sa rozpadá na oxid uhličitý a vodu.", isCorrect: false, feedback: "To by bol proces dýchania. Rastlina glukózu ukladá do zásob." },
+                    { text: "Premieňa sa na chlorofyl, aby podporila ďalšiu fotosyntézu.", isCorrect: false, feedback: "Glukóza je stavebná a energetická látka, nemení sa priamo na pigment." },
+                    { text: "Vylučuje sa cez prieduchy listov do okolia.", isCorrect: false, feedback: "Rastlina si glukózu necháva pre seba ako zdroj energie a stavebný prvok." }
+                ]
+            },
+            {
+                text: "Ktorý zoznam obsahuje výlučne VONKAJŠIE činitele fotosyntézy?",
+                options: [
+                    { text: "Svetlo, teplota, koncentrácia $CO_2$, voda, minerálne látky.", isCorrect: true, feedback: "" },
+                    { text: "Svetlo, teplota, fyziologický stav rastliny, voda.", isCorrect: false, feedback: "Fyziologický stav rastliny je vnútorný činiteľ." },
+                    { text: "Množstvo chlorofylu, vek listov, teplota, voda.", isCorrect: false, feedback: "Množstvo chlorofylu a vek listov (fyziologický stav) sú vnútorné činitele." },
+                    { text: "Koncentrácia $CO_2$, metabolické procesy, minerálne látky.", isCorrect: false, feedback: "Metabolické procesy sú vnútorným činiteľom." }
+                ]
+            }
+        ];
+
+        let currentScore = 0;
+        let answeredCount = 0;
+        const totalQuestions = questionsData.length;
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function initQuiz() {
+            const container = document.getElementById('quiz-container');
+            shuffleArray(questionsData);
+
+            questionsData.forEach((q, index) => {
+                let currentOptions = [...q.options];
+                shuffleArray(currentOptions);
+
+                const qDiv = document.createElement('div');
+                qDiv.className = 'question-container';
+                qDiv.id = `q-${index}`;
+
+                let optionsHtml = '';
+                currentOptions.forEach((opt) => {
+                    const safeFeedback = opt.feedback.replace(/"/g, '&quot;');
+                    optionsHtml += `
+                        <button class="option" 
+                            onclick="handleAnswer(this, ${opt.isCorrect}, '${safeFeedback}')">
+                            ${opt.text}
+                        </button>
+                    `;
+                });
+
+                qDiv.innerHTML = `
+                    <div class="question-text">${index + 1}. ${q.text}</div>
+                    <div class="options-grid">${optionsHtml}</div>
+                `;
+                container.appendChild(qDiv);
+            });
+            if (window.MathJax) window.MathJax.typesetPromise();
+        }
+
+        function handleAnswer(btn, isCorrect, feedback) {
+            const parent = btn.parentElement;
+            if (parent.dataset.locked === "true") return;
+            parent.dataset.locked = "true";
+            
+            const buttons = parent.querySelectorAll('.option');
+            buttons.forEach(b => b.classList.add('disabled'));
+
+            if (isCorrect) {
+                btn.classList.add('correct');
+                currentScore++;
+            } else {
+                btn.classList.add('incorrect');
+                showModal(feedback);
+                buttons.forEach(b => {
+                    if (b.getAttribute('onclick').includes('true,')) {
+                        b.classList.add('correct');
+                    }
+                });
+            }
+
+            answeredCount++;
+            if (answeredCount === totalQuestions) showResults();
+        }
+
+        function showModal(text) {
+            if (!text) return;
+            document.getElementById('feedbackText').innerHTML = text;
+            document.getElementById('feedbackModal').style.display = 'block';
+            if (window.MathJax) window.MathJax.typesetPromise();
+        }
+
+        function closeModal() {
+            document.getElementById('feedbackModal').style.display = 'none';
+        }
+
+        function showResults() {
+            const percentage = Math.round((currentScore / totalQuestions) * 100);
+            let grade = percentage >= 90 ? 'Výborný' : percentage >= 80 ? 'Veľmi dobrý' : percentage >= 70 ? 'Dobrý' : percentage >= 60 ? 'Dostačujúci' : 'Nedostačujúci';
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `Výsledok: ${currentScore} / ${totalQuestions} (${percentage}%)<br><span style="color: #2c3e50; font-size: 1.1em">${grade}</span>`;
+            resultsDiv.scrollIntoView({behavior: "smooth"});
+        }
+
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('feedbackModal')) closeModal();
+        }
+
+        initQuiz();
+    </script>
+</body>
+</html>

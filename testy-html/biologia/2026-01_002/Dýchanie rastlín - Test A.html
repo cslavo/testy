@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dýchanie rastlín - Test A</title>
+    <!-- MathJax pre vzorce -->
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.5; background: #f9f9f9; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+        .question-container { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .question-text { font-weight: 600; font-size: 1.1em; margin-bottom: 15px; color: #2c3e50; }
+        .option { display: block; width: 100%; padding: 12px 15px; margin: 8px 0; background: #fff; border: 2px solid #e0e0e0; border-radius: 6px; cursor: pointer; text-align: left; transition: all 0.2s; font-size: 0.95em; box-sizing: border-box; }
+        .option:hover:not(.disabled) { background: #f0f7ff; border-color: #2196F3; }
+        
+        /* Stavy odpovedí */
+        .option.correct { background: #d4edda !important; border-color: #28a745 !important; color: #155724; cursor: default; }
+        .option.incorrect { background: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; cursor: default; }
+        .option.disabled { cursor: default; opacity: 0.7; pointer-events: none; }
+        
+        .results { text-align: center; padding: 20px; margin-top: 20px; font-size: 1.2em; font-weight: bold; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: none; }
+        
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; animation: fadeIn 0.3s; }
+        .modal-content { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-header { font-weight: bold; color: #dc3545; margin-bottom: 10px; font-size: 1.1em; }
+        .modal-body { margin-bottom: 20px; color: #555; }
+        .btn-close { background: #2c3e50; color: white; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-size: 1em; }
+        .btn-close:hover { background: #1a252f; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <h1 id="testTitle">Dýchanie rastlín - Test A</h1>
+    <div id="quiz-container"></div>
+    <div id="results" class="results"></div>
+
+    <!-- Modal pre feedback -->
+    <div class="modal-overlay" id="feedbackModal">
+        <div class="modal-content">
+            <div class="modal-header">Nesprávna odpoveď</div>
+            <div class="modal-body" id="feedbackText"></div>
+            <button class="btn-close" onclick="closeModal()">Rozumiem</button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // DÁTA TESTU (GENEROVANÉ AI)
+        // ==========================================
+        const questionsData = [
+            {
+                text: "Čo je základnou podstatou procesu dýchania rastlín z hľadiska výmeny plynov?",
+                options: [
+                    { text: "Prijímanie kyslíka a výdaj oxidu uhličitého.", isCorrect: true, feedback: "" },
+                    { text: "Prijímanie oxidu uhličitého a výdaj kyslíka.", isCorrect: false, feedback: "Toto je definícia fotosyntézy, nie dýchania. Pri dýchaní sa $O_2$ spotrebúva a $CO_2$ uvoľňuje." },
+                    { text: "Prijímanie dusíka a výdaj vodnej pary.", isCorrect: false, feedback: "Dýchanie je primárne o výmene kyslíka a oxidu uhličitého, dusík v tomto procese nehrá hlavnú úlohu." },
+                    { text: "Prijímanie kyslíka bez výdaja iných plynov.", isCorrect: false, feedback: "Dýchanie je spojené aj s výdajom odpadového produktu, ktorým je oxid uhličitý ($CO_2$)." }
+                ]
+            },
+            {
+                text: "Kde v bunke prebieha aeróbna fáza dýchania?",
+                options: [
+                    { text: "V mitochondriách.", isCorrect: true, feedback: "" },
+                    { text: "V cytoplazme.", isCorrect: false, feedback: "V cytoplazme prebieha iba anaeróbna časť dýchania (glykolýza), aeróbna vyžaduje mitochondrie." },
+                    { text: "V chloroplastoch.", isCorrect: false, feedback: "Chloroplasty sú miestom fotosyntézy, nie bunkového dýchania." },
+                    { text: "Na ribozómoch.", isCorrect: false, feedback: "Ribozómy slúžia na syntézu bielkovín, nie na energetické dýchanie." }
+                ]
+            },
+            {
+                text: "Aký je priamy energetický zisk prvej fázy dýchania – glykolýzy?",
+                options: [
+                    { text: "2 molekuly ATP.", isCorrect: true, feedback: "" },
+                    { text: "36 molekúl ATP.", isCorrect: false, feedback: "36 ATP je zisk z celkového dýchania (vrátane aeróbnej časti), samotná glykolýza získa len 2 ATP." },
+                    { text: "38 molekúl ATP.", isCorrect: false, feedback: "Tento počet sa niekedy uvádza ako teoretické maximum celého procesu, nie však samotnej glykolýzy, ktorá dáva len 2 ATP." },
+                    { text: "0 molekúl ATP.", isCorrect: false, feedback: "Glykolýza je energetický proces, pri ktorom vzniká malé množstvo energie (2 ATP)." }
+                ]
+            },
+            {
+                text: "Ktorá z uvedených možností NEPATRÍ medzi základné podmienky dýchania?",
+                options: [
+                    { text: "Prítomnosť asimilačných farbív (chlorofyl).", isCorrect: true, feedback: "" },
+                    { text: "Prítomnosť energetického substrátu (glukóza).", isCorrect: false, feedback: "Glukóza je nevyhnutná ako zdroj energie, ktorá sa dýchaním uvoľňuje." },
+                    { text: "Prítomnosť kyslíka.", isCorrect: false, feedback: "Kyslík je základnou podmienkou pre aeróbne dýchanie." },
+                    { text: "Prítomnosť enzýmov.", isCorrect: false, feedback: "Všetky fázy dýchania sú enzymaticky katalyzované reakcie." }
+                ]
+            },
+            {
+                text: "Aká je funkcia dýchacieho reťazca v procese biologickej oxidácie?",
+                options: [
+                    { text: "Biologická tvorba vody a fosforylácia (tvorba ATP).", isCorrect: true, feedback: "" },
+                    { text: "Rozklad glukózy na kyselinu pyrohroznovú.", isCorrect: false, feedback: "Toto je popis glykolýzy, nie dýchacieho reťazca." },
+                    { text: "Vznik acetylkoenzýmu A z kyseliny octovej.", isCorrect: false, feedback: "Toto je medzistupeň pred Krebsovým cyklom, nie dýchací reťazec." },
+                    { text: "Syntéza glukózy z $CO_2$.", isCorrect: false, feedback: "Syntéza glukózy prebieha pri fotosyntéze, dýchací reťazec naopak energiu uvoľňuje." }
+                ]
+            },
+            {
+                text: "Ako sa líši dýchanie a fotosyntéza z hľadiska energetiky?",
+                options: [
+                    { text: "Pri dýchaní sa energia uvoľňuje, pri fotosyntéze sa spotrebúva.", isCorrect: true, feedback: "" },
+                    { text: "Pri dýchaní sa energia spotrebúva, pri fotosyntéze sa uvoľňuje.", isCorrect: false, feedback: "Je to presne naopak. Fotosyntéza energiu viaže (zo Slnka), dýchanie ju uvoľňuje (z väzieb)." },
+                    { text: "Oba procesy energiu výlučne spotrebúvajú.", isCorrect: false, feedback: "Dýchanie je katabolický proces, ktorý energiu uvoľňuje vo forme ATP." },
+                    { text: "Oba procesy energiu výlučne produkujú do okolia ako teplo.", isCorrect: false, feedback: "Fotosyntéza energiu viaže do chemických väzieb, neuvoľňuje ju primárne ako teplo." }
+                ]
+            },
+            {
+                text: "Ktorá chemická rovnica správne popisuje proces v dýchacom reťazci?",
+                options: [
+                    { text: "$2H^+ + 2e^- + O^{2-} \\rightarrow H_2O$", isCorrect: true, feedback: "" },
+                    { text: "$C_6H_{12}O_6 + 6O_2 \\rightarrow 6CO_2 + 6H_2O$", isCorrect: false, feedback: "Toto je súhrnná rovnica celého dýchania, nie špecifická rovnica dýchacieho reťazca." },
+                    { text: "$H_2O \\rightarrow 2H^+ + 2e^- + O^{2-}$", isCorrect: false, feedback: "Toto je rovnica rozkladu vody, v dýchacom reťazci sa voda naopak tvorí." },
+                    { text: "Kyselina pyrohroznová $\\rightarrow$ Kvasný produkt + $CO_2$", isCorrect: false, feedback: "Toto je všeobecná schéma kvasenia, nie dýchacieho reťazca." }
+                ]
+            },
+            {
+                text: "Ktorý typ kvasenia sa využíva v liehovarníctve pri výrobe piva a vína?",
+                options: [
+                    { text: "Alkoholové kvasenie.", isCorrect: true, feedback: "" },
+                    { text: "Mliečne kvasenie.", isCorrect: false, feedback: "Mliečne kvasenie produkuje kyselinu mliečnu a využíva sa pri výrobe jogurtov." },
+                    { text: "Citrónové kvasenie.", isCorrect: false, feedback: "Citrónové kvasenie produkuje kyselinu citrónovú, nie alkohol." },
+                    { text: "Octové kvasenie.", isCorrect: false, feedback: "Text zmieňuje pri liehovarníctve (pivo, víno) konkrétne etylalkohol, čo je produkt alkoholového kvasenia." }
+                ]
+            }
+        ];
+
+        // ==========================================
+        // LOGIKA APLIKÁCIE
+        // ==========================================
+        let currentScore = 0;
+        let answeredCount = 0;
+        const totalQuestions = questionsData.length;
+
+        // Fisher-Yates Shuffle
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function initQuiz() {
+            const container = document.getElementById('quiz-container');
+            
+            // 1. Náhodné poradie otázok
+            shuffleArray(questionsData);
+
+            questionsData.forEach((q, index) => {
+                // 2. Náhodné poradie odpovedí pre každú otázku
+                let currentOptions = [...q.options];
+                shuffleArray(currentOptions);
+
+                const qDiv = document.createElement('div');
+                qDiv.className = 'question-container';
+                qDiv.id = `q-${index}`;
+
+                // Vytvorenie HTML pre otázku
+                let optionsHtml = '';
+                currentOptions.forEach((opt, i) => {
+                    const safeFeedback = opt.feedback.replace(/"/g, '&quot;');
+                    
+                    optionsHtml += `
+                        <button class="option" 
+                            onclick="handleAnswer(this, ${opt.isCorrect}, '${safeFeedback}', ${index})"
+                            data-answered="false">
+                            ${opt.text}
+                        </button>
+                    `;
+                });
+
+                qDiv.innerHTML = `
+                    <div class="question-text">${index + 1}. ${q.text}</div>
+                    <div class="options-grid">${optionsHtml}</div>
+                `;
+                container.appendChild(qDiv);
+            });
+            
+            // Re-render MathJax pre statický obsah
+            if (window.MathJax) {
+                window.MathJax.typesetPromise();
+            }
+        }
+
+        function handleAnswer(btn, isCorrect, feedback, qIndex) {
+            const parent = btn.parentElement;
+            if (parent.dataset.locked === "true") return;
+            
+            parent.dataset.locked = "true"; // Zamkneme otázku
+            
+            const buttons = parent.querySelectorAll('.option');
+            buttons.forEach(b => b.classList.add('disabled'));
+
+            if (isCorrect) {
+                btn.classList.add('correct');
+                currentScore++;
+            } else {
+                btn.classList.add('incorrect');
+                showModal(feedback);
+            }
+
+             buttons.forEach(b => {
+                if (b.getAttribute('onclick').includes('true,')) {
+                    b.classList.add('correct');
+                }
+            });
+
+            answeredCount++;
+            if (answeredCount === totalQuestions) {
+                showResults();
+            }
+        }
+
+        function showModal(text) {
+            if (!text) return;
+            document.getElementById('feedbackText').innerHTML = text; // innerHTML pre formátovanie
+            document.getElementById('feedbackModal').style.display = 'block';
+            // UPDATE: Re-render MathJax pre dynamický obsah v modále
+            if (window.MathJax) {
+                window.MathJax.typesetPromise();
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('feedbackModal').style.display = 'none';
+        }
+
+        function showResults() {
+            const percentage = Math.round((currentScore / totalQuestions) * 100);
+            let grade = '';
+            if (percentage >= 90) grade = 'Výborný';
+            else if (percentage >= 80) grade = 'Veľmi dobrý';
+            else if (percentage >= 70) grade = 'Dobrý';
+            else if (percentage >= 60) grade = 'Dostačujúci';
+            else grade = 'Nedostačujúci';
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `
+                Výsledok: ${currentScore} / ${totalQuestions} (${percentage}%)<br>
+                <span style="color: #2c3e50; font-size: 1.1em">${grade}</span>
+            `;
+            resultsDiv.scrollIntoView({behavior: "smooth"});
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('feedbackModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        initQuiz();
+    </script>
+</body>
+</html>
