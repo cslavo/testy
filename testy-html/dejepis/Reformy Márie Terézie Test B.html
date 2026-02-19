@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reformy Márie Terézie - Test B</title>
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 {
+            text-align: center; color: #fff; margin-bottom: 8px;
+            font-size: 1.5em; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); line-height: 1.3;
+        }
+        .subtitle {
+            text-align: center; color: rgba(255,255,255,0.9);
+            font-weight: 600; font-size: 1.1em; margin-bottom: 20px;
+        }
+        .progress-wrapper {
+            background: #fff; border-radius: 12px; padding: 16px 20px;
+            margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .progress-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px; font-weight: 600; color: #333; font-size: 0.95em;
+        }
+        .progress-bar-track {
+            height: 10px; background: #e0e0e0; border-radius: 5px; overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%; background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 5px; transition: width 0.4s ease; width: 0%;
+        }
+        .question-card {
+            background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .question-card.active { display: block; }
+        .question-card.answered { pointer-events: none; }
+        .question-text {
+            font-size: 1.1em; font-weight: 600; margin-bottom: 18px; line-height: 1.5; color: #333;
+        }
+        .question-number {
+            display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; width: 30px; height: 30px; border-radius: 50%;
+            text-align: center; line-height: 30px; font-size: 0.85em;
+            margin-right: 10px; font-weight: 700;
+        }
+        .options-list { list-style: none; }
+        .option-item {
+            padding: 13px 16px; margin-bottom: 8px; border: 2px solid #e0e0e0;
+            border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
+            font-size: 0.95em; line-height: 1.4; color: #333;
+        }
+        .option-item:hover { border-color: #667eea; background: #f0f0ff; }
+        .option-item.correct {
+            border-color: #4caf50; background: #e8f5e9; color: #2e7d32; font-weight: 600;
+        }
+        .option-item.incorrect {
+            border-color: #f44336; background: #ffebee; color: #c62828;
+        }
+        .next-btn {
+            display: none; margin-top: 16px; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; border: none; padding: 12px 28px; font-size: 1em; border-radius: 25px;
+            cursor: pointer; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+            float: right; pointer-events: auto;
+        }
+        .next-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .next-btn.visible { display: inline-block; }
+        .results-card {
+            background: #fff; border-radius: 12px; padding: 40px; text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .results-card h2 { font-size: 1.6em; margin-bottom: 10px; color: #333; }
+        .results-score { font-size: 2.8em; font-weight: 700; margin: 20px 0; }
+        .results-score.excellent { color: #4caf50; }
+        .results-score.good { color: #ff9800; }
+        .results-score.poor { color: #f44336; }
+        .results-message { font-size: 1.05em; margin-bottom: 30px; color: #555; }
+        .restart-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 14px 40px; font-size: 1.05em; border-radius: 30px; cursor: pointer;
+            font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .restart-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 1000;
+            justify-content: center; align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: #fff; border-radius: 12px; padding: 28px; max-width: 500px;
+            width: 90%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .modal-content h3 { color: #f44336; margin-bottom: 12px; font-size: 1.2em; }
+        .modal-content p { color: #555; font-size: 0.95em; line-height: 1.6; margin-bottom: 18px; }
+        .modal-close-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 10px 28px; border-radius: 20px; cursor: pointer; font-size: 0.95em; font-weight: 600;
+        }
+        .modal-close-btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Reformy Márie Terézie</h1>
+        <div class="subtitle">Test B</div>
+        <div class="progress-wrapper">
+            <div class="progress-header">
+                <span id="questionCounter">Otázka 1 / 0</span>
+                <span id="progressPercent">0 %</span>
+            </div>
+            <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="quizContainer"></div>
+        <div class="results-card" id="resultsCard">
+            <h2>Výsledky testu</h2>
+            <div class="results-score" id="resultsScore"></div>
+            <div class="results-message" id="resultsMessage"></div>
+            <button class="restart-btn" id="restartBtn">Skúsiť znova</button>
+        </div>
+    </div>
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <h3>Nesprávna odpoveď</h3>
+            <p id="modalText"></p>
+            <button class="modal-close-btn" id="modalCloseBtn">Rozumiem</button>
+        </div>
+    </div>
+
+<script>
+const questionsData = [
+    {
+        question: "Aký bol hlavný impulz, ktorý viedol Máriu Teréziu k zavádzaniu reforiem?",
+        options: [
+            { text: "Neúspešné vojny odhalili hospodársku a vojenskú slabosť monarchie.", isCorrect: true, feedback: "" },
+            { text: "Tlak zo strany Osmanskej ríše, ktorá ohrozovala priamo Viedeň.", isCorrect: false, feedback: "Hlavným dôvodom bola vnútorná slabosť monarchie odhalená vojnami (napr. o dedičstvo), nie priamy útok Osmanov v tom čase." },
+            { text: "Požiadavka uhorskej šľachty na modernizáciu krajiny.", isCorrect: false, feedback: "Uhorská šľachta reformy skôr odmietala, nebola ich iniciátorom." },
+            { text: "Snaha o okamžité zavedenie demokracie a zrušenie monarchie.", isCorrect: false, feedback: "Reformy mali posilniť monarchiu a panovníka, nie zaviesť demokraciu." }
+        ]
+    },
+    {
+        question: "Ktoré opatrenia zaviedla Mária Terézia v zdravotníctve?",
+        options: [
+            { text: "Nariaďovala stavbu murovaných domov a kontrolovala diplomy lekárov.", isCorrect: true, feedback: "" },
+            { text: "Zakázala lekárom pôsobiť na vidieku, museli byť len v mestách.", isCorrect: false, feedback: "Naopak, zabezpečovala, aby v každej župe (aj na vidieku) bol nejaký lekár." },
+            { text: "Zrušila murované domy a podporovala drevenú výstavbu kvôli rýchlosti.", isCorrect: false, feedback: "Nariadila stavbu murovaných domov, pravdepodobne z hygienických a protipožiarnych dôvodov." },
+            { text: "Preniesla zodpovednosť za epidémie výlučne na cirkev.", isCorrect: false, feedback: "Štát sa aktívne snažil predchádzať epidémiám, nepresúval to len na cirkev." }
+        ]
+    },
+    {
+        question: "Kde na Slovensku vznikli moderné manufaktúry spomínané v texte?",
+        options: [
+            { text: "V Bernolákove (Čeklís), Haliči, Tepličke nad Váhom či Šaštíne.", isCorrect: true, feedback: "" },
+            { text: "Výlučne v Bratislave a Košiciach.", isCorrect: false, feedback: "Text menuje viacero lokalít ako Bernolákovo, Halič, Senica, Sobotište, nie len veľké mestá." },
+            { text: "Len v banských mestách ako Banská Štiavnica a Kremnica.", isCorrect: false, feedback: "Manufaktúry (napr. textilné) vznikali aj mimo banských miest, napr. v Trnave alebo na západnom Slovensku." },
+            { text: "Všetky manufaktúry boli sústredené v Rakúsku, na Slovensku žiadne nevznikli.", isCorrect: false, feedback: "Text explicitne menuje manufaktúry, ktoré vznikli na Slovensku (vtedy Uhorsku)." }
+        ]
+    },
+    {
+        question: "Aké zmeny v mene a merných jednotkách zaviedla Mária Terézia?",
+        options: [
+            { text: "Zjednotila miery a váhy a zaviedla jednotnú zlatkovú menu (aj papierové peniaze).", isCorrect: true, feedback: "" },
+            { text: "Zaviedla striebornú menu, ale zakázala používanie papierových peňazí.", isCorrect: false, feedback: "Zaviedla zlatkovú menu a objavili sa prvé papierové peniaze." },
+            { text: "Ponechala rozličné miery pre každú župu, aby zachovala tradície.", isCorrect: false, feedback: "Cieľom bolo zjednotenie mier a váh pre zrýchlenie obchodu." },
+            { text: "Zrušila peniaze a zaviedla výmenný obchod (barter).", isCorrect: false, feedback: "Reformy viedli k modernizácii meny, nie k návratu k barteru." }
+        ]
+    },
+    {
+        question: "Ako bolo hospodársky rozdelené územie monarchie podľa plánov Márie Terézie?",
+        options: [
+            { text: "Priemysel sa budoval v Česku a Rakúsku, Uhorsko malo byť poľnohospodárskou zásobárňou.", isCorrect: true, feedback: "" },
+            { text: "Uhorsko sa stalo priemyselným centrom, kým Rakúsko dodávalo potraviny.", isCorrect: false, feedback: "Bolo to naopak: Uhorsko (vrátane Slovenska) malo zásobovať monarchiu poľnohospodársky." },
+            { text: "Všetky časti monarchie mali mať rovnaký podiel priemyslu a poľnohospodárstva.", isCorrect: false, feedback: "Text uvádza nerovnomerný rozvoj: priemysel v Česku/Rakúsku, poľnohospodárstvo v Uhorsku." },
+            { text: "Priemysel bol zakázaný v celej monarchii.", isCorrect: false, feedback: "Mária Terézia aktívne podporovala zakladanie manufaktúr a priemyslu." }
+        ]
+    },
+    {
+        question: "Čo bol tzv. tereziánsky urbár?",
+        options: [
+            { text: "Súpis pôdy, na základe ktorého sa pri daniach zohľadňovala jej kvalita a veľkosť.", isCorrect: true, feedback: "" },
+            { text: "Zoznam zakázaných kníh, ktoré cirkev nesmela používať.", isCorrect: false, feedback: "Urbár sa týka pôdy a poddaných, nie kníh (to by bol index)." },
+            { text: "Nariadenie o povinnej školskej dochádzke na vidieku.", isCorrect: false, feedback: "Školstvo riešilo Ratio educationis, urbár riešil pôdu a poddaných." },
+            { text: "Zoznam šľachticov, ktorí odmietli platiť dane.", isCorrect: false, feedback: "Išlo o súpis pôdy pre spravodlivé zdanenie, nie zoznam rebelov." }
+        ]
+    },
+    {
+        question: "Aké opatrenia zaviedla panovníčka vo vzťahu k cirkvi?",
+        options: [
+            { text: "Pápežské buly sa mohli čítať až po schválení panovníkom a zredukovala počet sviatkov.", isCorrect: true, feedback: "" },
+            { text: "Zvýšila počet cirkevných sviatkov, aby podporila náboženský život.", isCorrect: false, feedback: "Sviatky zredukovala, aby sa v krajine viac pracovalo." },
+            { text: "Úplne podriadila štát cirkvi a vzdala sa právomocí v prospech pápeža.", isCorrect: false, feedback: "Naopak, snažila sa obmedziť vplyv cirkvi v štáte." },
+            { text: "Zakázala zakladanie nových fár a biskupstiev.", isCorrect: false, feedback: "Podporovala zakladanie nových fár a biskupstiev (pre lepšiu správu)." }
+        ]
+    },
+    {
+        question: "Čo zaviedol školský poriadok Ratio educationis z roku 1777?",
+        options: [
+            { text: "Povinnú školskú dochádzku (6-12 rokov) a jednotný školský systém.", isCorrect: true, feedback: "" },
+            { text: "Povinnú vojenskú službu od 15 rokov namiesto školy.", isCorrect: false, feedback: "Ratio educationis sa týkalo školstva, nie armády." },
+            { text: "Vyučovanie výlučne v latinčine už od ľudových škôl.", isCorrect: false, feedback: "V ľudových školách sa vyučovalo v národných jazykoch, latinčina bola na stredných školách." },
+            { text: "Zrušenie univerzít a podporu len základného vzdelania.", isCorrect: false, feedback: "Vytvorila systém od ZŠ až po univerzity, takže univerzity nerušila." }
+        ]
+    },
+    {
+        question: "Ako zasiahla Mária Terézia do pôsobenia jezuitov?",
+        options: [
+            { text: "Zakázala rád jezuitov v Uhorsku a obmedzila vplyv cirkvi v školstve.", isCorrect: true, feedback: "" },
+            { text: "Poverila jezuitov vedením vojenskej akadémie.", isCorrect: false, feedback: "Jezuitov zakázala, takže ich nepoverovala vedením nových inštitúcií." },
+            { text: "Urobila z jezuitov jediný povolený učiteľský rád.", isCorrect: false, feedback: "Práve naopak, ich rád zakázala." },
+            { text: "Jezuiti dostali na starosť správu nových manufaktúr.", isCorrect: false, feedback: "Jezuiti boli náboženský rád, reformy ich vplyv obmedzili/zrušili, nedali im na starosť priemysel." }
+        ]
+    },
+    {
+        question: "Ktorí dvaja významní odborníci radili Márii Terézii v oblasti baníctva a kartografie?",
+        options: [
+            { text: "Matej Kornel Hell (baníctvo/čerpadlá) a Samuel Mikovíni (kartograf/hvezdár).", isCorrect: true, feedback: "" },
+            { text: "Adam František Kollár a Matej Bel.", isCorrect: false, feedback: "Kollár bol knihovník/právnik a Bel polyhistor/geograf, baníctvom a čerpadlami sa zaoberal Hell." },
+            { text: "František Štefan Lotrinský a Matej Bel.", isCorrect: false, feedback: "Lotrinský bol manžel (ekonomika), Bel polyhistor, nie banský špecialista." },
+            { text: "Ján Amos Komenský a Ľudovít Štúr.", isCorrect: false, feedback: "Tieto osobnosti žili v iných obdobiach a nie sú spomínané v texte ako radcovia Márie Terézie." }
+        ]
+    },
+    {
+        question: "Čo vykonala Mária Terézia, aby mala lepší prehľad o daniach?",
+        options: [
+            { text: "Uskutočnila sčítanie ľudu.", isCorrect: true, feedback: "" },
+            { text: "Zaviedla daň z komínov, ktorú vyberali vojaci.", isCorrect: false, feedback: "Text spomína sčítanie ľudu ako nástroj na prehľad o daniach." },
+            { text: "Prikázala cirkvi, aby viedla záznamy o majetku veriacich.", isCorrect: false, feedback: "Sčítanie ľudu organizoval štát, nie cirkev pre daňové účely." },
+            { text: "Zrušila dane pre šľachtu, aby si ju naklonila.", isCorrect: false, feedback: "Naopak, jej radca Kollár navrhoval zdanenie šľachty a ona sa snažila získať prehľad." }
+        ]
+    }
+];
+
+// ===== UNIVERSAL SCRIPT (V8) =====
+let currentQuestion = 0;
+let score = 0;
+let answered = 0;
+let shuffledQuestions = [];
+let waitingForNext = false;
+let pendingNextQIndex = -1;
+
+function shuffle(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function initQuiz() {
+    currentQuestion = 0;
+    score = 0;
+    answered = 0;
+    waitingForNext = false;
+    pendingNextQIndex = -1;
+    shuffledQuestions = shuffle(questionsData).map(function(q) {
+        return { question: q.question, options: shuffle(q.options) };
+    });
+    document.getElementById('resultsCard').style.display = 'none';
+    document.getElementById('quizContainer').style.display = 'block';
+    renderQuiz();
+    updateProgress();
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function renderQuiz() {
+    var container = document.getElementById('quizContainer');
+    container.innerHTML = '';
+    shuffledQuestions.forEach(function(q, qIndex) {
+        var card = document.createElement('div');
+        card.className = 'question-card' + (qIndex === 0 ? ' active' : '');
+        card.id = 'qcard-' + qIndex;
+
+        var optionsHTML = '';
+        q.options.forEach(function(opt) {
+            optionsHTML += '<li class="option-item" data-correct="' + opt.isCorrect + '" data-feedback="' + escapeAttr(opt.feedback) + '">' + opt.text + '</li>';
+        });
+
+        card.innerHTML = '<div class="question-text"><span class="question-number">' + (qIndex + 1) + '</span>' + q.question + '</div><ul class="options-list">' + optionsHTML + '</ul><button class="next-btn" id="nextBtn-' + qIndex + '">Ďalšia otázka →</button>';
+        container.appendChild(card);
+
+        var items = card.querySelectorAll('.option-item');
+        items.forEach(function(item) {
+            item.addEventListener('click', function() {
+                handleAnswer(card, item, qIndex);
+            });
+        });
+
+        document.getElementById('nextBtn-' + qIndex).addEventListener('click', function() {
+            waitingForNext = false;
+            advanceToNext();
+        });
+    });
+}
+
+function escapeAttr(str) {
+    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function handleAnswer(card, selectedItem, qIndex) {
+    if (card.classList.contains('answered')) return;
+    card.classList.add('answered');
+    answered++;
+
+    var isCorrect = selectedItem.getAttribute('data-correct') === 'true';
+    var feedback = selectedItem.getAttribute('data-feedback');
+
+    if (isCorrect) {
+        selectedItem.classList.add('correct');
+        score++;
+        updateProgress();
+        // Correct answer: auto-advance after 1.5s
+        setTimeout(function() {
+            advanceToNext();
+        }, 1500);
+    } else {
+        selectedItem.classList.add('incorrect');
+        // Highlight the correct answer in green
+        card.querySelectorAll('.option-item').forEach(function(opt) {
+            if (opt.getAttribute('data-correct') === 'true') {
+                opt.classList.add('correct');
+            }
+        });
+        updateProgress();
+        // Wrong answer: NO auto-advance! Show modal, then manual "Next" button.
+        waitingForNext = true;
+        if (feedback && feedback.length > 0) {
+            showModal(decodeHTMLEntities(feedback), qIndex);
+        } else {
+            // No feedback text — show next button immediately
+            showNextButton(qIndex);
+        }
+    }
+}
+
+function showNextButton(qIndex) {
+    var btn = document.getElementById('nextBtn-' + qIndex);
+    if (btn) {
+        btn.classList.add('visible');
+        btn.focus();
+    }
+}
+
+function advanceToNext() {
+    // Guard: do not advance while waiting for user to review correct answer
+    if (waitingForNext) return;
+    if (answered >= shuffledQuestions.length) {
+        showResults();
+    } else {
+        currentQuestion++;
+        showQuestion(currentQuestion);
+    }
+}
+
+function decodeHTMLEntities(text) {
+    var ta = document.createElement('textarea');
+    ta.innerHTML = text;
+    return ta.value;
+}
+
+function showQuestion(index) {
+    document.querySelectorAll('.question-card').forEach(function(c) { c.classList.remove('active'); });
+    var next = document.getElementById('qcard-' + index);
+    if (next) {
+        next.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (window.MathJax) { window.MathJax.typesetPromise(); }
+    }
+}
+
+function updateProgress() {
+    var total = shuffledQuestions.length;
+    var pct = total > 0 ? Math.round((answered / total) * 100) : 0;
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressPercent').textContent = pct + ' %';
+    document.getElementById('questionCounter').textContent = 'Otázka ' + Math.min(answered + 1, total) + ' / ' + total;
+}
+
+function showResults() {
+    document.getElementById('quizContainer').style.display = 'none';
+    var resultsCard = document.getElementById('resultsCard');
+    resultsCard.style.display = 'block';
+
+    var total = shuffledQuestions.length;
+    var pct = Math.round((score / total) * 100);
+    var scoreEl = document.getElementById('resultsScore');
+    scoreEl.textContent = score + ' / ' + total + ' (' + pct + ' %)';
+
+    scoreEl.className = 'results-score';
+    if (pct >= 80) {
+        scoreEl.classList.add('excellent');
+        document.getElementById('resultsMessage').textContent = 'Výborný výsledok! Učivo máš dobre zvládnuté.';
+    } else if (pct >= 50) {
+        scoreEl.classList.add('good');
+        document.getElementById('resultsMessage').textContent = 'Dobrý výsledok, ale ešte je priestor na zlepšenie.';
+    } else {
+        scoreEl.classList.add('poor');
+        document.getElementById('resultsMessage').textContent = 'Skús si učivo zopakovať a test absolvovať znova.';
+    }
+
+    document.getElementById('progressBar').style.width = '100%';
+    document.getElementById('progressPercent').textContent = '100 %';
+    document.getElementById('questionCounter').textContent = 'Dokončené: ' + score + ' / ' + total + ' správne';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showModal(text, qIndex) {
+    pendingNextQIndex = qIndex;
+    document.getElementById('modalText').textContent = text;
+    document.getElementById('modalOverlay').classList.add('active');
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+    // After closing modal, show the "Next question" button so user can review the correct answer
+    if (waitingForNext && pendingNextQIndex >= 0) {
+        showNextButton(pendingNextQIndex);
+        pendingNextQIndex = -1;
+    }
+}
+
+document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' || e.key === 'Enter') {
+        if (document.getElementById('modalOverlay').classList.contains('active')) {
+            closeModal();
+        }
+    }
+});
+
+document.getElementById('restartBtn').addEventListener('click', function() {
+    initQuiz();
+});
+
+initQuiz();
+</script>
+</body>
+</html>

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktívny Test A</title>
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 {
+            text-align: center; color: #fff; margin-bottom: 8px;
+            font-size: 1.5em; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); line-height: 1.3;
+        }
+        .subtitle {
+            text-align: center; color: rgba(255,255,255,0.9);
+            font-weight: 600; font-size: 1.1em; margin-bottom: 20px;
+        }
+        .progress-wrapper {
+            background: #fff; border-radius: 12px; padding: 16px 20px;
+            margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .progress-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px; font-weight: 600; color: #333; font-size: 0.95em;
+        }
+        .progress-bar-track {
+            height: 10px; background: #e0e0e0; border-radius: 5px; overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%; background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 5px; transition: width 0.4s ease; width: 0%;
+        }
+        .question-card {
+            background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .question-card.active { display: block; }
+        .question-card.answered { pointer-events: none; }
+        .question-text {
+            font-size: 1.1em; font-weight: 600; margin-bottom: 18px; line-height: 1.5; color: #333;
+        }
+        .question-number {
+            display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; width: 30px; height: 30px; border-radius: 50%;
+            text-align: center; line-height: 30px; font-size: 0.85em;
+            margin-right: 10px; font-weight: 700;
+        }
+        .options-list { list-style: none; }
+        .option-item {
+            padding: 13px 16px; margin-bottom: 8px; border: 2px solid #e0e0e0;
+            border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
+            font-size: 0.95em; line-height: 1.4; color: #333;
+        }
+        .option-item:hover { border-color: #667eea; background: #f0f0ff; }
+        .option-item.correct {
+            border-color: #4caf50; background: #e8f5e9; color: #2e7d32; font-weight: 600;
+        }
+        .option-item.incorrect {
+            border-color: #f44336; background: #ffebee; color: #c62828;
+        }
+        .next-btn {
+            display: none; margin-top: 16px; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; border: none; padding: 12px 28px; font-size: 1em; border-radius: 25px;
+            cursor: pointer; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+            float: right; pointer-events: auto;
+        }
+        .next-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .next-btn.visible { display: inline-block; }
+        .results-card {
+            background: #fff; border-radius: 12px; padding: 40px; text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .results-card h2 { font-size: 1.6em; margin-bottom: 10px; color: #333; }
+        .results-score { font-size: 2.8em; font-weight: 700; margin: 20px 0; }
+        .results-score.excellent { color: #4caf50; }
+        .results-score.good { color: #ff9800; }
+        .results-score.poor { color: #f44336; }
+        .results-message { font-size: 1.05em; margin-bottom: 30px; color: #555; }
+        .restart-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 14px 40px; font-size: 1.05em; border-radius: 30px; cursor: pointer;
+            font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .restart-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 1000;
+            justify-content: center; align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: #fff; border-radius: 12px; padding: 28px; max-width: 500px;
+            width: 90%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .modal-content h3 { color: #f44336; margin-bottom: 12px; font-size: 1.2em; }
+        .modal-content p { color: #555; font-size: 0.95em; line-height: 1.6; margin-bottom: 18px; }
+        .modal-close-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 10px 28px; border-radius: 20px; cursor: pointer; font-size: 0.95em; font-weight: 600;
+        }
+        .modal-close-btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Priemyselná revolúcia</h1>
+        <div class="subtitle">Test A</div>
+        <div class="progress-wrapper">
+            <div class="progress-header">
+                <span id="questionCounter">Otázka 1 / 0</span>
+                <span id="progressPercent">0 %</span>
+            </div>
+            <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="quizContainer"></div>
+        <div class="results-card" id="resultsCard">
+            <h2>Výsledky testu</h2>
+            <div class="results-score" id="resultsScore"></div>
+            <div class="results-message" id="resultsMessage"></div>
+            <button class="restart-btn" id="restartBtn">Skúsiť znova</button>
+        </div>
+    </div>
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <h3>Nesprávna odpoveď</h3>
+            <p id="modalText"></p>
+            <button class="modal-close-btn" id="modalCloseBtn">Rozumiem</button>
+        </div>
+    </div>
+
+<script>
+const questionsData = [
+    {
+        question: "Kde a v akom časovom období sa začala priemyselná revolúcia?",
+        options: [
+            { text: "V Anglicku v 2. polovici 18. storočia", isCorrect: true, feedback: "" },
+            { text: "V Spojených štátoch amerických na začiatku 19. storočia", isCorrect: false, feedback: "USA sa pripojili až neskôr, revolúcia vznikla pôvodne v Anglicku v 2. polovici 18. storočia." },
+            { text: "Vo Francúzsku počas Napoleonských vojen", isCorrect: false, feedback: "Francúzsko nasledovalo až po rozšírení revolúcie z Anglicka, nebolo jej kolískou." },
+            { text: "V Anglicku v 1. polovici 17. storočia", isCorrect: false, feedback: "17. storočie je príliš skoro; revolúcia začala až v 2. polovici 18. storočia." }
+        ]
+    },
+    {
+        question: "Aké boli politické predpoklady Veľkej Británie pre vznik priemyselnej revolúcie?",
+        options: [
+            { text: "Konštitučná monarchia s mocou kráľa obmedzenou parlamentom, ktorý podporoval slobodu podnikania", isCorrect: true, feedback: "" },
+            { text: "Absolutistická monarchia, kde kráľ priamo riadil výstavbu tovární", isCorrect: false, feedback: "Británia bola konštitučnou, nie absolutistickou monarchiou, a kľúčová bola sloboda podnikania podporovaná parlamentom." },
+            { text: "Republika, ktorá vznikla po zvrhnutí kráľa a znárodnení pôdy", isCorrect: false, feedback: "Británia ostala monarchiou a k znárodňovaniu nedochádzalo, práve naopak, podporoval sa voľný trh." },
+            { text: "Silná centralizovaná moc cirkvi, ktorá financovala technický rozvoj", isCorrect: false, feedback: "Politické predpoklady sa týkali parlamentnej demokracie a slobody podnikania, nie moci cirkvi." }
+        ]
+    },
+    {
+        question: "Aké prírodné bohatstvo v Británii bolo kľúčové pre hospodárske predpoklady revolúcie?",
+        options: [
+            { text: "Dostatok nálezísk železnej rudy, uhlia a splavných tokov", isCorrect: true, feedback: "" },
+            { text: "Veľké ložiská ropy a zemného plynu", isCorrect: false, feedback: "Ropa a plyn sa stali dôležitými až omnoho neskôr, v 18. storočí bolo kľúčové uhlie a železná ruda." },
+            { text: "Náleziská drahých kovov (zlato, striebro) a diamantov", isCorrect: false, feedback: "Priemyselná revolúcia stála na úžitkových surovinách ako uhlie a železo, nie na drahých kovoch." },
+            { text: "Rozsiahle lesy poskytujúce drevo na stavbu lodí", isCorrect: false, feedback: "Hoci drevo bolo dôležité, text špecificky vyzdvihuje uhlie, železnú rudu a splavné toky." }
+        ]
+    },
+    {
+        question: "Aký proces bezprostredne predchádzal priemyselnej revolúcii a uvoľnil pracovnú silu?",
+        options: [
+            { text: "Agrárna revolúcia, ktorá zvýšila výnosy v poľnohospodárstve", isCorrect: true, feedback: "" },
+            { text: "Občianska vojna, ktorá vyhnala ľudí z vidieka", isCorrect: false, feedback: "Nebola to vojna, ale zefektívnenie poľnohospodárstva (agrárna revolúcia), čo umožnilo ľuďom odísť do priemyslu." },
+            { text: "Koloniálna expanzia do Indie", isCorrect: false, feedback: "Kolónie boli dôležité ako trh, ale bezprostredným predchodcom uvoľnenia pracovnej sily bola agrárna revolúcia." },
+            { text: "Vynález kníhtlače a šírenie vzdelanosti", isCorrect: false, feedback: "Kníhtlač je vynález z 15. storočia, priemyselnú revolúciu v 18. storočí predchádzala agrárna revolúcia." }
+        ]
+    },
+    {
+        question: "Kto a kedy vynašiel parný stroj, ktorý sa stal prevratným vynálezom?",
+        options: [
+            { text: "James Watt v roku 1765", isCorrect: true, feedback: "" },
+            { text: "Thomas Alva Edison v roku 1879", isCorrect: false, feedback: "Edison je známy žiarovkou a pôsobil neskôr. Parný stroj vynašiel James Watt v roku 1765." },
+            { text: "George Stephenson v roku 1814", isCorrect: false, feedback: "Stephenson zostrojil parnú lokomotívu, ale samotný parný stroj vynašiel James Watt skôr." },
+            { text: "Isaac Newton v roku 1705", isCorrect: false, feedback: "Newton bol fyzik, nie vynálezca parného stroja. Tým bol James Watt." }
+        ]
+    },
+    {
+        question: "Ktoré nové priemyselné odvetvia vznikli vďaka zavedeniu parného stroja?",
+        options: [
+            { text: "Strojárstvo a hutníctvo", isCorrect: true, feedback: "" },
+            { text: "Textilníctvo a odevný priemysel", isCorrect: false, feedback: "Textilná výroba existovala už predtým, ako nové špecifické odvetvia spojené s 'vekom pary' text uvádza strojárstvo a hutníctvo." },
+            { text: "Chemický a farmaceutický priemysel", isCorrect: false, feedback: "Tieto odvetvia sa naplno rozvinuli až v neskorších fázach, text spomína strojárstvo a hutníctvo." },
+            { text: "Automobilový priemysel a letectvo", isCorrect: false, feedback: "Toto sú odvetvia 20. storočia. V 18./19. storočí vzniklo strojárstvo a hutníctvo." }
+        ]
+    },
+    {
+        question: "Čo znamená pojem urbanizácia, ktorý sprevádzal priemyselnú revolúciu?",
+        options: [
+            { text: "Sťahovanie ľudí z vidieka do miest a vznik veľkomiest", isCorrect: true, feedback: "" },
+            { text: "Zavádzanie moderných strojov do poľnohospodárskej výroby", isCorrect: false, feedback: "To je mechanizácia poľnohospodárstva. Urbanizácia je proces sťahovania sa do miest." },
+            { text: "Rozširovanie volebného práva pre mestské obyvateľstvo", isCorrect: false, feedback: "Toto je politická reforma. Urbanizácia sa týka demografického presunu ľudí do miest." },
+            { text: "Výstavba nových ciest a železníc medzi štátmi", isCorrect: false, feedback: "Toto je rozvoj infraštruktúry. Urbanizácia je rast miest a sťahovanie ľudí do nich." }
+        ]
+    },
+    {
+        question: "Aké boli pracovné podmienky robotníkov v 18. storočí v Anglicku?",
+        options: [
+            { text: "Otrasné podmienky, pracovali celé rodiny vrátane detí, niekedy až 12 hodín denne", isCorrect: true, feedback: "" },
+            { text: "Prísne regulované štátom s garantovanou 8-hodinovou pracovnou dobou", isCorrect: false, feedback: "8-hodinová doba neexistovala, pracovalo sa až 12 hodín a štát do podmienok spočiatku nezasahoval." },
+            { text: "Majitelia tovární poskytovali robotníkom bezplatné ubytovanie a vzdelanie", isCorrect: false, feedback: "Naopak, majitelia na podmienky 'nijak nedbali' a robotníci žili v zlých podmienkach." },
+            { text: "Pracovať mohli len muži starší ako 18 rokov, ženy a deti boli chránené", isCorrect: false, feedback: "Bohužiaľ, pracovať museli celé rodiny, vrátane žien a detí." }
+        ]
+    },
+    {
+        question: "Ako sa volá prvá sociálna encyklika pápeža Leva XIII.?",
+        options: [
+            { text: "Rerum novarum", isCorrect: true, feedback: "" },
+            { text: "Mater et Magistra", isCorrect: false, feedback: "Toto je iná encyklika. Lev XIII. vydal encykliku s názvom Rerum novarum (O nových veciach)." },
+            { text: "Ora et Labora", isCorrect: false, feedback: "Toto je heslo benediktínov ('Modli sa a pracuj'), nie názov sociálnej encykliky Leva XIII." },
+            { text: "Deus Caritas Est", isCorrect: false, feedback: "Toto je encyklika Benedikta XVI. Prvá sociálna encyklika Leva XIII. bola Rerum novarum." }
+        ]
+    },
+    {
+        question: "Čo vynašiel Robert Fulton?",
+        options: [
+            { text: "Prvú paroloď", isCorrect: true, feedback: "" },
+            { text: "Parnú lokomotívu", isCorrect: false, feedback: "Lokomotívu vynašiel George Stephenson. Fulton vynašiel paroloď." },
+            { text: "Telegraf", isCorrect: false, feedback: "Telegraf vynašiel Edison (podľa textu, resp. zdokonalil). Fulton je spojený s paroloďou." },
+            { text: "Dynamit", isCorrect: false, feedback: "Dynamit vynašiel Alfred Nobel." }
+        ]
+    },
+    {
+        question: "Ktorý vynálezca je autorom dynamitu?",
+        options: [
+            { text: "Alfred Nobel", isCorrect: true, feedback: "" },
+            { text: "Werner von Siemens", isCorrect: false, feedback: "Siemens vynašiel dynamo, nie dynamit." },
+            { text: "Graham Bell", isCorrect: false, feedback: "Bell vynašiel telefón." },
+            { text: "Thomas Alva Edison", isCorrect: false, feedback: "Edison má na konte žiarovku a iné prístroje, ale dynamit vynašiel Nobel." }
+        ]
+    },
+    {
+        question: "Aký vynález sa pripisuje Wernerovi von Siemensovi?",
+        options: [
+            { text: "Dynamo", isCorrect: true, feedback: "" },
+            { text: "Elektromotor", isCorrect: false, feedback: "Text špecificky priraďuje Siemensovi vynález dynama." },
+            { text: "Röntgen", isCorrect: false, feedback: "Röntgen nie je v zozname vynálezov v texte. Siemens vynašiel dynamo." },
+            { text: "Dieselový motor", isCorrect: false, feedback: "Dieselový motor nie je predmetom tohto textu. Siemens je uvedený pri dyname." }
+        ]
+    },
+    {
+        question: "Ktorý dopravný prostriedok vynašli Bratia Wrightovci?",
+        options: [
+            { text: "Lietadlo", isCorrect: true, feedback: "" },
+            { text: "Teplovzdušný balón", isCorrect: false, feedback: "Balón vynašli bratia Montgolfiérovci. Wrightovci zostrojili lietadlo." },
+            { text: "Vzducholoď", isCorrect: false, feedback: "Text pripisuje Wrightovcom lietadlo, nie vzducholoď." },
+            { text: "Helikoptéru", isCorrect: false, feedback: "V texte sa spomína lietadlo v súvislosti s bratmi Wrightovcami." }
+        ]
+    }
+];
+
+// ===== UNIVERSAL SCRIPT (V8) =====
+let currentQuestion = 0;
+let score = 0;
+let answered = 0;
+let shuffledQuestions = [];
+let waitingForNext = false;
+let pendingNextQIndex = -1;
+
+function shuffle(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function initQuiz() {
+    currentQuestion = 0;
+    score = 0;
+    answered = 0;
+    waitingForNext = false;
+    pendingNextQIndex = -1;
+    shuffledQuestions = shuffle(questionsData).map(function(q) {
+        return { question: q.question, options: shuffle(q.options) };
+    });
+    document.getElementById('resultsCard').style.display = 'none';
+    document.getElementById('quizContainer').style.display = 'block';
+    renderQuiz();
+    updateProgress();
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function renderQuiz() {
+    var container = document.getElementById('quizContainer');
+    container.innerHTML = '';
+    shuffledQuestions.forEach(function(q, qIndex) {
+        var card = document.createElement('div');
+        card.className = 'question-card' + (qIndex === 0 ? ' active' : '');
+        card.id = 'qcard-' + qIndex;
+
+        var optionsHTML = '';
+        q.options.forEach(function(opt) {
+            optionsHTML += '<li class="option-item" data-correct="' + opt.isCorrect + '" data-feedback="' + escapeAttr(opt.feedback) + '">' + opt.text + '</li>';
+        });
+
+        card.innerHTML = '<div class="question-text"><span class="question-number">' + (qIndex + 1) + '</span>' + q.question + '</div><ul class="options-list">' + optionsHTML + '</ul><button class="next-btn" id="nextBtn-' + qIndex + '">Ďalšia otázka →</button>';
+        container.appendChild(card);
+
+        var items = card.querySelectorAll('.option-item');
+        items.forEach(function(item) {
+            item.addEventListener('click', function() {
+                handleAnswer(card, item, qIndex);
+            });
+        });
+
+        document.getElementById('nextBtn-' + qIndex).addEventListener('click', function() {
+            waitingForNext = false;
+            advanceToNext();
+        });
+    });
+}
+
+function escapeAttr(str) {
+    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function handleAnswer(card, selectedItem, qIndex) {
+    if (card.classList.contains('answered')) return;
+    card.classList.add('answered');
+    answered++;
+
+    var isCorrect = selectedItem.getAttribute('data-correct') === 'true';
+    var feedback = selectedItem.getAttribute('data-feedback');
+
+    if (isCorrect) {
+        selectedItem.classList.add('correct');
+        score++;
+        updateProgress();
+        // Correct answer: auto-advance after 1.5s
+        setTimeout(function() {
+            advanceToNext();
+        }, 1500);
+    } else {
+        selectedItem.classList.add('incorrect');
+        // Highlight the correct answer in green
+        card.querySelectorAll('.option-item').forEach(function(opt) {
+            if (opt.getAttribute('data-correct') === 'true') {
+                opt.classList.add('correct');
+            }
+        });
+        updateProgress();
+        // Wrong answer: NO auto-advance! Show modal, then manual "Next" button.
+        waitingForNext = true;
+        if (feedback && feedback.length > 0) {
+            showModal(decodeHTMLEntities(feedback), qIndex);
+        } else {
+            // No feedback text — show next button immediately
+            showNextButton(qIndex);
+        }
+    }
+}
+
+function showNextButton(qIndex) {
+    var btn = document.getElementById('nextBtn-' + qIndex);
+    if (btn) {
+        btn.classList.add('visible');
+        btn.focus();
+    }
+}
+
+function advanceToNext() {
+    // Guard: do not advance while waiting for user to review correct answer
+    if (waitingForNext) return;
+    if (answered >= shuffledQuestions.length) {
+        showResults();
+    } else {
+        currentQuestion++;
+        showQuestion(currentQuestion);
+    }
+}
+
+function decodeHTMLEntities(text) {
+    var ta = document.createElement('textarea');
+    ta.innerHTML = text;
+    return ta.value;
+}
+
+function showQuestion(index) {
+    document.querySelectorAll('.question-card').forEach(function(c) { c.classList.remove('active'); });
+    var next = document.getElementById('qcard-' + index);
+    if (next) {
+        next.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (window.MathJax) { window.MathJax.typesetPromise(); }
+    }
+}
+
+function updateProgress() {
+    var total = shuffledQuestions.length;
+    var pct = total > 0 ? Math.round((answered / total) * 100) : 0;
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressPercent').textContent = pct + ' %';
+    document.getElementById('questionCounter').textContent = 'Otázka ' + Math.min(answered + 1, total) + ' / ' + total;
+}
+
+function showResults() {
+    document.getElementById('quizContainer').style.display = 'none';
+    var resultsCard = document.getElementById('resultsCard');
+    resultsCard.style.display = 'block';
+
+    var total = shuffledQuestions.length;
+    var pct = Math.round((score / total) * 100);
+    var scoreEl = document.getElementById('resultsScore');
+    scoreEl.textContent = score + ' / ' + total + ' (' + pct + ' %)';
+
+    scoreEl.className = 'results-score';
+    if (pct >= 80) {
+        scoreEl.classList.add('excellent');
+        document.getElementById('resultsMessage').textContent = 'Výborný výsledok! Učivo máš dobre zvládnuté.';
+    } else if (pct >= 50) {
+        scoreEl.classList.add('good');
+        document.getElementById('resultsMessage').textContent = 'Dobrý výsledok, ale ešte je priestor na zlepšenie.';
+    } else {
+        scoreEl.classList.add('poor');
+        document.getElementById('resultsMessage').textContent = 'Skús si učivo zopakovať a test absolvovať znova.';
+    }
+
+    document.getElementById('progressBar').style.width = '100%';
+    document.getElementById('progressPercent').textContent = '100 %';
+    document.getElementById('questionCounter').textContent = 'Dokončené: ' + score + ' / ' + total + ' správne';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showModal(text, qIndex) {
+    pendingNextQIndex = qIndex;
+    document.getElementById('modalText').textContent = text;
+    document.getElementById('modalOverlay').classList.add('active');
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+    // After closing modal, show the "Next question" button so user can review the correct answer
+    if (waitingForNext && pendingNextQIndex >= 0) {
+        showNextButton(pendingNextQIndex);
+        pendingNextQIndex = -1;
+    }
+}
+
+document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' || e.key === 'Enter') {
+        if (document.getElementById('modalOverlay').classList.contains('active')) {
+            closeModal();
+        }
+    }
+});
+
+document.getElementById('restartBtn').addEventListener('click', function() {
+    initQuiz();
+});
+
+initQuiz();
+</script>
+</body>
+</html>
