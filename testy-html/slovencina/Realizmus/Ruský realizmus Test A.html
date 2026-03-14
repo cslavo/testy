@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktívny Test</title>
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 {
+            text-align: center; color: #fff; margin-bottom: 8px;
+            font-size: 1.5em; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); line-height: 1.3;
+        }
+        .subtitle {
+            text-align: center; color: rgba(255,255,255,0.9);
+            font-weight: 600; font-size: 1.1em; margin-bottom: 20px;
+        }
+        .progress-wrapper {
+            background: #fff; border-radius: 12px; padding: 16px 20px;
+            margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .progress-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px; font-weight: 600; color: #333; font-size: 0.95em;
+        }
+        .progress-bar-track {
+            height: 10px; background: #e0e0e0; border-radius: 5px; overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%; background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 5px; transition: width 0.4s ease; width: 0%;
+        }
+        .question-card {
+            background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .question-card.active { display: block; }
+        .question-card.answered { pointer-events: none; }
+        .question-text {
+            font-size: 1.1em; font-weight: 600; margin-bottom: 18px; line-height: 1.5; color: #333;
+        }
+        .question-number {
+            display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; width: 30px; height: 30px; border-radius: 50%;
+            text-align: center; line-height: 30px; font-size: 0.85em;
+            margin-right: 10px; font-weight: 700;
+        }
+        .options-list { list-style: none; }
+        .option-item {
+            padding: 13px 16px; margin-bottom: 8px; border: 2px solid #e0e0e0;
+            border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
+            font-size: 0.95em; line-height: 1.4; color: #333;
+        }
+        .option-item:hover { border-color: #667eea; background: #f0f0ff; }
+        .option-item.correct {
+            border-color: #4caf50; background: #e8f5e9; color: #2e7d32; font-weight: 600;
+        }
+        .option-item.incorrect {
+            border-color: #f44336; background: #ffebee; color: #c62828;
+        }
+        .next-btn {
+            display: none; margin-top: 16px; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; border: none; padding: 12px 28px; font-size: 1em; border-radius: 25px;
+            cursor: pointer; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+            float: right; pointer-events: auto;
+        }
+        .next-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .next-btn.visible { display: inline-block; }
+        .results-card {
+            background: #fff; border-radius: 12px; padding: 40px; text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .results-card h2 { font-size: 1.6em; margin-bottom: 10px; color: #333; }
+        .results-score { font-size: 2.8em; font-weight: 700; margin: 20px 0; }
+        .results-score.excellent { color: #4caf50; }
+        .results-score.good { color: #ff9800; }
+        .results-score.poor { color: #f44336; }
+        .results-message { font-size: 1.05em; margin-bottom: 30px; color: #555; }
+        .restart-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 14px 40px; font-size: 1.05em; border-radius: 30px; cursor: pointer;
+            font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .restart-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 1000;
+            justify-content: center; align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: #fff; border-radius: 12px; padding: 28px; max-width: 500px;
+            width: 90%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .modal-content h3 { color: #f44336; margin-bottom: 12px; font-size: 1.2em; }
+        .modal-content p { color: #555; font-size: 0.95em; line-height: 1.6; margin-bottom: 18px; }
+        .modal-close-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 10px 28px; border-radius: 20px; cursor: pointer; font-size: 0.95em; font-weight: 600;
+        }
+        .modal-close-btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ruský realizmus</h1>
+        <div class="subtitle">Test A</div>
+        <div class="progress-wrapper">
+            <div class="progress-header">
+                <span id="questionCounter">Otázka 1 / 0</span>
+                <span id="progressPercent">0 %</span>
+            </div>
+            <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="quizContainer"></div>
+        <div class="results-card" id="resultsCard">
+            <h2>Výsledky testu</h2>
+            <div class="results-score" id="resultsScore"></div>
+            <div class="results-message" id="resultsMessage"></div>
+            <button class="restart-btn" id="restartBtn">Skúsiť znova</button>
+        </div>
+    </div>
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <h3>Nesprávna odpoveď</h3>
+            <p id="modalText"></p>
+            <button class="modal-close-btn" id="modalCloseBtn">Rozumiem</button>
+        </div>
+    </div>
+
+<script>
+const questionsData = [
+    {
+        question: "Aké sú hlavné časové a tematické znaky ruského realizmu podľa textu?",
+        options: [
+            { text: "40. roky 19. storočia, zobrazenie života jednoduchého sedliackeho ľudu.", isCorrect: true, feedback: "" },
+            { text: "50. roky 19. storočia, zobrazenie úpadku cárskej moci a nástupu kapitalizmu.", isCorrect: false, feedback: "Hoci niektoré diela (Mŕtve duše) sa odohrávajú v 50. rokoch, samotný smer ruského realizmu je v texte definovaný od 40. rokov so zameraním na jednoduchý sedliacky ľud." },
+            { text: "40. roky 19. storočia, zameranie výhradne na život vysokej petrohradskej šľachty.", isCorrect: false, feedback: "Naopak, text zdôrazňuje, že stredobodom záujmu ruského realizmu bol život jednoduchého sedliackeho ľudu, nie výhradne šľachty." },
+            { text: "70. roky 19. storočia, analýza vnútorného sveta narkomanov a prostitútok.", isCorrect: false, feedback: "Tieto témy sa objavujú v neskorších dielach (Tolstoj, Dostojevskij), no ruský realizmus ako taký sa formuje už v 40. rokoch a jeho nosnou témou bol sedliacky ľud." }
+        ]
+    },
+    {
+        question: "Čo v kontexte Gogoľovej tvorby znamená pojem \"smiech cez slzy\"?",
+        options: [
+            { text: "Znamená to, že sa s humorom pozerá na jednoduchého človeka, ale so súcitom kritizuje (bičuje) vyššie vrstvy.", isCorrect: true, feedback: "" },
+            { text: "Znamená to, že vyššie vrstvy sa vysmievajú jednoduchému ľudu, čo u čitateľa vyvoláva súcit a slzy.", isCorrect: false, feedback: "Význam je opačný. Je to autorov prístup – on sám sa díva na jednoduchého človeka s humorom, zatiaľ čo vyššie vrstvy tvrdo kritizuje." },
+            { text: "Ide o psychologický stav hrdinov, ktorí prežívajú radosť tesne predtým, ako spáchajú samovraždu.", isCorrect: false, feedback: "Toto nie je definícia Gogoľovho \"smiechu cez slzy\". Ide o literárny postup, nie o psychologický stav postáv pred samovraždou." },
+            { text: "Označuje to situáciu, kedy autor píše komédiu, no sám v súkromí trpí ťažkými depresiami a šialenstvom.", isCorrect: false, feedback: "Gogoľ síce zomrel v šialenstve a depresii, ale termín \"smiech cez slzy\" priamo označuje jeho literárnu techniku, nie jeho osobný psychický stav pri písaní." }
+        ]
+    },
+    {
+        question: "Aká je hlavná zápletka Gogoľovej komédie Revízor?",
+        options: [
+            { text: "Skorumpovaní úradníci v mestečku si zo strachu pomýlia obyčajného úradníka z Petrohradu so skutočným revízorom.", isCorrect: true, feedback: "" },
+            { text: "Skutočný revízor z Petrohradu prichádza inkognito do penziónu a postupne odhaľuje korupciu a neporiadky v mestečku.", isCorrect: false, feedback: "Skutočný revízor prichádza až úplne na konci hry. Celý dej sa točí okolo falošného (domnelého) revízora." },
+            { text: "Úradníci v mestečku nastrčia falošného revízora, aby oklamali a vyhnali prichádzajúcu cársku kontrolu.", isCorrect: false, feedback: "Falošný revízor nebol nastrčený úmyselne. Úradníci konali v panike a sami uverili omylu, že hosť v penzióne je revízor." },
+            { text: "Revízor príde do mestečka, vezme si peniaze z úplatkov a následne ujde s dušami za hranice.", isCorrect: false, feedback: "Toto je pomiešanie dvoch diel. Prijímanie pôžičky na mŕtve duše a útek za hranice je zápletka Gogoľovho diela Mŕtve duše, nie Revízora." }
+        ]
+    },
+    {
+        question: "Aká je hlavná myšlienka generačného konfliktu v Turgenevovom románe Otcovia a deti?",
+        options: [
+            { text: "Nemôžeme postaviť nový svet, pokiaľ úplne zrušíme a odmietneme ten starý.", isCorrect: true, feedback: "" },
+            { text: "Stará generácia musí ustúpiť a nechať mladých nihilistov, aby vybudovali svet od nuly.", isCorrect: false, feedback: "Toto je presný opak hlavnej myšlienky. Turgenev poukazuje na to, že nie je možné stavať nové na úplnom zrušení starého (nihilizme)." },
+            { text: "Konflikt medzi otcami, ktorí chcú zrušiť nevoľníctvo, a deťmi, ktoré chcú zachovať staré statkárske tradície.", isCorrect: false, feedback: "Úlohy sú tu vymenené. Sú to otcovia, ktorí majú zastarané názory, a syn (nihilista), ktorý neprijíma nič staré." },
+            { text: "Spoločnosť sa zlepší jedine vtedy, ak generácia detí prijme pokoru a kresťanské základy od svojich otcov.", isCorrect: false, feedback: "Toto je životná filozofia L. N. Tolstého (kresťanské základy, pokora, pasivita), nie Turgenevova myšlienka v Otcoch a deťoch." }
+        ]
+    },
+    {
+        question: "Čo znamená, že Dostojevského román je \"polyfónny\"?",
+        options: [
+            { text: "Jeden román obsahuje prvky viacerých typov románov súčasne (filozofický, náboženský, sociálny, psychologický).", isCorrect: true, feedback: "" },
+            { text: "Znamená to, že hlavný hrdina má v sebe mnohohlasný vnútorný konflikt medzi dobrom a zlom, ktorý nevie vyriešiť.", isCorrect: false, feedback: "Hoci Dostojevskij skúma zápas dobra a zla v ľudskej duši, termín \"polyfónny román\" sa vzťahuje na žánrovú rozmanitosť diela, nie priamo na vnútorný hlas postavy." },
+            { text: "Dielo je napísané z pohľadu viacerých rozprávačov, ktorí pochádzajú z rôznych sociálnych vrstiev.", isCorrect: false, feedback: "Polyfónia u Dostojevského neznamená len striedanie rozprávačov, ale prelínanie rôznych románových rovín (filozofickej, psychologickej atď.) v jednom celku." },
+            { text: "Ide o hudobný podmaz, ktorý sa v tej dobe čítal nahlas pri prezentácii Dostojevského dramatických diel.", isCorrect: false, feedback: "Termín \"polyfónny\" je literárnovedný pojem pre mnohohlasnosť žánrov a ideí, s hudobným sprievodom to nemá nič spoločné." }
+        ]
+    },
+    {
+        question: "Kto a prečo zabil Nastasiu v Dostojevského románe Idiot?",
+        options: [
+            { text: "Zabil ju Rogožin, pretože žiarlil na Myškina.", isCorrect: true, feedback: "" },
+            { text: "Zabil ju knieža Myškin, pretože sa zbláznil, keď zistil, že spáva s kupcom Rogožinom.", isCorrect: false, feedback: "Myškin bol \"idiot\" v zmysle extrémnej dobroty, nikomu by neublížil. Zbláznil sa až z následkov jej smrti, ktorú nespôsobil." },
+            { text: "Spáchala samovraždu skokom pod vlak, pretože žila život, ktorý nechcela žiť.", isCorrect: false, feedback: "Skok pod vlak je osudom Anny Kareninovej (L. N. Tolstoj), nie Nastasie, ktorú zavraždil žiarlivý Rogožin." },
+            { text: "Zabil ju Rogožin na príkaz Myškina, aby ju vyslobodili zo situácie, z ktorej sa nevedela dostať.", isCorrect: false, feedback: "Myškin Nastasii ponúkol manželstvo, aby jej pomohol, nikdy neplánoval jej vraždu. Rogožin konal výhradne z vlastnej žiarlivosti." }
+        ]
+    },
+    {
+        question: "Ako je v románe Bratia Karamazovovci charakterizovaný syn Ivan?",
+        options: [
+            { text: "Je to chladný racionalista a nihilista, autor myšlienky \"keď niet Boha, je dovolené všetko\".", isCorrect: true, feedback: "" },
+            { text: "Je to ľahkovážny mladík milujúci zábavu, ktorý sa chcel zbaviť otca pre peniaze a rovnakú ženu.", isCorrect: false, feedback: "Táto charakteristika patrí najstaršiemu synovi Dimitrijovi, nie Ivanovi." },
+            { text: "Je to jemný, citlivý a nežný syn, ktorý nezvláda rodinné konflikty a odchádza do kláštora.", isCorrect: false, feedback: "Jemný syn, ktorý odchádza do kláštora, sa volá Aľoša, nie Ivan." },
+            { text: "Je to duševne zaostalý syn, ktorý v rodine slúži ako sluha a nakoniec spácha samovraždu.", isCorrect: false, feedback: "Tento opis sedí na štvrtého syna (z prvého manželstva/slúžky) Pavla/Smerďakova, nie na Ivana." }
+        ]
+    },
+    {
+        question: "Aký bol hlavný motív Rodiona Raskolnikova pre vraždu úžerníčky v diele Zločin a trest?",
+        options: [
+            { text: "Chcel dokázať princíp inšpirovaný Nietzschem, že patrí k \"výnimočným\" ľuďom, ktorí môžu všetko.", isCorrect: true, feedback: "" },
+            { text: "Bol extrémne chudobný a potreboval získať peniaze, aby zabránil sestre vydať sa za bohatého muža bez lásky.", isCorrect: false, feedback: "Hoci chudoba mu komplikovala situáciu a sestra sa chcela vydať pre peniaze, hlavným spúšťačom nebola lúpež, ale filozofický princíp (dokázať, že nie je obyčajný človek)." },
+            { text: "Vraždil zo žiarlivosti, pretože úžerníčka nútila Soňu Marmeládovú do prostitúcie.", isCorrect: false, feedback: "Soňu nenútila do prostitúcie úžerníčka. Soňa to robila dobrovoľne, aby uživila súrodencov. S Raskolnikovom sa zblížila až po jeho čine." },
+            { text: "Chcel sa pomstiť za to, že mu úžerníčka odmietla požičať peniaze na štúdium v Petrohrade.", isCorrect: false, feedback: "Raskolnikov si k nej išiel peniaze požičať, ale nevraždil z pomsty za odmietnutie. Išlo o testovanie vlastnej teórie o nadľuďoch." }
+        ]
+    },
+    {
+        question: "Z akých základov vychádzala životná filozofia L. N. Tolstého?",
+        options: [
+            { text: "Z kresťanských základov, presadzovala humanizmus, pokoru, pasivitu a sebazdokonaľovanie.", isCorrect: true, feedback: "" },
+            { text: "Z nihilizmu, presadzovala potrebu zničenia starých hodnôt pre vybudovanie lepšej spoločnosti.", isCorrect: false, feedback: "Nihilizmus a búranie starého sveta je témou Turgenevových Otcov a detí, Tolstého filozofia stála na kresťanstve a pokore." },
+            { text: "Z existencializmu, zameriavala sa na neustály zápas dobra a zla vo vnútri človeka.", isCorrect: false, feedback: "Zápas dobra a zla a vplyv na existencializmus sú charakteristické pre F. M. Dostojevského, nie L. N. Tolstého." },
+            { text: "Z teórie nadčloveka F. Nietzscheho, ktorá tvrdila, že silní jedinci určujú chod dejín.", isCorrect: false, feedback: "Nietzscheho teória inšpirovala postavu Raskolnikova (Dostojevskij). Tolstoj naopak veril, že dejiny tvoria masy, nie jednotlivci." }
+        ]
+    },
+    {
+        question: "Ako Tolstoj v románe Vojna a mier interpretuje tvorbu dejín?",
+        options: [
+            { text: "Dejiny netvoria veľkí jednotlivci a stratégovia, ale masy jednoduchých ľudí.", isCorrect: true, feedback: "" },
+            { text: "Dejiny určujú výnimoční vojvodcovia ako Napoleon, zatiaľ čo masy slúžia len ako nástroj.", isCorrect: false, feedback: "Text tvrdí presný opak. Tolstoj odmieta vplyv veľkých jednotlivcov (Napoleon je opísaný ako samoľúby) a zdôrazňuje silu masy." },
+            { text: "Chod dejín závisí výlučne od zrušenia nevoľníctva a politických rozhodnutí cára.", isCorrect: false, feedback: "Hoci je nevoľníctvo dobovou témou v iných dielach, vo Vojne a mieri Tolstoj prezentuje filozofiu, že dejinami hýbu masy ľudí, nie konkrétne politické dekréty cára." },
+            { text: "Dejiny tvorí len vopred určený náboženský osud, voči ktorému sú ľudia i velitelia bezmocní.", isCorrect: false, feedback: "Tolstoj nehovorí o fatálnom náboženskom predurčení dejín, ale explicitne pripisuje tvorbu dejín akciám más jednoduchých ľudí." }
+        ]
+    },
+    {
+        question: "Prečo úradník Karenin pôvodne odmietal rozvod so svojou manželkou Annou?",
+        options: [
+            { text: "Odmietal ho, pretože sa obával, čo si o rozvode pomyslí spoločnosť.", isCorrect: true, feedback: "" },
+            { text: "Odmietal ho, pretože Annu stále hlboko miloval a nechcel ju stratiť kvôli Vronskému.", isCorrect: false, feedback: "Manželstvo Kareninovcov bolo bez lásky. Jeho hlavným dôvodom proti rozvodu bolo zachovanie spoločenského statusu a strach z mienky okolia." },
+            { text: "Odmietal ho, pretože chcel Annu zničiť a poslať ju do vyhnanstva na Sibír.", isCorrect: false, feedback: "Karenin ju nechcel poslať na Sibír (to je motív z iných románov). Nechcel rozvod zo spoločenských dôvodov." },
+            { text: "Odmietal ho preto, že by podľa zákona prišiel o celý svoj majetok v prospech Vronského.", isCorrect: false, feedback: "Finančná strata nebola dôvodom, ktorý text uvádza. Hlavným motívom bol spoločenský kontext a to, čo si pomyslia ostatní." }
+        ]
+    },
+    {
+        question: "Akým spôsobom sa opäť stretávajú hlavné postavy v románe Vzkriesenie (Nechľudov a Maslovová)?",
+        options: [
+            { text: "Nechľudov sedí v súdnej komisii a spozná v obvinenej prostitútke dievča, ktoré v mladosti zviedol a opustil.", isCorrect: true, feedback: "" },
+            { text: "Nechľudov prichádza ako dobrovoľník na Sibír a náhodne tam stretne Maslovovú vo vyhnanstve.", isCorrect: false, feedback: "Na Sibír za ňou odišiel až neskôr, aby jej pomohol. Spoznali sa už predtým priamo počas súdneho procesu, kde on figuroval v komisii." },
+            { text: "Maslovová začne pracovať v dome Nechľudovovej tety a on sa do nej zamiluje.", isCorrect: false, feedback: "To bola ich minulosť. Opätovné stretnutie, ktoré spúšťa dej románu po rokoch, sa deje na súde, kde je ona obvinená." },
+            { text: "Stretnú sa vo vlaku pri návrate z liečenia vo Švajčiarsku, kde si Nechľudov uvedomí svoju vinu.", isCorrect: false, feedback: "Motív stretnutia vo vlaku po liečení vo Švajčiarsku patrí kniežaťu Myškinovi (román Idiot), nie Nechľudovovi." }
+        ]
+    },
+    {
+        question: "Ktorý známy výrok patrí Antonovi Pavlovičovi Čechovovi?",
+        options: [
+            { text: "\"Stručnosť je sestra talentu.\"", isCorrect: true, feedback: "" },
+            { text: "\"Neobviňuj zrkadlo, ak ti namiesto tváre ukáže rypák.\"", isCorrect: false, feedback: "Toto je motto Gogoľovej hry Revízor, nie Čechovov výrok." },
+            { text: "\"Keď niet Boha, je dovolené všetko.\"", isCorrect: false, feedback: "Túto myšlienku vyslovuje postava Ivana v Dostojevského Bratoch Karamazovovcoch." },
+            { text: "\"Človek je hádankou, ktorú treba rozlúštiť.\"", isCorrect: false, feedback: "Tento výrok je prejavom Dostojevského antropocentrizmu, nepatrí Čechovovi." }
+        ]
+    },
+    {
+        question: "Ako v Čechovovej poviedke Tučný a chudý zareaguje chudý úradník, keď zistí, že jeho kamarát z detstva je veľmi bohatý?",
+        options: [
+            { text: "Stratí svoju dôstojnosť, začne sa ponižovať a kamarátovi vykať.", isCorrect: true, feedback: "" },
+            { text: "Snaží sa od neho získať peniaze, aby si mohol otvoriť vlastný úrad.", isCorrect: false, feedback: "Text nespomína žiadnu žiadosť o pôžičku. Pointou poviedky je psychologická zmena – okamžitá strata hrdosti a sebaúcty úradníka." },
+            { text: "Začne ho z nenávisti a žiarlivosti udávať za neplnenie povinností na pošte.", isCorrect: false, feedback: "Udávanie na pošte je motív spojený s Gogoľovým Revízorom, nemá nič spoločné s touto Čechovovou poviedkou." },
+            { text: "Ignoruje ho a tvári sa, že ho nespoznáva, pretože sa hanbí za svoju chudobu.", isCorrect: false, feedback: "Úradník sa nezačne tváriť, že ho nepozná, naopak, začne k nemu pristupovať s extrémnou, až ponižujúcou úctou a vykaním." }
+        ]
+    },
+    {
+        question: "Kto je podľa textu označený ako \"kladný hrdina\" v Gogoľovom románe Mŕtve duše?",
+        options: [
+            { text: "Ruský ľud.", isCorrect: true, feedback: "" },
+            { text: "Podvodník Čičikov, pretože bojuje proti skorumpovanému systému.", isCorrect: false, feedback: "Čičikov vôbec nie je kladný hrdina, je to podvodník, ktorý systém využíva vo svoj prospech na nákup mŕtvych duší." },
+            { text: "Cár, ktorý ponúkol pôžičku na záchranu nevoľníkov.", isCorrect: false, feedback: "Cárska vláda len poskytovala pôžičky za duše, čo Čičikov zneužil. Cár nie je v diele kladným hrdinom." },
+            { text: "Mladý študent, ktorý chcel zmeniť spoločnosť.", isCorrect: false, feedback: "Mladý ambiciózny študent je Rodion Raskolnikov zo Zločinu a trestu (Dostojevskij), nie postava z Mŕtvych duší." }
+        ]
+    }
+];
+
+// ===== UNIVERSAL SCRIPT (V8) =====
+let currentQuestion = 0;
+let score = 0;
+let answered = 0;
+let shuffledQuestions = [];
+let waitingForNext = false;
+let pendingNextQIndex = -1;
+
+function shuffle(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function initQuiz() {
+    currentQuestion = 0;
+    score = 0;
+    answered = 0;
+    waitingForNext = false;
+    pendingNextQIndex = -1;
+    shuffledQuestions = shuffle(questionsData).map(function(q) {
+        return { question: q.question, options: shuffle(q.options) };
+    });
+    document.getElementById('resultsCard').style.display = 'none';
+    document.getElementById('quizContainer').style.display = 'block';
+    renderQuiz();
+    updateProgress();
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function renderQuiz() {
+    var container = document.getElementById('quizContainer');
+    container.innerHTML = '';
+    shuffledQuestions.forEach(function(q, qIndex) {
+        var card = document.createElement('div');
+        card.className = 'question-card' + (qIndex === 0 ? ' active' : '');
+        card.id = 'qcard-' + qIndex;
+
+        var optionsHTML = '';
+        q.options.forEach(function(opt) {
+            optionsHTML += '<li class="option-item" data-correct="' + opt.isCorrect + '" data-feedback="' + escapeAttr(opt.feedback) + '">' + opt.text + '</li>';
+        });
+
+        card.innerHTML = '<div class="question-text"><span class="question-number">' + (qIndex + 1) + '</span>' + q.question + '</div><ul class="options-list">' + optionsHTML + '</ul><button class="next-btn" id="nextBtn-' + qIndex + '">Ďalšia otázka →</button>';
+        container.appendChild(card);
+
+        var items = card.querySelectorAll('.option-item');
+        items.forEach(function(item) {
+            item.addEventListener('click', function() {
+                handleAnswer(card, item, qIndex);
+            });
+        });
+
+        document.getElementById('nextBtn-' + qIndex).addEventListener('click', function() {
+            waitingForNext = false;
+            advanceToNext();
+        });
+    });
+}
+
+function escapeAttr(str) {
+    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function handleAnswer(card, selectedItem, qIndex) {
+    if (card.classList.contains('answered')) return;
+    card.classList.add('answered');
+    answered++;
+
+    var isCorrect = selectedItem.getAttribute('data-correct') === 'true';
+    var feedback = selectedItem.getAttribute('data-feedback');
+
+    if (isCorrect) {
+        selectedItem.classList.add('correct');
+        score++;
+        updateProgress();
+        setTimeout(function() {
+            advanceToNext();
+        }, 1500);
+    } else {
+        selectedItem.classList.add('incorrect');
+        card.querySelectorAll('.option-item').forEach(function(opt) {
+            if (opt.getAttribute('data-correct') === 'true') {
+                opt.classList.add('correct');
+            }
+        });
+        updateProgress();
+        waitingForNext = true;
+        if (feedback && feedback.length > 0) {
+            showModal(decodeHTMLEntities(feedback), qIndex);
+        } else {
+            showNextButton(qIndex);
+        }
+    }
+}
+
+function showNextButton(qIndex) {
+    var btn = document.getElementById('nextBtn-' + qIndex);
+    if (btn) {
+        btn.classList.add('visible');
+        btn.focus();
+    }
+}
+
+function advanceToNext() {
+    if (waitingForNext) return;
+    if (answered >= shuffledQuestions.length) {
+        showResults();
+    } else {
+        currentQuestion++;
+        showQuestion(currentQuestion);
+    }
+}
+
+function decodeHTMLEntities(text) {
+    var ta = document.createElement('textarea');
+    ta.innerHTML = text;
+    return ta.value;
+}
+
+function showQuestion(index) {
+    document.querySelectorAll('.question-card').forEach(function(c) { c.classList.remove('active'); });
+    var next = document.getElementById('qcard-' + index);
+    if (next) {
+        next.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (window.MathJax) { window.MathJax.typesetPromise(); }
+    }
+}
+
+function updateProgress() {
+    var total = shuffledQuestions.length;
+    var pct = total > 0 ? Math.round((answered / total) * 100) : 0;
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressPercent').textContent = pct + ' %';
+    document.getElementById('questionCounter').textContent = 'Otázka ' + Math.min(answered + 1, total) + ' / ' + total;
+}
+
+function showResults() {
+    document.getElementById('quizContainer').style.display = 'none';
+    var resultsCard = document.getElementById('resultsCard');
+    resultsCard.style.display = 'block';
+
+    var total = shuffledQuestions.length;
+    var pct = Math.round((score / total) * 100);
+    var scoreEl = document.getElementById('resultsScore');
+    scoreEl.textContent = score + ' / ' + total + ' (' + pct + ' %)';
+
+    scoreEl.className = 'results-score';
+    if (pct >= 80) {
+        scoreEl.classList.add('excellent');
+        document.getElementById('resultsMessage').textContent = 'Výborný výsledok! Učivo máš dobre zvládnuté.';
+    } else if (pct >= 50) {
+        scoreEl.classList.add('good');
+        document.getElementById('resultsMessage').textContent = 'Dobrý výsledok, ale ešte je priestor na zlepšenie.';
+    } else {
+        scoreEl.classList.add('poor');
+        document.getElementById('resultsMessage').textContent = 'Skús si učivo zopakovať a test absolvovať znova.';
+    }
+
+    document.getElementById('progressBar').style.width = '100%';
+    document.getElementById('progressPercent').textContent = '100 %';
+    document.getElementById('questionCounter').textContent = 'Dokončené: ' + score + ' / ' + total + ' správne';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showModal(text, qIndex) {
+    pendingNextQIndex = qIndex;
+    document.getElementById('modalText').textContent = text;
+    document.getElementById('modalOverlay').classList.add('active');
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+    if (waitingForNext && pendingNextQIndex >= 0) {
+        showNextButton(pendingNextQIndex);
+        pendingNextQIndex = -1;
+    }
+}
+
+document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' || e.key === 'Enter') {
+        if (document.getElementById('modalOverlay').classList.contains('active')) {
+            closeModal();
+        }
+    }
+});
+
+document.getElementById('restartBtn').addEventListener('click', function() {
+    initQuiz();
+});
+
+initQuiz();
+</script>
+</body>
+</html>

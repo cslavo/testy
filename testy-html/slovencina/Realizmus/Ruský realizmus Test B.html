@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktívny Test</title>
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 {
+            text-align: center; color: #fff; margin-bottom: 8px;
+            font-size: 1.5em; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); line-height: 1.3;
+        }
+        .subtitle {
+            text-align: center; color: rgba(255,255,255,0.9);
+            font-weight: 600; font-size: 1.1em; margin-bottom: 20px;
+        }
+        .progress-wrapper {
+            background: #fff; border-radius: 12px; padding: 16px 20px;
+            margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .progress-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px; font-weight: 600; color: #333; font-size: 0.95em;
+        }
+        .progress-bar-track {
+            height: 10px; background: #e0e0e0; border-radius: 5px; overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%; background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 5px; transition: width 0.4s ease; width: 0%;
+        }
+        .question-card {
+            background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .question-card.active { display: block; }
+        .question-card.answered { pointer-events: none; }
+        .question-text {
+            font-size: 1.1em; font-weight: 600; margin-bottom: 18px; line-height: 1.5; color: #333;
+        }
+        .question-number {
+            display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; width: 30px; height: 30px; border-radius: 50%;
+            text-align: center; line-height: 30px; font-size: 0.85em;
+            margin-right: 10px; font-weight: 700;
+        }
+        .options-list { list-style: none; }
+        .option-item {
+            padding: 13px 16px; margin-bottom: 8px; border: 2px solid #e0e0e0;
+            border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
+            font-size: 0.95em; line-height: 1.4; color: #333;
+        }
+        .option-item:hover { border-color: #667eea; background: #f0f0ff; }
+        .option-item.correct {
+            border-color: #4caf50; background: #e8f5e9; color: #2e7d32; font-weight: 600;
+        }
+        .option-item.incorrect {
+            border-color: #f44336; background: #ffebee; color: #c62828;
+        }
+        .next-btn {
+            display: none; margin-top: 16px; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; border: none; padding: 12px 28px; font-size: 1em; border-radius: 25px;
+            cursor: pointer; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+            float: right; pointer-events: auto;
+        }
+        .next-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .next-btn.visible { display: inline-block; }
+        .results-card {
+            background: #fff; border-radius: 12px; padding: 40px; text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .results-card h2 { font-size: 1.6em; margin-bottom: 10px; color: #333; }
+        .results-score { font-size: 2.8em; font-weight: 700; margin: 20px 0; }
+        .results-score.excellent { color: #4caf50; }
+        .results-score.good { color: #ff9800; }
+        .results-score.poor { color: #f44336; }
+        .results-message { font-size: 1.05em; margin-bottom: 30px; color: #555; }
+        .restart-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 14px 40px; font-size: 1.05em; border-radius: 30px; cursor: pointer;
+            font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .restart-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 1000;
+            justify-content: center; align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: #fff; border-radius: 12px; padding: 28px; max-width: 500px;
+            width: 90%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .modal-content h3 { color: #f44336; margin-bottom: 12px; font-size: 1.2em; }
+        .modal-content p { color: #555; font-size: 0.95em; line-height: 1.6; margin-bottom: 18px; }
+        .modal-close-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 10px 28px; border-radius: 20px; cursor: pointer; font-size: 0.95em; font-weight: 600;
+        }
+        .modal-close-btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ruský realizmus</h1>
+        <div class="subtitle">Test B</div>
+        <div class="progress-wrapper">
+            <div class="progress-header">
+                <span id="questionCounter">Otázka 1 / 0</span>
+                <span id="progressPercent">0 %</span>
+            </div>
+            <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="quizContainer"></div>
+        <div class="results-card" id="resultsCard">
+            <h2>Výsledky testu</h2>
+            <div class="results-score" id="resultsScore"></div>
+            <div class="results-message" id="resultsMessage"></div>
+            <button class="restart-btn" id="restartBtn">Skúsiť znova</button>
+        </div>
+    </div>
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <h3>Nesprávna odpoveď</h3>
+            <p id="modalText"></p>
+            <button class="modal-close-btn" id="modalCloseBtn">Rozumiem</button>
+        </div>
+    </div>
+
+<script>
+const questionsData = [
+    {
+        question: "Ako skončil život dramatika a prozaika Nikolaja Vasiľjeviča Gogoľa?",
+        options: [
+            { text: "Zomrel v šialenstve a ťažkej depresii.", isCorrect: true, feedback: "" },
+            { text: "Bol odsúdený a zomrel vo vyhnanstve na Sibíri.", isCorrect: false, feedback: "Gogoľ nebol poslaný na Sibír (to bol osud mnohých Dostojevského postáv). Zomrel psychicky chorý." },
+            { text: "Spáchal samovraždu skokom pod vlak.", isCorrect: false, feedback: "Toto je osud Anny Kareninovej, fiktívnej postavy z Tolstého románu, nie reálneho autora Gogoľa." },
+            { text: "Prežil pokojnú starosť vo Švajčiarsku, kde sa liečil z epilepsie.", isCorrect: false, feedback: "Liečenie vo Švajčiarsku z epilepsie je charakteristické pre Dostojevského postavu kniežaťa Myškina (Idiot)." }
+        ]
+    },
+    {
+        question: "S akým cieľom kupoval Čičikov nevoľníkov v románe Mŕtve duše?",
+        options: [
+            { text: "Plánoval na mŕtve duše získať vládnu pôžičku a následne ujsť za hranice.", isCorrect: true, feedback: "" },
+            { text: "Chcel ich oslobodiť z nevoľníctva a postaviť sa na čelo sedliackeho povstania.", isCorrect: false, feedback: "Čičikov bol podvodník. Jeho zámerom nebol záchrana ľudu, ale výlučne finančný obohacovací podvod." },
+            { text: "Potreboval lacnú pracovnú silu na svoj upadajúci statok, aby sa vyhol plateniu daní.", isCorrect: false, feedback: "Kupoval mŕtve duše (teda ľudí, ktorí fyzicky nežili, ale papierovo áno). Nemohli u neho pracovať, slúžili len ako zábezpeka pre štátnu pôžičku." },
+            { text: "Kupoval ich pre skutočného revízora, aby tak odčinil korupciu a neporiadok v úradoch.", isCorrect: false, feedback: "Revízor a neporiadky v úradoch sú námetom iného Gogoľovho diela (Revízor). Čičikov konal pre vlastný zisk." }
+        ]
+    },
+    {
+        question: "Aké známe motto uviedol Gogoľ k svojej dráme Revízor?",
+        options: [
+            { text: "\"Neobviňuj zrkadlo, ak ti namiesto tváre ukáže rypák.\"", isCorrect: true, feedback: "" },
+            { text: "\"Keď niet Boha, je dovolené všetko.\"", isCorrect: false, feedback: "Toto je slávna myšlienka Ivana Karamazova z Dostojevského románu Bratia Karamazovovci." },
+            { text: "\"Stručnosť je sestra talentu.\"", isCorrect: false, feedback: "Tento výrok o písaní presadzoval Anton Pavlovič Čechov, majster krátkej poviedky." },
+            { text: "\"Človek je hádankou, ktorú musíme s pokorou prijať.\"", isCorrect: false, feedback: "Toto je modifikácia Dostojevského princípu antropocentrizmu (človek je hádankou) skombinovaná s Tolstého pokorou." }
+        ]
+    },
+    {
+        question: "Aký bol literárny a spoločenský cieľ I. S. Turgeneva, zmieňovaný v súvislosti s jeho dielom?",
+        options: [
+            { text: "Kritizoval nevoľnícky systém v Rusku a hľadal silu, ktorá by mohla krajinu zachrániť.", isCorrect: true, feedback: "" },
+            { text: "Snažil sa dokázať, že ruský štát môžu zachrániť iba výnimoční jednotlivci – nadľudia.", isCorrect: false, feedback: "Myšlienka \"výnimočných jednotlivcov\" (nadľudí) vychádza od Nietzscheho a polemizuje s ňou Dostojevskij v Zločine a treste, nie Turgenev." },
+            { text: "Chcel úplne zrušiť starý svet a propagoval čistý nihilizmus ako jedinú cestu vpred.", isCorrect: false, feedback: "Naopak. V Otcoch a deťoch Turgenev ukazuje, že nemôžeme postaviť nový svet, ak ten starý úplne zrušíme a odmietneme (čo reprezentoval nihilista Bazarov)." },
+            { text: "Zameriaval sa na obhajobu cárskej byrokracie a vysmieval sa chudobnému úradníctvu.", isCorrect: false, feedback: "Turgenev cársky systém (najmä nevoľníctvo) kritizoval, neobhajoval ho. Výsmech z úradníctva strácajúceho hrdosť je skôr doménou Čechova." }
+        ]
+    },
+    {
+        question: "Čo v Dostojevského tvorbe znamená pojem \"antropocentrizmus\"?",
+        options: [
+            { text: "Znamená to, že v centre autorovej pozornosti je človek, ktorý je chápaný ako nevyriešená \"hádanka\".", isCorrect: true, feedback: "" },
+            { text: "Je to presvedčenie, že v centre každej dobrej literatúry musí byť spoločenská, nie psychologická kritika.", isCorrect: false, feedback: "Dostojevskij bol práve naopak zameraný primárne na psychológiu a vnútro jednotlivca (človeka), nie výhradne na spoločenskú kritiku ako celok." },
+            { text: "Znamená to, že autor rozdeľuje ľudí na \"obyčajných\" a \"výnimočných\".", isCorrect: false, feedback: "Rozdelenie na obyčajných a výnimočných je konkrétna filozofia Rodiona Raskolnikova inšpirovaná Nietzschem, nie všeobecná definícia Dostojevského antropocentrizmu." },
+            { text: "Ide o autorský postoj, kedy rozprávač vystupuje ako Boh, ktorý hodnotí všetky postavy.", isCorrect: false, feedback: "Antropocentrizmus neznamená božský pohľad, ale doslova to, že centrom všetkého diania a záujmu je samotný človek (anthropos)." }
+        ]
+    },
+    {
+        question: "Prečo sa hlavný hrdina Dostojevského románu volá \"Idiot\"?",
+        options: [
+            { text: "Pretože knieža Myškin bol naivný hrdina a extrémny dobrák, ktorý veril, že všetko sa dá prekonať láskou.", isCorrect: true, feedback: "" },
+            { text: "Pretože trpel poúrazovou duševnou zaostalosťou a nechápal spoločenské pravidlá vo vlaku.", isCorrect: false, feedback: "Myshkin sa sice liečil na epilepsiu, no nebol mentálne zaostalý v medicínskom zmysle; označenie \"idiot\" odkazovalo na jeho sociálnu nepriechodnosť kvôli absolútnej morálnej čistote." },
+            { text: "Pretože zavraždil starú úžerníčku bez toho, aby si premyslel následky svojho konania.", isCorrect: false, feedback: "Vražda úžerníčky je námetom románu Zločin a trest (Raskolnikov), nie románu Idiot." },
+            { text: "Pretože odmietal uveriť v Boha a neustále opakoval, že všetko je dovolené.", isCorrect: false, feedback: "Tento postoj je charakteristický pre nihilistu Ivana z Bratov Karamazovovcov, kým Myškin má naopak silné kresťanské a mravné hodnoty." }
+        ]
+    },
+    {
+        question: "Kto fyzicky zavraždil otca v románe Bratia Karamazovovci a čo ho k tomu viedlo?",
+        options: [
+            { text: "Zavraždil ho zaostalý syn Pavel (Smerďakov), ktorého naviedla Ivanova myšlienka o neexistencii Boha.", isCorrect: true, feedback: "" },
+            { text: "Zavraždil ho najstarší syn Dimitrij, pretože chcel od otca peniaze a žiarlil na jeho frajerku.", isCorrect: false, feedback: "Dimitrij mal motív a chcel otca zabiť, no v skutočnosti to nespravil. Bol len nespravodlivo odsúdený súdom." },
+            { text: "Zavraždil ho chladný racionalista Ivan, aby si v praxi overil teóriu \"keď niet Boha, je dovolené všetko\".", isCorrect: false, feedback: "Ivan bol autorom myšlienky, ale vraždu fyzicky nevykonal. Iba ňou zmanipuloval Pavla, ktorý otca zabil." },
+            { text: "Otec spáchal samovraždu pre svoje zvrhlé a nemravné správanie, ale synovia boli obvinení z vraždy.", isCorrect: false, feedback: "Otec nespáchal samovraždu, bol skutočne zavraždený Pavlom. Samovraždu neskôr spáchal samotný vrah (Pavel)." }
+        ]
+    },
+    {
+        question: "Ako prijal najstarší syn Dimitrij Karamazov skutočnosť, že ho súd nespravodlivo odsúdil na Sibír za vraždu otca?",
+        options: [
+            { text: "Prijal tento trest ako formu vnútornej katarzie (očisty).", isCorrect: true, feedback: "" },
+            { text: "Odmietol trest a s pomocou brata Aľošu ušiel za hranice do Talianska.", isCorrect: false, feedback: "Dimitrij trest prijal a na Sibír s ním odišla aj Grušenka. Do Talianska odišiel autor Gogoľ po premiére Revízora." },
+            { text: "Zrútil sa, zbláznil a spáchal pred odchodom na Sibír samovraždu.", isCorrect: false, feedback: "Samovraždu spáchal skutočný vrah Pavel, ktorému súd neveril. Dimitrij trest zobral na seba ako očistu." },
+            { text: "Preklial svojich bratov a vyhlásil, že ľudia by odsúdili Krista aj druhýkrát.", isCorrect: false, feedback: "Odsúdenie Krista druhýkrát je hlboká filozofická myšlienka prítomná v románe (Legenda o Veľkom inkvizítorovi od Ivana), ale nie je to Dimitrijova reakcia na rozsudok." }
+        ]
+    },
+    {
+        question: "Akú rolu zohrala Soňa Marmeládová v živote Rodiona Raskolnikova (Zločin a trest)?",
+        options: [
+            { text: "Presvedčila ho, aby sa priznal k vražde, očistil sa a odpykal si trest na Sibíri.", isCorrect: true, feedback: "" },
+            { text: "Sama sa priznala k vražde úžerníčky, aby Raskolnikova zachránila pred väzením.", isCorrect: false, feedback: "Soňa na seba vinu nevzala. Ako silne veriaca osoba ho presvedčila, aby prijal zodpovednosť za svoj čin on sám." },
+            { text: "Požičala mu peniaze zarobené prostitúciou, aby mohol dokončiť štúdium a utajiť vraždu.", isCorrect: false, feedback: "Jej rola nebola finančná (peniaze potrebovala pre svojich súrodencov), ale morálna a duchovná záchrana Raskolnikova." },
+            { text: "Zradila ho a udala na polícii, pretože nedokázala žiť s vrahom.", isCorrect: false, feedback: "Soňa Raskolnikova nezradila, naopak, stála pri ňom, podporovala ho v priznaní a neskôr za ním dokonca odišla na Sibír." }
+        ]
+    },
+    {
+        question: "Ako je v románe Vojna a mier zobrazený kontrast medzi veliteľmi Kutuzovom a Napoleonom?",
+        options: [
+            { text: "Kutuzov využíva jednoduchý sedliacky rozum a rozumie ľudu, zatiaľ čo Napoleon je samoľúby a márnomyseľný dobyvateľ.", isCorrect: true, feedback: "" },
+            { text: "Napoleon je zobrazený ako osloboditeľ nevoľníkov, zatiaľ čo Kutuzov bojuje za udržanie starých statkárskych tradícií.", isCorrect: false, feedback: "Tolstoj neopisuje Napoleona ako osloboditeľa, ale ako márnomyseľného jednotlivca, ktorý si namýšľa, že riadi dejiny. Kutuzov je v diele vykreslený pozitívne cez prepojenie s ruským ľudom." },
+            { text: "Kutuzov je chladný racionalista bez citu, kým Napoleon rozhoduje na základe náboženskej pokory.", isCorrect: false, feedback: "Práve naopak. Kutuzov koná prirodzene a rozumie ľudu, zatiaľ čo pokora je to posledné, čo by text pripisoval Napoleonovi." },
+            { text: "Obaja sú vykreslení ako hrdinovia, ktorí vlastnými strategickými rozhodnutiami stvorili ruské dejiny.", isCorrect: false, feedback: "Podľa Tolstého netvoria dejiny veľkí jednotlivci, ale masy ľudí. Preto ani jeden nie je strojcom dejín, hoci Kutuzov túto silu más chápe lepšie." }
+        ]
+    },
+    {
+        question: "Aký vzťah slúži v románe Anna Karenina ako pozitívny protiklad k tragickému osudu Anny a Vronského?",
+        options: [
+            { text: "Šťastné manželstvo Kitty a Levina.", isCorrect: true, feedback: "" },
+            { text: "Romantický vzťah Soně a Raskolnikova.", isCorrect: false, feedback: "Soňa a Raskolnikov sú postavy z Dostojevského románu Zločin a trest, nie z Anny Kareninovej." },
+            { text: "Mystický vzťah Nastasie a kupca Rogožina.", isCorrect: false, feedback: "Nastasja a Rogožin sú postavy z Dostojevského románu Idiot a ich vzťah končí vraždou, nie je pozitívnym protikladom." },
+            { text: "Manželstvo medzi kniežaťom Nechľudovom a Kaťušou Maslovovou.", isCorrect: false, feedback: "Tieto postavy patria do Tolstého románu Vzkriesenie, pričom Kaťuša si Nechľudova nakoniec ani nevezme." }
+        ]
+    },
+    {
+        question: "Ako sa končí životný príbeh Anny Kareninovej v rovnomennej knihe?",
+        options: [
+            { text: "Je hysterická a nespokojná so svojím životom, a preto spácha samovraždu skokom pod vlak.", isCorrect: true, feedback: "" },
+            { text: "Zmieria sa s Kareninom, opustí Vronského a venuje sa výchove svojho syna Serjožu.", isCorrect: false, feedback: "Anna sa k manželovi nevrátila a prístup k Serjožovi jej bol odopretý. Zomrela tragicky." },
+            { text: "Zostane opustená vo vyhnanstve na Sibíri, kam ju spoločnosť vyženie za neveru.", isCorrect: false, feedback: "Sibírske vyhnanstvo nie je údelom Anny Kareninovej, ale mnohých iných ruských hrdinov (napr. Maslovová, Raskolnikov)." },
+            { text: "Zblázni sa, keď zistí, že Vronský tajne miluje Kitty.", isCorrect: false, feedback: "Hoci Kitty kedysi Vronského chcela, napokon sa vydala za Levina a bola šťastná. Annina tragédia pramenila z jej vnútornej rozpoltenosti a zúfalstva, ukončeného skokom pod vlak." }
+        ]
+    },
+    {
+        question: "Ako sa skončí snaha kniežaťa Nechľudova o pomoc Maslovovej na konci románu Vzkriesenie?",
+        options: [
+            { text: "Maslovová odmietne jeho ponuku na manželstvo a vydá sa za iného vyhnanca.", isCorrect: true, feedback: "" },
+            { text: "Maslovová sa za neho vydá, spoločne ujdú zo Sibíri a založia školu pre sedliakov.", isCorrect: false, feedback: "Založenie školy pre sedliakov urobil sám autor (Tolstoj) vo svojom osobnom živote. Maslovová si Nechľudova nevzala." },
+            { text: "Nechľudovovi sa podarí dokázať jej nevinu, čím ju oslobodí, a ich cesty sa navždy rozídu.", isCorrect: false, feedback: "Maslovová na Sibíri zostala a vydala sa za iného vyhnanca. Obaja však dosiahli morálne \"vzkriesenie\"." },
+            { text: "Maslovová skočí pod vlak, pretože nedokáže zabudnúť na to, že ju v mladosti opustil.", isCorrect: false, feedback: "Skok pod vlak je osudom Anny Kareninovej, nie Maslovovej. Maslovová nájde novú cestu s iným mužom." }
+        ]
+    },
+    {
+        question: "Ktorá z nasledujúcich charakteristík opisuje typických hrdinov Čechovových drám (napr. Chameleón)?",
+        options: [
+            { text: "Hrdinovia prežívajú zložité vnútorné stavy, trápia sa, sú nerozhodní a chýba im odvaha konať.", isCorrect: true, feedback: "" },
+            { text: "Hrdinovia sú zvyčajne ambiciózni študenti, ktorí kvôli filozofickým ideálom páchajú násilné činy.", isCorrect: false, feedback: "Ambiciózny študent páchajúci násilie z presvedčenia je Rodion Raskolnikov od Dostojevského, nie bežný Čechovov hrdina." },
+            { text: "Hrdinovia sa snažia odhaliť korupciu na najvyšších úradoch pomocou ostrého satyrického humoru.", isCorrect: false, feedback: "Hoci Čechov píše satiru, jeho dramatickí hrdinovia netvoria akčné postavy odhaľujúce korupciu (to je skôr motív Gogoľovho Revízora), ale pasívne postavy." },
+            { text: "Sú to vždy bohatí statkári, ktorí rozdávajú svoj majetok a snažia sa žiť životom jednoduchého roľníka.", isCorrect: false, feedback: "Tento opis sa vzťahuje na osobný život L. N. Tolstého a jeho hľadanie jednoduchej pravdy, nie na charakteristiku Čechovových dramatických postáv." }
+        ]
+    },
+    {
+        question: "Čo podľa textu symbolizuje názov a motív vtáka v Čechovovej hre Čajka?",
+        options: [
+            { text: "Symbolizuje slobodu.", isCorrect: true, feedback: "" },
+            { text: "Symbolizuje rýchlu stratu ľudskej dôstojnosti pred bohatstvom.", isCorrect: false, feedback: "Strata dôstojnosti pred bohatstvom je ústredným motívom iného Čechovovho diela, poviedky Tučný a chudý." },
+            { text: "Je metaforou pre ruský ľud, ktorý na krídlach uniká pred nevoľníctvom.", isCorrect: false, feedback: "Táto metafora sa v texte pri Čechovovi vôbec nenachádza. Záchrana ľudu je témou skôr u Gogoľa alebo Turgeneva." },
+            { text: "Zosobňuje psychickú chorobu a depresiu, ktorej podľahla hlavná hrdinka.", isCorrect: false, feedback: "Čajka priamo symbolizuje slobodu, po ktorej postavy túžia (napr. Nina chce byť slávnou umelkyňou), nie primárne klinickú depresiu." }
+        ]
+    }
+];
+
+// ===== UNIVERSAL SCRIPT (V8) =====
+let currentQuestion = 0;
+let score = 0;
+let answered = 0;
+let shuffledQuestions = [];
+let waitingForNext = false;
+let pendingNextQIndex = -1;
+
+function shuffle(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function initQuiz() {
+    currentQuestion = 0;
+    score = 0;
+    answered = 0;
+    waitingForNext = false;
+    pendingNextQIndex = -1;
+    shuffledQuestions = shuffle(questionsData).map(function(q) {
+        return { question: q.question, options: shuffle(q.options) };
+    });
+    document.getElementById('resultsCard').style.display = 'none';
+    document.getElementById('quizContainer').style.display = 'block';
+    renderQuiz();
+    updateProgress();
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function renderQuiz() {
+    var container = document.getElementById('quizContainer');
+    container.innerHTML = '';
+    shuffledQuestions.forEach(function(q, qIndex) {
+        var card = document.createElement('div');
+        card.className = 'question-card' + (qIndex === 0 ? ' active' : '');
+        card.id = 'qcard-' + qIndex;
+
+        var optionsHTML = '';
+        q.options.forEach(function(opt) {
+            optionsHTML += '<li class="option-item" data-correct="' + opt.isCorrect + '" data-feedback="' + escapeAttr(opt.feedback) + '">' + opt.text + '</li>';
+        });
+
+        card.innerHTML = '<div class="question-text"><span class="question-number">' + (qIndex + 1) + '</span>' + q.question + '</div><ul class="options-list">' + optionsHTML + '</ul><button class="next-btn" id="nextBtn-' + qIndex + '">Ďalšia otázka →</button>';
+        container.appendChild(card);
+
+        var items = card.querySelectorAll('.option-item');
+        items.forEach(function(item) {
+            item.addEventListener('click', function() {
+                handleAnswer(card, item, qIndex);
+            });
+        });
+
+        document.getElementById('nextBtn-' + qIndex).addEventListener('click', function() {
+            waitingForNext = false;
+            advanceToNext();
+        });
+    });
+}
+
+function escapeAttr(str) {
+    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function handleAnswer(card, selectedItem, qIndex) {
+    if (card.classList.contains('answered')) return;
+    card.classList.add('answered');
+    answered++;
+
+    var isCorrect = selectedItem.getAttribute('data-correct') === 'true';
+    var feedback = selectedItem.getAttribute('data-feedback');
+
+    if (isCorrect) {
+        selectedItem.classList.add('correct');
+        score++;
+        updateProgress();
+        setTimeout(function() {
+            advanceToNext();
+        }, 1500);
+    } else {
+        selectedItem.classList.add('incorrect');
+        card.querySelectorAll('.option-item').forEach(function(opt) {
+            if (opt.getAttribute('data-correct') === 'true') {
+                opt.classList.add('correct');
+            }
+        });
+        updateProgress();
+        waitingForNext = true;
+        if (feedback && feedback.length > 0) {
+            showModal(decodeHTMLEntities(feedback), qIndex);
+        } else {
+            showNextButton(qIndex);
+        }
+    }
+}
+
+function showNextButton(qIndex) {
+    var btn = document.getElementById('nextBtn-' + qIndex);
+    if (btn) {
+        btn.classList.add('visible');
+        btn.focus();
+    }
+}
+
+function advanceToNext() {
+    if (waitingForNext) return;
+    if (answered >= shuffledQuestions.length) {
+        showResults();
+    } else {
+        currentQuestion++;
+        showQuestion(currentQuestion);
+    }
+}
+
+function decodeHTMLEntities(text) {
+    var ta = document.createElement('textarea');
+    ta.innerHTML = text;
+    return ta.value;
+}
+
+function showQuestion(index) {
+    document.querySelectorAll('.question-card').forEach(function(c) { c.classList.remove('active'); });
+    var next = document.getElementById('qcard-' + index);
+    if (next) {
+        next.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (window.MathJax) { window.MathJax.typesetPromise(); }
+    }
+}
+
+function updateProgress() {
+    var total = shuffledQuestions.length;
+    var pct = total > 0 ? Math.round((answered / total) * 100) : 0;
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressPercent').textContent = pct + ' %';
+    document.getElementById('questionCounter').textContent = 'Otázka ' + Math.min(answered + 1, total) + ' / ' + total;
+}
+
+function showResults() {
+    document.getElementById('quizContainer').style.display = 'none';
+    var resultsCard = document.getElementById('resultsCard');
+    resultsCard.style.display = 'block';
+
+    var total = shuffledQuestions.length;
+    var pct = Math.round((score / total) * 100);
+    var scoreEl = document.getElementById('resultsScore');
+    scoreEl.textContent = score + ' / ' + total + ' (' + pct + ' %)';
+
+    scoreEl.className = 'results-score';
+    if (pct >= 80) {
+        scoreEl.classList.add('excellent');
+        document.getElementById('resultsMessage').textContent = 'Výborný výsledok! Učivo máš dobre zvládnuté.';
+    } else if (pct >= 50) {
+        scoreEl.classList.add('good');
+        document.getElementById('resultsMessage').textContent = 'Dobrý výsledok, ale ešte je priestor na zlepšenie.';
+    } else {
+        scoreEl.classList.add('poor');
+        document.getElementById('resultsMessage').textContent = 'Skús si učivo zopakovať a test absolvovať znova.';
+    }
+
+    document.getElementById('progressBar').style.width = '100%';
+    document.getElementById('progressPercent').textContent = '100 %';
+    document.getElementById('questionCounter').textContent = 'Dokončené: ' + score + ' / ' + total + ' správne';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showModal(text, qIndex) {
+    pendingNextQIndex = qIndex;
+    document.getElementById('modalText').textContent = text;
+    document.getElementById('modalOverlay').classList.add('active');
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+    if (waitingForNext && pendingNextQIndex >= 0) {
+        showNextButton(pendingNextQIndex);
+        pendingNextQIndex = -1;
+    }
+}
+
+document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' || e.key === 'Enter') {
+        if (document.getElementById('modalOverlay').classList.contains('active')) {
+            closeModal();
+        }
+    }
+});
+
+document.getElementById('restartBtn').addEventListener('click', function() {
+    initQuiz();
+});
+
+initQuiz();
+</script>
+</body>
+</html>

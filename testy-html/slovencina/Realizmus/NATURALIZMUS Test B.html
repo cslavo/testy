@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktívny Test</title>
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 {
+            text-align: center; color: #fff; margin-bottom: 8px;
+            font-size: 1.5em; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); line-height: 1.3;
+        }
+        .subtitle {
+            text-align: center; color: rgba(255,255,255,0.9);
+            font-weight: 600; font-size: 1.1em; margin-bottom: 20px;
+        }
+        .progress-wrapper {
+            background: #fff; border-radius: 12px; padding: 16px 20px;
+            margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .progress-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px; font-weight: 600; color: #333; font-size: 0.95em;
+        }
+        .progress-bar-track {
+            height: 10px; background: #e0e0e0; border-radius: 5px; overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%; background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 5px; transition: width 0.4s ease; width: 0%;
+        }
+        .question-card {
+            background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .question-card.active { display: block; }
+        .question-card.answered { pointer-events: none; }
+        .question-text {
+            font-size: 1.1em; font-weight: 600; margin-bottom: 18px; line-height: 1.5; color: #333;
+        }
+        .question-number {
+            display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; width: 30px; height: 30px; border-radius: 50%;
+            text-align: center; line-height: 30px; font-size: 0.85em;
+            margin-right: 10px; font-weight: 700;
+        }
+        .options-list { list-style: none; }
+        .option-item {
+            padding: 13px 16px; margin-bottom: 8px; border: 2px solid #e0e0e0;
+            border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
+            font-size: 0.95em; line-height: 1.4; color: #333;
+        }
+        .option-item:hover { border-color: #667eea; background: #f0f0ff; }
+        .option-item.correct {
+            border-color: #4caf50; background: #e8f5e9; color: #2e7d32; font-weight: 600;
+        }
+        .option-item.incorrect {
+            border-color: #f44336; background: #ffebee; color: #c62828;
+        }
+        .next-btn {
+            display: none; margin-top: 16px; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; border: none; padding: 12px 28px; font-size: 1em; border-radius: 25px;
+            cursor: pointer; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+            float: right; pointer-events: auto;
+        }
+        .next-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .next-btn.visible { display: inline-block; }
+        .results-card {
+            background: #fff; border-radius: 12px; padding: 40px; text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .results-card h2 { font-size: 1.6em; margin-bottom: 10px; color: #333; }
+        .results-score { font-size: 2.8em; font-weight: 700; margin: 20px 0; }
+        .results-score.excellent { color: #4caf50; }
+        .results-score.good { color: #ff9800; }
+        .results-score.poor { color: #f44336; }
+        .results-message { font-size: 1.05em; margin-bottom: 30px; color: #555; }
+        .restart-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 14px 40px; font-size: 1.05em; border-radius: 30px; cursor: pointer;
+            font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .restart-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 1000;
+            justify-content: center; align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: #fff; border-radius: 12px; padding: 28px; max-width: 500px;
+            width: 90%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .modal-content h3 { color: #f44336; margin-bottom: 12px; font-size: 1.2em; }
+        .modal-content p { color: #555; font-size: 0.95em; line-height: 1.6; margin-bottom: 18px; }
+        .modal-close-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 10px 28px; border-radius: 20px; cursor: pointer; font-size: 0.95em; font-weight: 600;
+        }
+        .modal-close-btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>NATURALIZMUS</h1>
+        <div class="subtitle">Test B</div>
+        <div class="progress-wrapper">
+            <div class="progress-header">
+                <span id="questionCounter">Otázka 1 / 0</span>
+                <span id="progressPercent">0 %</span>
+            </div>
+            <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="quizContainer"></div>
+        <div class="results-card" id="resultsCard">
+            <h2>Výsledky testu</h2>
+            <div class="results-score" id="resultsScore"></div>
+            <div class="results-message" id="resultsMessage"></div>
+            <button class="restart-btn" id="restartBtn">Skúsiť znova</button>
+        </div>
+    </div>
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <h3>Nesprávna odpoveď</h3>
+            <p id="modalText"></p>
+            <button class="modal-close-btn" id="modalCloseBtn">Rozumiem</button>
+        </div>
+    </div>
+
+<script>
+const questionsData = [
+    {
+        question: "Z akého slova a významu je odvodený názov literárneho smeru naturalizmus?",
+        options: [
+            { text: "Zo slova \"nature\", čo znamená príroda, prirodzenosť alebo podstata.", isCorrect: true, feedback: "" },
+            { text: "Zo slova \"nativus\", čo v preklade znamená vrodený alebo dedičný.", isCorrect: false, feedback: "Hoci naturalizmus primárne rieši dedičnosť, samotný názov je etymologicky odvodený od slova \"nature\" (príroda/prirodzenosť)." },
+            { text: "Zo slova \"natura\", čo označuje vedu o ľudskom tele a anatómii.", isCorrect: false, feedback: "Slovo \"nature\" v tomto literárnom kontexte odkazuje na prírodu a ľudskú podstatu, nie špecificky na anatómiu." },
+            { text: "Zo slova \"natural\", čo v 19. storočí označovalo mestskú chudobu.", isCorrect: false, feedback: "Názov nesúvisí so slovom pre chudobu. Odvíja sa od snahy zachytiť prirodzenosť a biologickú podstatu človeka." }
+        ]
+    },
+    {
+        question: "Ktorý významný vedec a jeho teória zásadne ovplyvnili Emila Zolu pri tvorbe naturalizmu?",
+        options: [
+            { text: "Charles Darwin a jeho evolučná teória.", isCorrect: true, feedback: "" },
+            { text: "Sigmund Freud a jeho psychoanalýza.", isCorrect: false, feedback: "Freudova psychoanalýza vznikla neskôr a ovplyvnila skôr modernu a surrealizmus. Zola vychádzal z Darwina." },
+            { text: "Karl Marx a jeho teória triedneho boja.", isCorrect: false, feedback: "Hoci Zola opisuje drsné sociálne rozdiely, základom jeho literárnej teórie bol biologický determinizmus vychádzajúci z Darwina." },
+            { text: "Louis Pasteur a jeho objavy v mikrobiológii.", isCorrect: false, feedback: "Zola sa síce inšpiroval vedou a biológiou, ale konkrétne išlo o Darwinovu teóriu o vývoji a vplyve prostredia." }
+        ]
+    },
+    {
+        question: "Aké výrazové prostriedky a scény sú typické pre naturalistické literárne diela?",
+        options: [
+            { text: "Detailné zachytenie krvi, násilia, sexu, použitie drsného jazyka a vulgarizmov.", isCorrect: true, feedback: "" },
+            { text: "Zjemňovanie reality, poetický jazyk a vyhýbanie sa tabuizovaným témam.", isCorrect: false, feedback: "Toto je presný opak naturalizmu. Naturalizmus realitu nezjemňuje, ale ukazuje ju v jej najsurovejšej a najdrsnejšej podobe." },
+            { text: "Sústredenie sa výlučne na psychologické monológy bez opisu vonkajšieho prostredia.", isCorrect: false, feedback: "Naturalizmus si zakladá práve na detailných, takmer vedeckých opisoch vonkajšieho prostredia a biologických prejavov postáv." },
+            { text: "Používanie výlučne spisovného a vznešeného jazyka aj u postáv z nižších vrstiev.", isCorrect: false, feedback: "Naturalizmus zámerne používa drsný jazyk a vulgarizmy, aby čo najvernejšie a najautentickejšie zachytil reč nižších vrstiev." }
+        ]
+    },
+    {
+        question: "Čo spája členov rodiny v rozsiahlom románovom cykle Rougonovci - Macquartovci?",
+        options: [
+            { text: "Sú potomkami jednej starej matky a zdedili po nej duševnú poruchu.", isCorrect: true, feedback: "" },
+            { text: "Všetci pracujú v rovnakej uhoľnej bani a zúčastňujú sa veľkého štrajku.", isCorrect: false, feedback: "V bani sa odohráva len dej románu Germinal. Celú rodinu spája spoločný pôvod a dedičná duševná porucha." },
+            { text: "Spája ich obrovský zdedený majetok, o ktorý medzi sebou neustále bojujú.", isCorrect: false, feedback: "Rodinu nespája bohatstvo, ale naopak, ťažká dedičná duševná záťaž, ktorá determinuje ich osudy." },
+            { text: "Všetci členovia rodiny prepadnú alkoholizmu a skončia na ulici.", isCorrect: false, feedback: "Alkoholizmus je ústredným motívom konkrétneho románu Zabijak, nie je to spojivo celého rodinného cyklu." }
+        ]
+    },
+    {
+        question: "Aká konkrétna udalosť zmení život manželského páru v románe Zabijak k horšiemu?",
+        options: [
+            { text: "Manžel, ktorý pracoval ako pokrývač, spadne zo strechy a prestane pracovať.", isCorrect: true, feedback: "" },
+            { text: "Manželka príde o prácu v práčovni a rodina sa ocitne úplne bez príjmu.", isCorrect: false, feedback: "Hlavným spúšťačom rodinného úpadku bol úraz manžela (pád zo strechy), po ktorom si zvykol na nečinnosť a začal piť." },
+            { text: "Ich dcéra Nana utečie z domu, čo rodičov doženie k zúfalstvu a pitiu.", isCorrect: false, feedback: "Úpadok rodičov začal manželovým úrazom a alkoholom oveľa skôr, než Nana vôbec dospela a stala sa kurtizánou." },
+            { text: "Manžel je prepustený z bane kvôli účasti na organizovanom štrajku.", isCorrect: false, feedback: "Banícke prostredie a štrajk sú témou románu Germinal. V Zabijakovi pracuje manžel ako pokrývač striech." }
+        ]
+    },
+    {
+        question: "Aké boli pôvodné ambície mladej Nany v rovnomennom románe?",
+        options: [
+            { text: "Mala sny a túžila sa stať úspešnou herečkou.", isCorrect: true, feedback: "" },
+            { text: "Chcela sa výhodne vydať za bohatého šľachtica a opustiť Paríž.", isCorrect: false, feedback: "Nana primárne chcela preraziť ako herečka. Keď sa jej to kvôli podmienkam nedarilo, stala sa z nej kurtizána." },
+            { text: "Túžila otvoriť si vlastný krajčírsky salón a vymaniť sa z chudoby.", isCorrect: false, feedback: "Jej ambície nesmerovali k poctivému remeslu, ale k svetlu reflektorov, divadlu a sláve." },
+            { text: "Chcela odísť do kláštora, aby odčinila hriechy svojich rodičov.", isCorrect: false, feedback: "Nana nemala žiadne náboženské ambície, bola plná svetských snov o sláve a nakoniec sa stala kurtizánou." }
+        ]
+    },
+    {
+        question: "Ako sa končí príbeh manželského páru v románe Zabijak?",
+        options: [
+            { text: "Obaja manželia zo zúfalstva pijú alkohol, až kým sa neupijú k smrti.", isCorrect: true, feedback: "" },
+            { text: "Manželka opustí svojho muža a začne nový život so svojou dcérou Nanou.", isCorrect: false, feedback: "Naturalizmus neponúka takéto šťastné a nádejné konce. Matka začne piť tiež a obaja manželia zomierajú." },
+            { text: "Manžel sa vylieči z alkoholizmu, ale zomiera na následky starého zranenia.", isCorrect: false, feedback: "Manžel sa nevylieči. Alkoholizmu prepadnú obaja a práve ten sa im stane osudným (\"zabijakom\")." },
+            { text: "Sú vysťahovaní na ulicu, kde zamrznú počas krutej parížskej zimy.", isCorrect: false, feedback: "Príčinou ich smrti nie je zamrznutie na ulici, ale priamy biologický dôsledok ťažkého a dlhodobého alkoholizmu." }
+        ]
+    }
+];
+
+// ===== UNIVERSAL SCRIPT (V8) =====
+let currentQuestion = 0;
+let score = 0;
+let answered = 0;
+let shuffledQuestions = [];
+let waitingForNext = false;
+let pendingNextQIndex = -1;
+
+function shuffle(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function initQuiz() {
+    currentQuestion = 0;
+    score = 0;
+    answered = 0;
+    waitingForNext = false;
+    pendingNextQIndex = -1;
+    shuffledQuestions = shuffle(questionsData).map(function(q) {
+        return { question: q.question, options: shuffle(q.options) };
+    });
+    document.getElementById('resultsCard').style.display = 'none';
+    document.getElementById('quizContainer').style.display = 'block';
+    renderQuiz();
+    updateProgress();
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function renderQuiz() {
+    var container = document.getElementById('quizContainer');
+    container.innerHTML = '';
+    shuffledQuestions.forEach(function(q, qIndex) {
+        var card = document.createElement('div');
+        card.className = 'question-card' + (qIndex === 0 ? ' active' : '');
+        card.id = 'qcard-' + qIndex;
+
+        var optionsHTML = '';
+        q.options.forEach(function(opt) {
+            optionsHTML += '<li class="option-item" data-correct="' + opt.isCorrect + '" data-feedback="' + escapeAttr(opt.feedback) + '">' + opt.text + '</li>';
+        });
+
+        card.innerHTML = '<div class="question-text"><span class="question-number">' + (qIndex + 1) + '</span>' + q.question + '</div><ul class="options-list">' + optionsHTML + '</ul><button class="next-btn" id="nextBtn-' + qIndex + '">Ďalšia otázka →</button>';
+        container.appendChild(card);
+
+        var items = card.querySelectorAll('.option-item');
+        items.forEach(function(item) {
+            item.addEventListener('click', function() {
+                handleAnswer(card, item, qIndex);
+            });
+        });
+
+        document.getElementById('nextBtn-' + qIndex).addEventListener('click', function() {
+            waitingForNext = false;
+            advanceToNext();
+        });
+    });
+}
+
+function escapeAttr(str) {
+    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function handleAnswer(card, selectedItem, qIndex) {
+    if (card.classList.contains('answered')) return;
+    card.classList.add('answered');
+    answered++;
+
+    var isCorrect = selectedItem.getAttribute('data-correct') === 'true';
+    var feedback = selectedItem.getAttribute('data-feedback');
+
+    if (isCorrect) {
+        selectedItem.classList.add('correct');
+        score++;
+        updateProgress();
+        setTimeout(function() {
+            advanceToNext();
+        }, 1500);
+    } else {
+        selectedItem.classList.add('incorrect');
+        card.querySelectorAll('.option-item').forEach(function(opt) {
+            if (opt.getAttribute('data-correct') === 'true') {
+                opt.classList.add('correct');
+            }
+        });
+        updateProgress();
+        waitingForNext = true;
+        if (feedback && feedback.length > 0) {
+            showModal(decodeHTMLEntities(feedback), qIndex);
+        } else {
+            showNextButton(qIndex);
+        }
+    }
+}
+
+function showNextButton(qIndex) {
+    var btn = document.getElementById('nextBtn-' + qIndex);
+    if (btn) {
+        btn.classList.add('visible');
+        btn.focus();
+    }
+}
+
+function advanceToNext() {
+    if (waitingForNext) return;
+    if (answered >= shuffledQuestions.length) {
+        showResults();
+    } else {
+        currentQuestion++;
+        showQuestion(currentQuestion);
+    }
+}
+
+function decodeHTMLEntities(text) {
+    var ta = document.createElement('textarea');
+    ta.innerHTML = text;
+    return ta.value;
+}
+
+function showQuestion(index) {
+    document.querySelectorAll('.question-card').forEach(function(c) { c.classList.remove('active'); });
+    var next = document.getElementById('qcard-' + index);
+    if (next) {
+        next.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (window.MathJax) { window.MathJax.typesetPromise(); }
+    }
+}
+
+function updateProgress() {
+    var total = shuffledQuestions.length;
+    var pct = total > 0 ? Math.round((answered / total) * 100) : 0;
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressPercent').textContent = pct + ' %';
+    document.getElementById('questionCounter').textContent = 'Otázka ' + Math.min(answered + 1, total) + ' / ' + total;
+}
+
+function showResults() {
+    document.getElementById('quizContainer').style.display = 'none';
+    var resultsCard = document.getElementById('resultsCard');
+    resultsCard.style.display = 'block';
+
+    var total = shuffledQuestions.length;
+    var pct = Math.round((score / total) * 100);
+    var scoreEl = document.getElementById('resultsScore');
+    scoreEl.textContent = score + ' / ' + total + ' (' + pct + ' %)';
+
+    scoreEl.className = 'results-score';
+    if (pct >= 80) {
+        scoreEl.classList.add('excellent');
+        document.getElementById('resultsMessage').textContent = 'Výborný výsledok! Učivo máš dobre zvládnuté.';
+    } else if (pct >= 50) {
+        scoreEl.classList.add('good');
+        document.getElementById('resultsMessage').textContent = 'Dobrý výsledok, ale ešte je priestor na zlepšenie.';
+    } else {
+        scoreEl.classList.add('poor');
+        document.getElementById('resultsMessage').textContent = 'Skús si učivo zopakovať a test absolvovať znova.';
+    }
+
+    document.getElementById('progressBar').style.width = '100%';
+    document.getElementById('progressPercent').textContent = '100 %';
+    document.getElementById('questionCounter').textContent = 'Dokončené: ' + score + ' / ' + total + ' správne';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showModal(text, qIndex) {
+    pendingNextQIndex = qIndex;
+    document.getElementById('modalText').textContent = text;
+    document.getElementById('modalOverlay').classList.add('active');
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+    if (waitingForNext && pendingNextQIndex >= 0) {
+        showNextButton(pendingNextQIndex);
+        pendingNextQIndex = -1;
+    }
+}
+
+document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' || e.key === 'Enter') {
+        if (document.getElementById('modalOverlay').classList.contains('active')) {
+            closeModal();
+        }
+    }
+});
+
+document.getElementById('restartBtn').addEventListener('click', function() {
+    initQuiz();
+});
+
+initQuiz();
+</script>
+</body>
+</html>

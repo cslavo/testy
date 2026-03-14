@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktívny Test</title>
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 {
+            text-align: center; color: #fff; margin-bottom: 8px;
+            font-size: 1.5em; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); line-height: 1.3;
+        }
+        .subtitle {
+            text-align: center; color: rgba(255,255,255,0.9);
+            font-weight: 600; font-size: 1.1em; margin-bottom: 20px;
+        }
+        .progress-wrapper {
+            background: #fff; border-radius: 12px; padding: 16px 20px;
+            margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .progress-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px; font-weight: 600; color: #333; font-size: 0.95em;
+        }
+        .progress-bar-track {
+            height: 10px; background: #e0e0e0; border-radius: 5px; overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%; background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 5px; transition: width 0.4s ease; width: 0%;
+        }
+        .question-card {
+            background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .question-card.active { display: block; }
+        .question-card.answered { pointer-events: none; }
+        .question-text {
+            font-size: 1.1em; font-weight: 600; margin-bottom: 18px; line-height: 1.5; color: #333;
+        }
+        .question-number {
+            display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; width: 30px; height: 30px; border-radius: 50%;
+            text-align: center; line-height: 30px; font-size: 0.85em;
+            margin-right: 10px; font-weight: 700;
+        }
+        .options-list { list-style: none; }
+        .option-item {
+            padding: 13px 16px; margin-bottom: 8px; border: 2px solid #e0e0e0;
+            border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
+            font-size: 0.95em; line-height: 1.4; color: #333;
+        }
+        .option-item:hover { border-color: #667eea; background: #f0f0ff; }
+        .option-item.correct {
+            border-color: #4caf50; background: #e8f5e9; color: #2e7d32; font-weight: 600;
+        }
+        .option-item.incorrect {
+            border-color: #f44336; background: #ffebee; color: #c62828;
+        }
+        .next-btn {
+            display: none; margin-top: 16px; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; border: none; padding: 12px 28px; font-size: 1em; border-radius: 25px;
+            cursor: pointer; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+            float: right; pointer-events: auto;
+        }
+        .next-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .next-btn.visible { display: inline-block; }
+        .results-card {
+            background: #fff; border-radius: 12px; padding: 40px; text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .results-card h2 { font-size: 1.6em; margin-bottom: 10px; color: #333; }
+        .results-score { font-size: 2.8em; font-weight: 700; margin: 20px 0; }
+        .results-score.excellent { color: #4caf50; }
+        .results-score.good { color: #ff9800; }
+        .results-score.poor { color: #f44336; }
+        .results-message { font-size: 1.05em; margin-bottom: 30px; color: #555; }
+        .restart-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 14px 40px; font-size: 1.05em; border-radius: 30px; cursor: pointer;
+            font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .restart-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 1000;
+            justify-content: center; align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: #fff; border-radius: 12px; padding: 28px; max-width: 500px;
+            width: 90%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .modal-content h3 { color: #f44336; margin-bottom: 12px; font-size: 1.2em; }
+        .modal-content p { color: #555; font-size: 0.95em; line-height: 1.6; margin-bottom: 18px; }
+        .modal-close-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 10px 28px; border-radius: 20px; cursor: pointer; font-size: 0.95em; font-weight: 600;
+        }
+        .modal-close-btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>FRANCÚZSKY REALIZMUS</h1>
+        <div class="subtitle">Test A</div>
+        <div class="progress-wrapper">
+            <div class="progress-header">
+                <span id="questionCounter">Otázka 1 / 0</span>
+                <span id="progressPercent">0 %</span>
+            </div>
+            <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="quizContainer"></div>
+        <div class="results-card" id="resultsCard">
+            <h2>Výsledky testu</h2>
+            <div class="results-score" id="resultsScore"></div>
+            <div class="results-message" id="resultsMessage"></div>
+            <button class="restart-btn" id="restartBtn">Skúsiť znova</button>
+        </div>
+    </div>
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <h3>Nesprávna odpoveď</h3>
+            <p id="modalText"></p>
+            <button class="modal-close-btn" id="modalCloseBtn">Rozumiem</button>
+        </div>
+    </div>
+
+<script>
+const questionsData = [
+    {
+        question: "Aký je spoločný názov pre tvorbu Honoré de Balzaca, ktorá podáva obraz francúzskej spoločnosti?",
+        options: [
+            { text: "Ľudská komédia", isCorrect: true, feedback: "" },
+            { text: "Kamenný román", isCorrect: false, feedback: "Kamenný román je pojem označujúci Balzacovo využívanie návratných postáv, nie názov jeho súborného diela." },
+            { text: "Stratené ilúzie", isCorrect: false, feedback: "Stratené ilúzie je názov jedného konkrétneho Balzacovho románu, nie celej jeho tvorby." },
+            { text: "Mravy francúzskeho vidieka", isCorrect: false, feedback: "Mravy francúzskeho vidieka je podtitul Flaubertovho románu Pani Bovaryová." }
+        ]
+    },
+    {
+        question: "Prečo sa otec Goriot postupne sťahoval do lacnejších izieb na najvyšších poschodiach penziónu?",
+        options: [
+            { text: "Prišiel o peniaze a firmu kvôli dcéram, ktoré si kupoval a dotoval ich život vo vyššej spoločnosti.", isCorrect: true, feedback: "" },
+            { text: "Jeho dcéry sa za neho hanbili a tak mu prenajali malú izbu, aby nebol na očiach bohatej smotánke.", isCorrect: false, feedback: "Dcéry mu izbu neprenajali. Goriot si ju musel platiť sám z toho mála, čo mu zostalo po predaji firmy, ku ktorému ho donútili." },
+            { text: "Chcel byť bližšie k Eugenovi de Rastignac, s ktorým tajne plánoval pomstu voči svojim dcéram.", isCorrect: false, feedback: "Goriot sa sťahoval z finančných dôvodov, pomstu neplánoval. Naopak, dcéry miloval až do konca, hoci si uvedomil, že si za to môže sám." },
+            { text: "Bol vyhnaný z armády po tom, čo u neho našli fotografiu Napoleona, a prišiel o všetky pocty.", isCorrect: false, feedback: "Toto je motív z románu Červený a Čierny od Stendhala (postava Juliena Sorela), nie z Otca Goriota." }
+        ]
+    },
+    {
+        question: "Aký osud stihne Eugena de Rastignaca v závere románu Otec Goriot?",
+        options: [
+            { text: "Zažíva morálnu smrť, pretože sa stáva milencom Goriotovej dcéry čisto pre peniaze.", isCorrect: true, feedback: "" },
+            { text: "Umiera na otravu arzénom, keď zistí, do akých dlhov ho dostal jeho ambiciózny život.", isCorrect: false, feedback: "Otravou arzénom kvôli dlhom umiera Ema Bovaryová v diele Gustava Flauberta." },
+            { text: "Je popravený za to, že v záchvate vášne postrelil ženu, ktorá chcela odhaliť jeho pôvod.", isCorrect: false, feedback: "Toto je osud Juliena Sorela v Stendhalovom románe Červený a Čierny, nie Eugena de Rastignaca." },
+            { text: "Uvedomí si úpadok spoločnosti a s otcom Goriotom sa odsťahuje z Paríža späť na vidiek.", isCorrect: false, feedback: "Eugen z Paríža neodchádza, naopak, podľahne jeho skorumpovanej morálke. Otec Goriot na konci fyzicky umiera." }
+        ]
+    },
+    {
+        question: "Kto je Rafael de Valentin z Balzacovho románu Šagrénová koža?",
+        options: [
+            { text: "Ambiciózny spisovateľ, ktorý počas písania svojho veľkého diela uvažuje o samovražde.", isCorrect: true, feedback: "" },
+            { text: "Starinár, ktorý vlastní čarovnú kožu a varuje ľudí pred jej ničivými účinkami na dĺžku života.", isCorrect: false, feedback: "Rafael nie je starinár, ale zákazník, ktorý od starinára túto kožu dostane." },
+            { text: "Kňaz, ktorý chudobným študentom radí študovať teológiu, aby sa dostali do vyššej spoločnosti.", isCorrect: false, feedback: "Tento motív patrí k postave Juliena Sorela, ktorému kňaz poradil teológiu v románe Červený a Čierny." },
+            { text: "Lekár, ktorý bol na pomery svojej manželky málo ambiciózny a od žiaľu nakoniec zomrel.", isCorrect: false, feedback: "Toto je opis Karola Bovaryho, manžela Emy Bovaryovej z diela Gustava Flauberta." }
+        ]
+    },
+    {
+        question: "Prečo bola Ema Bovaryová nespokojná so svojím manželom Karolom?",
+        options: [
+            { text: "Bol lekárom, ktorý ju mal veľmi rád, ale na jej vkus bol príliš málo ambiciózny.", isCorrect: true, feedback: "" },
+            { text: "Bol despotickým tyranom, ktorý jej nedovolil sebarozvoj ani čítanie dievčenských románov.", isCorrect: false, feedback: "Karol bol k nej láskavý a snažil sa pre ňu urobiť všetko, jeho problémom v očí Emy bol nedostatok ambícií." },
+            { text: "Bol to chudobný tesár z vidieka, zatiaľ čo ona túžila po živote v parížskej smotánke.", isCorrect: false, feedback: "Karol bol lekár, nie tesár. Tesárom bol otec Juliena Sorela (Červený a Čierny)." },
+            { text: "Svoj čas venoval výlučne dcéram, na ktoré Ema žiarlila, pretože túžila po jeho pozornosti.", isCorrect: false, feedback: "Tento motív je prekrútený. Ema mala s Karolom dcéru, ale bola nespokojná s jeho povahou, nie s tým, že by ju zanedbával kvôli deťom." }
+        ]
+    },
+    {
+        question: "Aký osud čaká dcéru Emy Bovaryovej na konci románu?",
+        options: [
+            { text: "Stane sa z nej robotníčka.", isCorrect: true, feedback: "" },
+            { text: "Zdedí obrovský majetok po tajných milencoch svojej matky.", isCorrect: false, feedback: "Emini milenci ju len využívali na peniaze, zanechala po sebe iba obrovské dlhy." },
+            { text: "Vydá sa za ambiciózneho lekára a splní si tak matkine nesplnené sny.", isCorrect: false, feedback: "Naopak, dcéra klesne na spoločenskom rebríčku a stane sa z nej obyčajná robotníčka." },
+            { text: "Vráti sa do kláštora, kde ju vychovávajú v prísnej morálke, ktorú jej matka odmietala.", isCorrect: false, feedback: "Výchovu v kláštore zažila v mladosti samotná Ema Bovaryová, jej dcéra však končí ako robotníčka." }
+        ]
+    },
+    {
+        question: "Čo symbolizujú farby v názve Stendhalovho románu Červený a Čierny?",
+        options: [
+            { text: "Červená znamená vášeň a revolúciu, čierna spoločnosť a despotizmus.", isCorrect: true, feedback: "" },
+            { text: "Červená je krv popravenej aristokracie a čierna je smútok za padnutými v revolúcii.", isCorrect: false, feedback: "Podľa textu červená symbolizuje vášeň a revolúciu, zatiaľ čo čierna symbolizuje súdobú francúzsku spoločnosť a despotizmus." },
+            { text: "Čierna reprezentuje kariéru v armáde pod Napoleonom a červená cirkevnú hierarchiu.", isCorrect: false, feedback: "Farby sú v skutočnosti prepojené opačne: červená (armáda/revolúcia) a čierna (kňazská reverenda/cirkev/despotizmus)." },
+            { text: "Červená je symbolom lásky Juliena k pani Derenalovej a čierna predstavuje žiarlivosť Matildy.", isCorrect: false, feedback: "Román nemá takúto romantickú symboliku farieb, ide v prvom rade o spoločensko-politický a osobnostný rozpor." }
+        ]
+    },
+    {
+        question: "Z akého prostredia pochádzal Julien Sorel (Červený a Čierny)?",
+        options: [
+            { text: "Bol to syn tesára z malého mesta, ktorý mal zlé a osamelé detstvo.", isCorrect: true, feedback: "" },
+            { text: "Bol to neschopný syn starostu, ktorého rodičia najali učiteľa latinčiny, aby mu pomohol.", isCorrect: false, feedback: "Julien Sorel bol práve tým nadaným mladíkom, ktorý učil latinčinu synov starostu." },
+            { text: "Bol to schudobnený šľachtic, ktorému po revolúcii nezostalo nič okrem starých titulov.", isCorrect: false, feedback: "Julien nemal žiadne tituly, bol synom obyčajného tesára, a práve jeho snaha dostať sa z tejto nízkej vrstvy nahor tvorí dej." },
+            { text: "Bol to nelegitímny syn generála, ktorého vychovávali v prísnom kláštore.", isCorrect: false, feedback: "S generálom sa stretáva neskôr prostredníctvom jeho dcéry Matildy. Jeho skutočný otec bol tesár." }
+        ]
+    },
+    {
+        question: "Prečo bol Julien Sorel odsúdený na smrť?",
+        options: [
+            { text: "Postrelil pani Derenalovú po tom, čo mu poslala list, v ktorom ho urážala a chcela prezradiť.", isCorrect: true, feedback: "" },
+            { text: "Zabil kňaza, ktorý mu poradil študovať teológiu, no neskôr ho nechal vylúčiť zo seminára.", isCorrect: false, feedback: "Julien zo seminára odišiel a postrelil starostovu manželku pani Derenalovú, nie kňaza." },
+            { text: "Zastrelil dcéru generála Matildu, pretože odhalila jeho skutočný, chudobný pôvod.", isCorrect: false, feedback: "Matildu nezastrelil; tá dokonca nosila jeho dieťa a po poprave ho pochovala. Postrelil pani Derenalovú." },
+            { text: "Otrávil starostu mesta, aby sa mohol tajne stretávať s jeho manželkou pani Derenalovou.", isCorrect: false, feedback: "Julien starostu nezabil. Bol odsúdený priamo za to, že sa pokúsil zavraždiť pani Derenalovú." }
+        ]
+    },
+    {
+        question: "Aký bol celkový charakter francúzskeho realizmu, ako sa uvádza v úvode textu?",
+        options: [
+            { text: "Kritický až naturalistický.", isCorrect: true, feedback: "" },
+            { text: "Romantický a idealizovaný.", isCorrect: false, feedback: "Práve naopak, realizmus podával pravdivý a kritický obraz spoločnosti, odmietal romantickú idealizáciu." },
+            { text: "Zameraný výlučne na oslavu aristokracie.", isCorrect: false, feedback: "Realizmus (napr. u Balzaca či Stendhala) spoločnosť s jej túžbou po moci a peniazoch ostro kritizoval, neoslavoval ju." },
+            { text: "Mystický a zameraný na náboženské dogmy.", isCorrect: false, feedback: "Realizmus riešil sociálne, morálne a finančné otázky súdobej spoločnosti, nie mysticizmus." }
+        ]
+    }
+];
+
+// ===== UNIVERSAL SCRIPT (V8) =====
+let currentQuestion = 0;
+let score = 0;
+let answered = 0;
+let shuffledQuestions = [];
+let waitingForNext = false;
+let pendingNextQIndex = -1;
+
+function shuffle(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function initQuiz() {
+    currentQuestion = 0;
+    score = 0;
+    answered = 0;
+    waitingForNext = false;
+    pendingNextQIndex = -1;
+    shuffledQuestions = shuffle(questionsData).map(function(q) {
+        return { question: q.question, options: shuffle(q.options) };
+    });
+    document.getElementById('resultsCard').style.display = 'none';
+    document.getElementById('quizContainer').style.display = 'block';
+    renderQuiz();
+    updateProgress();
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function renderQuiz() {
+    var container = document.getElementById('quizContainer');
+    container.innerHTML = '';
+    shuffledQuestions.forEach(function(q, qIndex) {
+        var card = document.createElement('div');
+        card.className = 'question-card' + (qIndex === 0 ? ' active' : '');
+        card.id = 'qcard-' + qIndex;
+
+        var optionsHTML = '';
+        q.options.forEach(function(opt) {
+            optionsHTML += '<li class="option-item" data-correct="' + opt.isCorrect + '" data-feedback="' + escapeAttr(opt.feedback) + '">' + opt.text + '</li>';
+        });
+
+        card.innerHTML = '<div class="question-text"><span class="question-number">' + (qIndex + 1) + '</span>' + q.question + '</div><ul class="options-list">' + optionsHTML + '</ul><button class="next-btn" id="nextBtn-' + qIndex + '">Ďalšia otázka →</button>';
+        container.appendChild(card);
+
+        var items = card.querySelectorAll('.option-item');
+        items.forEach(function(item) {
+            item.addEventListener('click', function() {
+                handleAnswer(card, item, qIndex);
+            });
+        });
+
+        document.getElementById('nextBtn-' + qIndex).addEventListener('click', function() {
+            waitingForNext = false;
+            advanceToNext();
+        });
+    });
+}
+
+function escapeAttr(str) {
+    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function handleAnswer(card, selectedItem, qIndex) {
+    if (card.classList.contains('answered')) return;
+    card.classList.add('answered');
+    answered++;
+
+    var isCorrect = selectedItem.getAttribute('data-correct') === 'true';
+    var feedback = selectedItem.getAttribute('data-feedback');
+
+    if (isCorrect) {
+        selectedItem.classList.add('correct');
+        score++;
+        updateProgress();
+        setTimeout(function() {
+            advanceToNext();
+        }, 1500);
+    } else {
+        selectedItem.classList.add('incorrect');
+        card.querySelectorAll('.option-item').forEach(function(opt) {
+            if (opt.getAttribute('data-correct') === 'true') {
+                opt.classList.add('correct');
+            }
+        });
+        updateProgress();
+        waitingForNext = true;
+        if (feedback && feedback.length > 0) {
+            showModal(decodeHTMLEntities(feedback), qIndex);
+        } else {
+            showNextButton(qIndex);
+        }
+    }
+}
+
+function showNextButton(qIndex) {
+    var btn = document.getElementById('nextBtn-' + qIndex);
+    if (btn) {
+        btn.classList.add('visible');
+        btn.focus();
+    }
+}
+
+function advanceToNext() {
+    if (waitingForNext) return;
+    if (answered >= shuffledQuestions.length) {
+        showResults();
+    } else {
+        currentQuestion++;
+        showQuestion(currentQuestion);
+    }
+}
+
+function decodeHTMLEntities(text) {
+    var ta = document.createElement('textarea');
+    ta.innerHTML = text;
+    return ta.value;
+}
+
+function showQuestion(index) {
+    document.querySelectorAll('.question-card').forEach(function(c) { c.classList.remove('active'); });
+    var next = document.getElementById('qcard-' + index);
+    if (next) {
+        next.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (window.MathJax) { window.MathJax.typesetPromise(); }
+    }
+}
+
+function updateProgress() {
+    var total = shuffledQuestions.length;
+    var pct = total > 0 ? Math.round((answered / total) * 100) : 0;
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressPercent').textContent = pct + ' %';
+    document.getElementById('questionCounter').textContent = 'Otázka ' + Math.min(answered + 1, total) + ' / ' + total;
+}
+
+function showResults() {
+    document.getElementById('quizContainer').style.display = 'none';
+    var resultsCard = document.getElementById('resultsCard');
+    resultsCard.style.display = 'block';
+
+    var total = shuffledQuestions.length;
+    var pct = Math.round((score / total) * 100);
+    var scoreEl = document.getElementById('resultsScore');
+    scoreEl.textContent = score + ' / ' + total + ' (' + pct + ' %)';
+
+    scoreEl.className = 'results-score';
+    if (pct >= 80) {
+        scoreEl.classList.add('excellent');
+        document.getElementById('resultsMessage').textContent = 'Výborný výsledok! Učivo máš dobre zvládnuté.';
+    } else if (pct >= 50) {
+        scoreEl.classList.add('good');
+        document.getElementById('resultsMessage').textContent = 'Dobrý výsledok, ale ešte je priestor na zlepšenie.';
+    } else {
+        scoreEl.classList.add('poor');
+        document.getElementById('resultsMessage').textContent = 'Skús si učivo zopakovať a test absolvovať znova.';
+    }
+
+    document.getElementById('progressBar').style.width = '100%';
+    document.getElementById('progressPercent').textContent = '100 %';
+    document.getElementById('questionCounter').textContent = 'Dokončené: ' + score + ' / ' + total + ' správne';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showModal(text, qIndex) {
+    pendingNextQIndex = qIndex;
+    document.getElementById('modalText').textContent = text;
+    document.getElementById('modalOverlay').classList.add('active');
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+    if (waitingForNext && pendingNextQIndex >= 0) {
+        showNextButton(pendingNextQIndex);
+        pendingNextQIndex = -1;
+    }
+}
+
+document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' || e.key === 'Enter') {
+        if (document.getElementById('modalOverlay').classList.contains('active')) {
+            closeModal();
+        }
+    }
+});
+
+document.getElementById('restartBtn').addEventListener('click', function() {
+    initQuiz();
+});
+
+initQuiz();
+</script>
+</body>
+</html>
