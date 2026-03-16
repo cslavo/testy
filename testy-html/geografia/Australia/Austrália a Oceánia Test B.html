@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktívny Test</title>
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 {
+            text-align: center; color: #fff; margin-bottom: 8px;
+            font-size: 1.5em; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); line-height: 1.3;
+        }
+        .subtitle {
+            text-align: center; color: rgba(255,255,255,0.9);
+            font-weight: 600; font-size: 1.1em; margin-bottom: 20px;
+        }
+        .progress-wrapper {
+            background: #fff; border-radius: 12px; padding: 16px 20px;
+            margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .progress-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px; font-weight: 600; color: #333; font-size: 0.95em;
+        }
+        .progress-bar-track {
+            height: 10px; background: #e0e0e0; border-radius: 5px; overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%; background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 5px; transition: width 0.4s ease; width: 0%;
+        }
+        .question-card {
+            background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .question-card.active { display: block; }
+        .question-card.answered { pointer-events: none; }
+        .question-text {
+            font-size: 1.1em; font-weight: 600; margin-bottom: 18px; line-height: 1.5; color: #333;
+        }
+        .question-number {
+            display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; width: 30px; height: 30px; border-radius: 50%;
+            text-align: center; line-height: 30px; font-size: 0.85em;
+            margin-right: 10px; font-weight: 700;
+        }
+        .options-list { list-style: none; }
+        .option-item {
+            padding: 13px 16px; margin-bottom: 8px; border: 2px solid #e0e0e0;
+            border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
+            font-size: 0.95em; line-height: 1.4; color: #333;
+        }
+        .option-item:hover { border-color: #667eea; background: #f0f0ff; }
+        .option-item.correct {
+            border-color: #4caf50; background: #e8f5e9; color: #2e7d32; font-weight: 600;
+        }
+        .option-item.incorrect {
+            border-color: #f44336; background: #ffebee; color: #c62828;
+        }
+        .next-btn {
+            display: none; margin-top: 16px; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; border: none; padding: 12px 28px; font-size: 1em; border-radius: 25px;
+            cursor: pointer; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+            float: right; pointer-events: auto;
+        }
+        .next-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .next-btn.visible { display: inline-block; }
+        .results-card {
+            background: #fff; border-radius: 12px; padding: 40px; text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .results-card h2 { font-size: 1.6em; margin-bottom: 10px; color: #333; }
+        .results-score { font-size: 2.8em; font-weight: 700; margin: 20px 0; }
+        .results-score.excellent { color: #4caf50; }
+        .results-score.good { color: #ff9800; }
+        .results-score.poor { color: #f44336; }
+        .results-message { font-size: 1.05em; margin-bottom: 30px; color: #555; }
+        .restart-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 14px 40px; font-size: 1.05em; border-radius: 30px; cursor: pointer;
+            font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .restart-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 1000;
+            justify-content: center; align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: #fff; border-radius: 12px; padding: 28px; max-width: 500px;
+            width: 90%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .modal-content h3 { color: #f44336; margin-bottom: 12px; font-size: 1.2em; }
+        .modal-content p { color: #555; font-size: 0.95em; line-height: 1.6; margin-bottom: 18px; }
+        .modal-close-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 10px 28px; border-radius: 20px; cursor: pointer; font-size: 0.95em; font-weight: 600;
+        }
+        .modal-close-btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Austrália a Oceánia</h1>
+        <div class="subtitle">Test B</div>
+        <div class="progress-wrapper">
+            <div class="progress-header">
+                <span id="questionCounter">Otázka 1 / 0</span>
+                <span id="progressPercent">0 %</span>
+            </div>
+            <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="quizContainer"></div>
+        <div class="results-card" id="resultsCard">
+            <h2>Výsledky testu</h2>
+            <div class="results-score" id="resultsScore"></div>
+            <div class="results-message" id="resultsMessage"></div>
+            <button class="restart-btn" id="restartBtn">Skúsiť znova</button>
+        </div>
+    </div>
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <h3>Nesprávna odpoveď</h3>
+            <p id="modalText"></p>
+            <button class="modal-close-btn" id="modalCloseBtn">Rozumiem</button>
+        </div>
+    </div>
+
+<script>
+const questionsData = [
+    {
+        question: "Aké je najnižšie položené miesto Austrálie?",
+        options: [
+            { text: "Eyrovo jazero (- 16 m n. m.).", isCorrect: true, feedback: "" },
+            { text: "Stredoaustrálska panva (- 50 m n. m.).", isCorrect: false, feedback: "Stredoaustrálska panva je síce geologický celok, kde sa nachádza najnižší bod, ale samotné dno (Eyrovo jazero) má -16 metrov." },
+            { text: "Západoaustrálska plošina (- 16 m n. m.).", isCorrect: false, feedback: "Západoaustrálska plošina tvorí rozsiahle púšte, no nenachádza sa tam najnižší bod." },
+            { text: "Údolie rieky Darling (- 12 m n. m.).", isCorrect: false, feedback: "Darling je najdlhšia rieka, ale jej koryto nie je najnižším bodom kontinentu." }
+        ]
+    },
+    {
+        question: "Kto je podľa zriadenia Commonwealth hlavným predstaviteľom austrálskeho štátu?",
+        options: [
+            { text: "Anglický kráľ, zastúpený guvernérom.", isCorrect: true, feedback: "" },
+            { text: "Austrálska prezidentka volená parlamentom na 4 roky.", isCorrect: false, feedback: "Austrália nemá prezidenta, patrí do spoločenstva Commonwealth, kde je formálnou hlavou britský panovník." },
+            { text: "Premiér Nového Južného Walesu z mesta Canberra.", isCorrect: false, feedback: "Premiér jednotlivého štátu nie je hlavným predstaviteľom celého zväzu." },
+            { text: "Náčelník pôvodných kmeňov Aborigénov.", isCorrect: false, feedback: "Aborigéni tvoria len 1,5 % obyvateľstva a ich tradiční zástupcovia neplnia funkciu formálnej hlavy štátu." }
+        ]
+    },
+    {
+        question: "Aká je najdlhšia rieka v Austrálii a kde pramení?",
+        options: [
+            { text: "Rieka Darling (prítok rieky Murray), prameniaca vo Veľkých predelových vrchoch.", isCorrect: true, feedback: "" },
+            { text: "Rieka Murray, prameniaca v Západoaustrálskej plošine.", isCorrect: false, feedback: "Hoci je Murray dôležitá, najdlhší je jej prítok Darling a pramenia vo Veľkých predelových vrchoch, nie v plošine." },
+            { text: "Creeks, čo je stabilne tečúca najdlhšia rieka na severe.", isCorrect: false, feedback: "Pojem 'creeks' označuje občasné, vysychajúce rieky, nie jeden konkrétny tok." },
+            { text: "Rieka Wolémia tečúca do Eyrovho jazera.", isCorrect: false, feedback: "Wolémia je názov pre endemickú rastlinu (strom), nie pre rieku." }
+        ]
+    },
+    {
+        question: "Ktoré druhy flóry sú podľa textu klasifikované v Austrálii ako invázne rastliny?",
+        options: [
+            { text: "Eukalyptus a akácia.", isCorrect: true, feedback: "" },
+            { text: "Wolémia a banksia.", isCorrect: false, feedback: "Tieto dva druhy sa zaraďujú medzi vzácne pôvodné endemity." },
+            { text: "Banánovník a chlebovník.", isCorrect: false, feedback: "Tieto tropické stromy sú spomínané v súvislosti s pralesmi Oceánie, nie ako austrálske invázne druhy." },
+            { text: "Scrub a mangrovníky.", isCorrect: false, feedback: "Scrub označuje prirodzené suché krovité porasty a mangrovníky rastú bežne na Yorskom polostrove." }
+        ]
+    },
+    {
+        question: "Aké náboženstvo je medzi obyvateľstvom Austrálie dominantné?",
+        options: [
+            { text: "Viac ako 50 % obyvateľov sa hlási k protestantom.", isCorrect: true, feedback: "" },
+            { text: "Prevažujú animisti, ktorí tvoria takmer 80 % populácie.", isCorrect: false, feedback: "Animisti (prírodné náboženstvá Aborigénov) tvoria iba približne 10 %." },
+            { text: "Viac ako 88 % populácie tvoria rímski katolíci.", isCorrect: false, feedback: "Katolíci tvoria len 20 % austrálskeho obyvateľstva." },
+            { text: "Najväčšou skupinou sú ateisti s podielom presahujúcim 50 %.", isCorrect: false, feedback: "Ateisti predstavujú 20 %, najväčšou skupinou sú protestanti." }
+        ]
+    },
+    {
+        question: "Hoci sa Austrália nazýva 'žitnica sveta', akú časť jej územia v skutočnosti tvorí orná pôda?",
+        options: [
+            { text: "Len 6 %.", isCorrect: true, feedback: "" },
+            { text: "Až 88 %.", isCorrect: false, feedback: "Ornej pôdy je napriek obrovskej agrárnej produkcii veľmi málo (6 %). Číslo 88 % v texte označuje podiel európskych prisťahovalcov." },
+            { text: "Len 1,5 %.", isCorrect: false, feedback: "1,5 % je podiel pôvodných obyvateľov (Aborigénov), nie rozloha ornej pôdy." },
+            { text: "Viac ako 50 %.", isCorrect: false, feedback: "Väčšinu povrchu tvoria púšte a panvy, ornej pôdy je len zanedbateľných 6 %." }
+        ]
+    },
+    {
+        question: "Ktoré mesto je v Austrálii najnavštevovanejšie a aké pamiatky ho charakterizujú?",
+        options: [
+            { text: "Sydney, kde sa nachádza Opera a Harbor Bridge.", isCorrect: true, feedback: "" },
+            { text: "Canberra, kde nájdeme monolit Uluru a Rock waves.", isCorrect: false, feedback: "Uluru a Rock waves sú prírodné úkazy (národný park, resp. oblasť v Západnej Austrálii), nie sú v meste Canberra." },
+            { text: "Melbourne, ktoré je preslávené Veľkou koralovou bariérou.", isCorrect: false, feedback: "Koralová bariéra sa tiahne pozdĺž severovýchodného pobrežia, východiskom k nej je mesto Cairns." },
+            { text: "Perth, kde sídli najväčší morský prístav a turistická atrakcia Hobiton.", isCorrect: false, feedback: "Hobiton sa nachádza na Novom Zélande, nie v austrálskom meste Perth." }
+        ]
+    },
+    {
+        question: "Aké sú charakteristické črty regiónu Mikronézia v Oceánii?",
+        options: [
+            { text: "Nazýva sa Drobnoostrovie a pozostáva z množstva ostrovov koralového pôvodu.", isCorrect: true, feedback: "" },
+            { text: "Nazýva sa Čiernoostrovie pre svoj primárne sopečný pôvod a čiernu pôdu.", isCorrect: false, feedback: "Čiernoostrovie s čiernou pôdou a tmavším obyvateľstvom je Melanézia." },
+            { text: "Skladá sa výlučne z veľkých pevninských ostrovov ako Nová Guinea.", isCorrect: false, feedback: "Mikronéziu tvoria stovky malých atolov. Nová Guinea je veľký pevninský ostrov patriaci do Melanézie." },
+            { text: "Je to Mnohoostrovie, kde žijú pôvodní obyvatelia Maori a Havajčania.", isCorrect: false, feedback: "Tento opis (Mnohoostrovie, Maori, Havaj) charakterizuje región Polynézia." }
+        ]
+    },
+    {
+        question: "Aká je situácia so zásobami povrchovej a pitnej vody na ostrovoch Oceánie?",
+        options: [
+            { text: "Rieky sú prítomné len na pevninských ostrovoch, koralové ostrovy trpia nedostatkom pitnej vody.", isCorrect: true, feedback: "" },
+            { text: "Všetky koralové ostrovy majú bohaté siete riek vďaka pravidelným tajfúnom.", isCorrect: false, feedback: "Koralové ostrovy (atoly) nedokážu povrchovú vodu udržať a veľmi trpia nedostatkom pitnej vody." },
+            { text: "Rieky sa nachádzajú len na sopečných ostrovoch (ako Havaj), pevninské ostrovy sú úplne suché.", isCorrect: false, feedback: "Text presne uvádza, že rieky sú doménou pevninských ostrovov, ako je Nový Zéland či Nová Guinea." },
+            { text: "Najväčším nedostatkom pitnej vody trpí Nový Zéland kvôli veľkému množstvu ľadovcov.", isCorrect: false, feedback: "Nový Zéland patrí medzi pevninské ostrovy a vďaka riekam a ľadovcom nemá plošný problém s pitnou vodou." }
+        ]
+    },
+    {
+        question: "Čím je v súčasnosti známy malý ostrovný štát Nauru v Mikronézii?",
+        options: [
+            { text: "Ťažbou guána (fosfátov), znížením pôvodnej úrovne obyvateľov a vysokou mierou civilizačných chorôb.", isCorrect: true, feedback: "" },
+            { text: "Je to najvyspelejší štát Oceánie s veľmi významným potravinárskym priemyslom.", isCorrect: false, feedback: "Označenie 'najvyspelejší štát' patrí Novému Zélandu." },
+            { text: "Je to závislé územie USA, na ktorom sa nachádza vojenská základňa Pearl Harbor.", isCorrect: false, feedback: "Základňa Pearl Harbor je na Havajských ostrovoch." },
+            { text: "Je známy výskytom kanibalizmu a koexistenciou 800 rôznych národov a jazykov.", isCorrect: false, feedback: "Táto extrémna kultúrna rozmanitosť je špecifická pre štát Papua - Nová Guinea." }
+        ]
+    },
+    {
+        question: "Ktoré tvrdenie najlepšie vystihuje Francúzsku Polynéziu podľa textu?",
+        options: [
+            { text: "Je to závislé územie Francúzska, používa sa tam euro a v minulosti tam prebiehali jadrové pokusy.", isCorrect: true, feedback: "" },
+            { text: "Je to nezávislý štát, ktorý plne odmietol francúzštinu a oficiálne zaviedol len anglický jazyk.", isCorrect: false, feedback: "Územie nie je nezávislé, je závislé od Francúzska a naďalej využíva francúzsky jazyk a menu euro." },
+            { text: "Je známa najmä rozsiahlym chovom hovädzieho dobytka a exportom bumerangov.", isCorrect: false, feedback: "Chov dobytka bol spomenutý pre Austráliu a Nový Zéland, pričom bumerangy sú doménou Aborigénov." },
+            { text: "Ide o jeden veľký pevninský ostrov patriaci do Melanézie.", isCorrect: false, feedback: "Polynézia pozostáva z mnohých ostrovov (zväčša sopečných) a leží mimo regiónu Melanézia." }
+        ]
+    },
+    {
+        question: "Aký je demografický vývoj a zloženie obyvateľstva v Austrálii?",
+        options: [
+            { text: "Prirodzený pohyb obyvateľstva je nízky, ale počet neklesá vďaka imigrácii, pričom žien je viac ako mužov.", isCorrect: true, feedback: "" },
+            { text: "Obyvateľstvo narastá extrémne rýchlo len vďaka vysokému prirodzenému prírastku austrálskych rodín.", isCorrect: false, feedback: "Prirodzený prírastok je naopak nízky, populácia rastie hlavne vďaka prisťahovalcom." },
+            { text: "Celkový počet obyvateľov rapídne klesá, pretože prisťahovalectvo do Austrálie bolo úplne zastavené.", isCorrect: false, feedback: "Prisťahovalci tvoria vyše 98,5 % obyvateľstva a ich príchod udržuje rast počtu populácie." },
+            { text: "Mužov je výrazne viac ako žien v dôsledku dopytu po fyzickej sile v poľnohospodárstve.", isCorrect: false, feedback: "Text explicitne uvádza, že v zložení populácie je v Austrálii viac žien ako mužov." }
+        ]
+    }
+];
+
+// ===== UNIVERSAL SCRIPT =====
+let currentQuestion = 0;
+let score = 0;
+let answered = 0;
+let shuffledQuestions = [];
+let waitingForNext = false;
+let pendingNextQIndex = -1;
+
+function shuffle(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function initQuiz() {
+    currentQuestion = 0;
+    score = 0;
+    answered = 0;
+    waitingForNext = false;
+    pendingNextQIndex = -1;
+    shuffledQuestions = shuffle(questionsData).map(function(q) {
+        return { question: q.question, options: shuffle(q.options) };
+    });
+    document.getElementById('resultsCard').style.display = 'none';
+    document.getElementById('quizContainer').style.display = 'block';
+    renderQuiz();
+    updateProgress();
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function renderQuiz() {
+    var container = document.getElementById('quizContainer');
+    container.innerHTML = '';
+    shuffledQuestions.forEach(function(q, qIndex) {
+        var card = document.createElement('div');
+        card.className = 'question-card' + (qIndex === 0 ? ' active' : '');
+        card.id = 'qcard-' + qIndex;
+
+        var optionsHTML = '';
+        q.options.forEach(function(opt) {
+            optionsHTML += '<li class="option-item" data-correct="' + opt.isCorrect + '" data-feedback="' + escapeAttr(opt.feedback) + '">' + opt.text + '</li>';
+        });
+
+        card.innerHTML = '<div class="question-text"><span class="question-number">' + (qIndex + 1) + '</span>' + q.question + '</div><ul class="options-list">' + optionsHTML + '</ul><button class="next-btn" id="nextBtn-' + qIndex + '">Ďalšia otázka →</button>';
+        container.appendChild(card);
+
+        var items = card.querySelectorAll('.option-item');
+        items.forEach(function(item) {
+            item.addEventListener('click', function() {
+                handleAnswer(card, item, qIndex);
+            });
+        });
+
+        document.getElementById('nextBtn-' + qIndex).addEventListener('click', function() {
+            waitingForNext = false;
+            advanceToNext();
+        });
+    });
+}
+
+function escapeAttr(str) {
+    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function handleAnswer(card, selectedItem, qIndex) {
+    if (card.classList.contains('answered')) return;
+    card.classList.add('answered');
+    answered++;
+
+    var isCorrect = selectedItem.getAttribute('data-correct') === 'true';
+    var feedback = selectedItem.getAttribute('data-feedback');
+
+    if (isCorrect) {
+        selectedItem.classList.add('correct');
+        score++;
+        updateProgress();
+        setTimeout(function() {
+            advanceToNext();
+        }, 1500);
+    } else {
+        selectedItem.classList.add('incorrect');
+        card.querySelectorAll('.option-item').forEach(function(opt) {
+            if (opt.getAttribute('data-correct') === 'true') {
+                opt.classList.add('correct');
+            }
+        });
+        updateProgress();
+        waitingForNext = true;
+        if (feedback && feedback.length > 0) {
+            showModal(decodeHTMLEntities(feedback), qIndex);
+        } else {
+            showNextButton(qIndex);
+        }
+    }
+}
+
+function showNextButton(qIndex) {
+    var btn = document.getElementById('nextBtn-' + qIndex);
+    if (btn) {
+        btn.classList.add('visible');
+        btn.focus();
+    }
+}
+
+function advanceToNext() {
+    if (waitingForNext) return;
+    if (answered >= shuffledQuestions.length) {
+        showResults();
+    } else {
+        currentQuestion++;
+        showQuestion(currentQuestion);
+    }
+}
+
+function decodeHTMLEntities(text) {
+    var ta = document.createElement('textarea');
+    ta.innerHTML = text;
+    return ta.value;
+}
+
+function showQuestion(index) {
+    document.querySelectorAll('.question-card').forEach(function(c) { c.classList.remove('active'); });
+    var next = document.getElementById('qcard-' + index);
+    if (next) {
+        next.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (window.MathJax) { window.MathJax.typesetPromise(); }
+    }
+}
+
+function updateProgress() {
+    var total = shuffledQuestions.length;
+    var pct = total > 0 ? Math.round((answered / total) * 100) : 0;
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressPercent').textContent = pct + ' %';
+    document.getElementById('questionCounter').textContent = 'Otázka ' + Math.min(answered + 1, total) + ' / ' + total;
+}
+
+function showResults() {
+    document.getElementById('quizContainer').style.display = 'none';
+    var resultsCard = document.getElementById('resultsCard');
+    resultsCard.style.display = 'block';
+
+    var total = shuffledQuestions.length;
+    var pct = Math.round((score / total) * 100);
+    var scoreEl = document.getElementById('resultsScore');
+    scoreEl.textContent = score + ' / ' + total + ' (' + pct + ' %)';
+
+    scoreEl.className = 'results-score';
+    if (pct >= 80) {
+        scoreEl.classList.add('excellent');
+        document.getElementById('resultsMessage').textContent = 'Výborný výsledok! Učivo máš dobre zvládnuté.';
+    } else if (pct >= 50) {
+        scoreEl.classList.add('good');
+        document.getElementById('resultsMessage').textContent = 'Dobrý výsledok, ale ešte je priestor na zlepšenie.';
+    } else {
+        scoreEl.classList.add('poor');
+        document.getElementById('resultsMessage').textContent = 'Skús si učivo zopakovať a test absolvovať znova.';
+    }
+
+    document.getElementById('progressBar').style.width = '100%';
+    document.getElementById('progressPercent').textContent = '100 %';
+    document.getElementById('questionCounter').textContent = 'Dokončené: ' + score + ' / ' + total + ' správne';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showModal(text, qIndex) {
+    pendingNextQIndex = qIndex;
+    document.getElementById('modalText').textContent = text;
+    document.getElementById('modalOverlay').classList.add('active');
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+    if (waitingForNext && pendingNextQIndex >= 0) {
+        showNextButton(pendingNextQIndex);
+        pendingNextQIndex = -1;
+    }
+}
+
+document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' || e.key === 'Enter') {
+        if (document.getElementById('modalOverlay').classList.contains('active')) {
+            closeModal();
+        }
+    }
+});
+
+document.getElementById('restartBtn').addEventListener('click', function() {
+    initQuiz();
+});
+
+initQuiz();
+</script>
+</body>
+</html>
