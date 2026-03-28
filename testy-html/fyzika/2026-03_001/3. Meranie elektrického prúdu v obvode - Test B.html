@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktívny Test</title>
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 {
+            text-align: center; color: #fff; margin-bottom: 8px;
+            font-size: 1.5em; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); line-height: 1.3;
+        }
+        .subtitle {
+            text-align: center; color: rgba(255,255,255,0.9);
+            font-weight: 600; font-size: 1.1em; margin-bottom: 20px;
+        }
+        .progress-wrapper {
+            background: #fff; border-radius: 12px; padding: 16px 20px;
+            margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .progress-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px; font-weight: 600; color: #333; font-size: 0.95em;
+        }
+        .progress-bar-track {
+            height: 10px; background: #e0e0e0; border-radius: 5px; overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%; background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 5px; transition: width 0.4s ease; width: 0%;
+        }
+        .question-card {
+            background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .question-card.active { display: block; }
+        .question-card.answered { pointer-events: none; }
+        .question-text {
+            font-size: 1.1em; font-weight: 600; margin-bottom: 18px; line-height: 1.5; color: #333;
+        }
+        .question-number {
+            display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; width: 30px; height: 30px; border-radius: 50%;
+            text-align: center; line-height: 30px; font-size: 0.85em;
+            margin-right: 10px; font-weight: 700;
+        }
+        .options-list { list-style: none; }
+        .option-item {
+            padding: 13px 16px; margin-bottom: 8px; border: 2px solid #e0e0e0;
+            border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
+            font-size: 0.95em; line-height: 1.4; color: #333;
+        }
+        .option-item:hover { border-color: #667eea; background: #f0f0ff; }
+        .option-item.correct {
+            border-color: #4caf50; background: #e8f5e9; color: #2e7d32; font-weight: 600;
+        }
+        .option-item.incorrect {
+            border-color: #f44336; background: #ffebee; color: #c62828;
+        }
+        .next-btn {
+            display: none; margin-top: 16px; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; border: none; padding: 12px 28px; font-size: 1em; border-radius: 25px;
+            cursor: pointer; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+            float: right; pointer-events: auto;
+        }
+        .next-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .next-btn.visible { display: inline-block; }
+        .results-card {
+            background: #fff; border-radius: 12px; padding: 40px; text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .results-card h2 { font-size: 1.6em; margin-bottom: 10px; color: #333; }
+        .results-score { font-size: 2.8em; font-weight: 700; margin: 20px 0; }
+        .results-score.excellent { color: #4caf50; }
+        .results-score.good { color: #ff9800; }
+        .results-score.poor { color: #f44336; }
+        .results-message { font-size: 1.05em; margin-bottom: 30px; color: #555; }
+        .restart-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 14px 40px; font-size: 1.05em; border-radius: 30px; cursor: pointer;
+            font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .restart-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 1000;
+            justify-content: center; align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: #fff; border-radius: 12px; padding: 28px; max-width: 500px;
+            width: 90%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .modal-content h3 { color: #f44336; margin-bottom: 12px; font-size: 1.2em; }
+        .modal-content p { color: #555; font-size: 0.95em; line-height: 1.6; margin-bottom: 18px; }
+        .modal-close-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 10px 28px; border-radius: 20px; cursor: pointer; font-size: 0.95em; font-weight: 600;
+        }
+        .modal-close-btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Meranie elektrického prúdu v obvode</h1>
+        <div class="subtitle">Test B</div>
+        <div class="progress-wrapper">
+            <div class="progress-header">
+                <span id="questionCounter">Otázka 1 / 0</span>
+                <span id="progressPercent">0 %</span>
+            </div>
+            <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="quizContainer"></div>
+        <div class="results-card" id="resultsCard">
+            <h2>Výsledky testu</h2>
+            <div class="results-score" id="resultsScore"></div>
+            <div class="results-message" id="resultsMessage"></div>
+            <button class="restart-btn" id="restartBtn">Skúsiť znova</button>
+        </div>
+    </div>
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <h3>Nesprávna odpoveď</h3>
+            <p id="modalText"></p>
+            <button class="modal-close-btn" id="modalCloseBtn">Rozumiem</button>
+        </div>
+    </div>
+
+<script>
+const questionsData = [
+    {
+        question: "Aký je správny systémový postup pri fyzickom zapájaní elektrického obvodu podľa schémy?",
+        options: [
+            { text: "Vychádzame od jednej svorky zdroja a postupne pripájame jednotlivé časti obvodu.", isCorrect: true, feedback: "" },
+            { text: "Začneme zapojením spotrebiča a následne k nemu pripojíme zdroj a spínač súčasne.", isCorrect: false, feedback: "Obvod sa skladá postupne (do kruhu) od jednej svorky zdroja, nie živelne od spotrebiča." },
+            { text: "Najprv prepojíme všetky spotrebiče navzájom a až nakoniec ich pripojíme k spínaču a zdroju.", isCorrect: false, feedback: "Tento postup by mohol viesť k chybám v zapojení (napr. neplánované paralelné vetvy). Postupuje sa krok za krokom od zdroja." },
+            { text: "Vychádzame od stredu obvodu a postupne pridávame súčiastky obojsmerne smerom k zdroju napätia.", isCorrect: false, feedback: "Takýto prístup nie je systematický. Správny začiatok je vždy na jednej zo svoriek zdroja." }
+        ]
+    },
+    {
+        question: "Ako treba manipulovať s koncami spojovacích vodičov (banánikmi) pri zostavovaní obvodu?",
+        options: [
+            { text: "Pripájame ich opatrne, aby sa nedeformovali, čo je podmienkou pre kvalitné elektrické spojenie.", isCorrect: true, feedback: "" },
+            { text: "Zatláčame ich do svoriek čo najväčšou silou, aby sa úplne minimalizoval prechodový odpor spojenia.", isCorrect: false, feedback: "Použitie hrubej sily spôsobí deformáciu banánika, čo následne zhorší kvalitu kontaktu." },
+            { text: "Pred zapojením ich musíme vždy jemne ohnúť kliešťami, aby pevnejšie držali v meracej zdierke.", isCorrect: false, feedback: "Úmyselná deformácia vodičov (banánikov) je nežiaduca a poškodzuje laboratórne vybavenie." },
+            { text: "Upravujeme ich tvar podľa veľkosti použitej svorky na prístroji pre lepšiu vodivosť.", isCorrect: false, feedback: "Banániky majú štandardizovanú veľkosť, ich tvar sa nesmie prispôsobovať (deformovať)." }
+        ]
+    },
+    {
+        question: "Aké pravidlo platí pre polaritu pri zapájaní meracieho prístroja do obvodu s jednosmerným prúdom?",
+        options: [
+            { text: "Svorku označenú + pripájame ku kladnému pólu zdroja a svorku - k zápornému pólu zdroja.", isCorrect: true, feedback: "" },
+            { text: "Svorku + pripájame k zápornému pólu zdroja a svorku - ku kladnému pólu zdroja.", isCorrect: false, feedback: "Toto je opačné zapojenie polarity, ktoré by pri ručičkovom prístroji spôsobilo výchylku nesprávnym smerom a možné poškodenie." },
+            { text: "Obe svorky pripájame na rovnaký pól zdroja, pričom rozhoduje jedine polarita spotrebiča.", isCorrect: false, feedback: "Pripojenie oboch svoriek na rovnaký pól by nevytvorilo uzavretý merací obvod pre prístroj." },
+            { text: "Svorku + pripájame pred spotrebič a svorku - tesne za spotrebič bez ohľadu na póly zdroja.", isCorrect: false, feedback: "Vždy je nutné rešpektovať polaritu zdroja (+ k +, - k -), inak prístroj nebude správne merať." }
+        ]
+    },
+    {
+        question: "Aký merací rozsah musíme na prístroji nastaviť na úplnom začiatku merania prúdu?",
+        options: [
+            { text: "Vždy nastavíme najväčší možný rozsah prístroja.", isCorrect: true, feedback: "" },
+            { text: "Nastavíme vždy najmenší možný rozsah, aby bolo meranie od prvého momentu čo najpresnejšie.", isCorrect: false, feedback: "Nastavenie na najmenší rozsah na začiatku by mohlo prístroj zničiť, ak by bol prúd v obvode príliš veľký." },
+            { text: "Nastavíme presne tú hodnotu rozsahu, ktorú očakávame na základe predchádzajúcich výpočtov.", isCorrect: false, feedback: "Aj keď máme odhad, vždy sa z bezpečnostných dôvodov začína na maximálnom rozsahu." },
+            { text: "Nastavíme na strednú hodnotu rozsahu, aby sme mohli bezpečne merať výchylky smerom nahor aj nadol.", isCorrect: false, feedback: "Stredná hodnota nechráni prístroj pred nárazovým vysokým prúdom. Začíname vždy na maxime." }
+        ]
+    },
+    {
+        question: "Na čo musíme pamätať pri použití univerzálnych meracích prístrojov (multimetrov)?",
+        options: [
+            { text: "Môžu fungovať ako ampérmeter alebo voltmeter, preto ich musíme pred pripojením do obvodu správne nastaviť.", isCorrect: true, feedback: "" },
+            { text: "Automaticky rozpoznajú, či meriame prúd alebo napätie na základe zapojenia, nevyžadujú prepínanie.", isCorrect: false, feedback: "Univerzálne prístroje nedokážu automaticky rozoznať, akú fyzikálnu veličinu chceme merať, je nutné nastaviť prepínač." },
+            { text: "Sú určené primárne na meranie napätia, zatiaľ čo na presné meranie prúdu potrebujeme iný špecializovaný prístroj.", isCorrect: false, feedback: "Multimetre plnohodnotne nahrádzajú aj ampérmeter, ak sú správne nastavené." },
+            { text: "Pred každým zapojením ich musíme nakalibrovať pomocou externého referenčného zdroja napätia.", isCorrect: false, feedback: "Bežné školské multimetre sa nemusia pred každým meraním externe kalibrovať, dôležité je len správne zvoliť funkciu a rozsah." }
+        ]
+    },
+    {
+        question: "Kedy je bezpečné upraviť (znížiť) merací rozsah prúdu na prístroji?",
+        options: [
+            { text: "Až po tom, ako sme získali približnú hodnotu prúdu meraním na maximálnom možnom rozsahu.", isCorrect: true, feedback: "" },
+            { text: "Okamžite po zapnutí obvodu, pokiaľ sa ručička prístroja vôbec nepohne z nulovej polohy.", isCorrect: false, feedback: "Nulová výchylka môže znamenať aj prerušený obvod. Najprv sa overuje chyba v zapojení, až potom sa mení rozsah." },
+            { text: "Ešte pred samotným fyzickým zapojením prístroja do obvodu, na základe odhadu odporu vodičov.", isCorrect: false, feedback: "Odhad nie je stopercentný. Pravidlom je zapojiť ho na maxime a znižovať rozsah až po overení reálneho toku." },
+            { text: "Len v prípade, že testovacia žiarovka v zapojenom obvode nesvieti dostatočne jasne.", isCorrect: false, feedback: "Jas žiarovky nie je exaktným meradlom pre nastavenie rozsahu prístroja." }
+        ]
+    },
+    {
+        question: "Čím je spôsobená samotná chyba (odchýlka) merania pri použití meracích prístrojov?",
+        options: [
+            { text: "Je spôsobená nedokonalosťou samotného meracieho prístroja a vyjadruje sa triedou presnosti.", isCorrect: true, feedback: "" },
+            { text: "Je spôsobená výhradne nesprávnym odčítaním hodnoty na stupnici zo strany ľudského pozorovateľa.", isCorrect: false, feedback: "Odčítanie chýb pozorovateľom je iný typ chyby. Prístrojová chyba vyplýva z konštrukcie a nedokonalosti súčiastok prístroja." },
+            { text: "Je spôsobená kolísaním napätia v mestskej elektrickej sieti počas laboratórneho experimentu.", isCorrect: false, feedback: "Chyba prístroja (trieda presnosti) je jeho stála vlastnosť, nesúvisí s aktuálnym stavom elektrickej siete." },
+            { text: "Je priamym dôsledkom použitia príliš dlhých spojovacích vodičov s nezanedbateľným odporom.", isCorrect: false, feedback: "Odpor vodičov mení parametre samotného obvodu, ale nezvyšuje vnútornú \"nepresnosť\" meracieho prístroja." }
+        ]
+    },
+    {
+        question: "Ako definujeme výpočet relatívnej odchýlky merania ($ \\delta I $) elektrického prúdu?",
+        options: [
+            { text: "Je to podiel odchýlky merania ($ \\Delta I $) a nameranej hodnoty prúdu ($ I $), vyjadrený v percentách.", isCorrect: true, feedback: "" },
+            { text: "Je to súčin triedy presnosti prístroja a maximálneho zvoleného rozsahu vyjadrený v percentách.", isCorrect: false, feedback: "Tento popis čiastočne zodpovedá výpočtu absolútnej odchýlky ($ \\Delta I $), nie relatívnej." },
+            { text: "Je to matematický rozdiel medzi maximálnym meracím rozsahom prístroja a aktuálne nameranou hodnotou.", isCorrect: false, feedback: "Relatívna chyba sa nepočíta ako rozdiel, ale ako podiel (pomer) absolútnej chyby k nameranej hodnote." },
+            { text: "Je to podiel nameranej hodnoty prúdu ($ I $) a triedy presnosti prístroja ($ \\delta_p $) vynásobený číslom sto.", isCorrect: false, feedback: "Vzorec je obrátený. Relatívna chyba porovnáva absolútnu chybu voči celkovej nameranej hodnote." }
+        ]
+    }
+];
+
+// ===== UNIVERSAL SCRIPT (V8) =====
+let currentQuestion = 0;
+let score = 0;
+let answered = 0;
+let shuffledQuestions = [];
+let waitingForNext = false;
+let pendingNextQIndex = -1;
+
+function shuffle(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function initQuiz() {
+    currentQuestion = 0;
+    score = 0;
+    answered = 0;
+    waitingForNext = false;
+    pendingNextQIndex = -1;
+    shuffledQuestions = shuffle(questionsData).map(function(q) {
+        return { question: q.question, options: shuffle(q.options) };
+    });
+    document.getElementById('resultsCard').style.display = 'none';
+    document.getElementById('quizContainer').style.display = 'block';
+    renderQuiz();
+    updateProgress();
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function renderQuiz() {
+    var container = document.getElementById('quizContainer');
+    container.innerHTML = '';
+    shuffledQuestions.forEach(function(q, qIndex) {
+        var card = document.createElement('div');
+        card.className = 'question-card' + (qIndex === 0 ? ' active' : '');
+        card.id = 'qcard-' + qIndex;
+
+        var optionsHTML = '';
+        q.options.forEach(function(opt) {
+            optionsHTML += '<li class="option-item" data-correct="' + opt.isCorrect + '" data-feedback="' + escapeAttr(opt.feedback) + '">' + opt.text + '</li>';
+        });
+
+        card.innerHTML = '<div class="question-text"><span class="question-number">' + (qIndex + 1) + '</span>' + q.question + '</div><ul class="options-list">' + optionsHTML + '</ul><button class="next-btn" id="nextBtn-' + qIndex + '">Ďalšia otázka →</button>';
+        container.appendChild(card);
+
+        var items = card.querySelectorAll('.option-item');
+        items.forEach(function(item) {
+            item.addEventListener('click', function() {
+                handleAnswer(card, item, qIndex);
+            });
+        });
+
+        document.getElementById('nextBtn-' + qIndex).addEventListener('click', function() {
+            waitingForNext = false;
+            advanceToNext();
+        });
+    });
+}
+
+function escapeAttr(str) {
+    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function handleAnswer(card, selectedItem, qIndex) {
+    if (card.classList.contains('answered')) return;
+    card.classList.add('answered');
+    answered++;
+
+    var isCorrect = selectedItem.getAttribute('data-correct') === 'true';
+    var feedback = selectedItem.getAttribute('data-feedback');
+
+    if (isCorrect) {
+        selectedItem.classList.add('correct');
+        score++;
+        updateProgress();
+        setTimeout(function() {
+            advanceToNext();
+        }, 1500);
+    } else {
+        selectedItem.classList.add('incorrect');
+        card.querySelectorAll('.option-item').forEach(function(opt) {
+            if (opt.getAttribute('data-correct') === 'true') {
+                opt.classList.add('correct');
+            }
+        });
+        updateProgress();
+        waitingForNext = true;
+        if (feedback && feedback.length > 0) {
+            showModal(decodeHTMLEntities(feedback), qIndex);
+        } else {
+            showNextButton(qIndex);
+        }
+    }
+}
+
+function showNextButton(qIndex) {
+    var btn = document.getElementById('nextBtn-' + qIndex);
+    if (btn) {
+        btn.classList.add('visible');
+        btn.focus();
+    }
+}
+
+function advanceToNext() {
+    if (waitingForNext) return;
+    if (answered >= shuffledQuestions.length) {
+        showResults();
+    } else {
+        currentQuestion++;
+        showQuestion(currentQuestion);
+    }
+}
+
+function decodeHTMLEntities(text) {
+    var ta = document.createElement('textarea');
+    ta.innerHTML = text;
+    return ta.value;
+}
+
+function showQuestion(index) {
+    document.querySelectorAll('.question-card').forEach(function(c) { c.classList.remove('active'); });
+    var next = document.getElementById('qcard-' + index);
+    if (next) {
+        next.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (window.MathJax) { window.MathJax.typesetPromise(); }
+    }
+}
+
+function updateProgress() {
+    var total = shuffledQuestions.length;
+    var pct = total > 0 ? Math.round((answered / total) * 100) : 0;
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressPercent').textContent = pct + ' %';
+    document.getElementById('questionCounter').textContent = 'Otázka ' + Math.min(answered + 1, total) + ' / ' + total;
+}
+
+function showResults() {
+    document.getElementById('quizContainer').style.display = 'none';
+    var resultsCard = document.getElementById('resultsCard');
+    resultsCard.style.display = 'block';
+
+    var total = shuffledQuestions.length;
+    var pct = Math.round((score / total) * 100);
+    var scoreEl = document.getElementById('resultsScore');
+    scoreEl.textContent = score + ' / ' + total + ' (' + pct + ' %)';
+
+    scoreEl.className = 'results-score';
+    if (pct >= 80) {
+        scoreEl.classList.add('excellent');
+        document.getElementById('resultsMessage').textContent = 'Výborný výsledok! Učivo máš dobre zvládnuté.';
+    } else if (pct >= 50) {
+        scoreEl.classList.add('good');
+        document.getElementById('resultsMessage').textContent = 'Dobrý výsledok, ale ešte je priestor na zlepšenie.';
+    } else {
+        scoreEl.classList.add('poor');
+        document.getElementById('resultsMessage').textContent = 'Skús si učivo zopakovať a test absolvovať znova.';
+    }
+
+    document.getElementById('progressBar').style.width = '100%';
+    document.getElementById('progressPercent').textContent = '100 %';
+    document.getElementById('questionCounter').textContent = 'Dokončené: ' + score + ' / ' + total + ' správne';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showModal(text, qIndex) {
+    pendingNextQIndex = qIndex;
+    document.getElementById('modalText').textContent = text;
+    document.getElementById('modalOverlay').classList.add('active');
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+    if (waitingForNext && pendingNextQIndex >= 0) {
+        showNextButton(pendingNextQIndex);
+        pendingNextQIndex = -1;
+    }
+}
+
+document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' || e.key === 'Enter') {
+        if (document.getElementById('modalOverlay').classList.contains('active')) {
+            closeModal();
+        }
+    }
+});
+
+document.getElementById('restartBtn').addEventListener('click', function() {
+    initQuiz();
+});
+
+initQuiz();
+</script>
+</body>
+</html>

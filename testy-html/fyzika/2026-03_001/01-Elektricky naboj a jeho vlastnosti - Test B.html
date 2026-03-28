@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktívny Test</title>
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 {
+            text-align: center; color: #fff; margin-bottom: 8px;
+            font-size: 1.5em; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); line-height: 1.3;
+        }
+        .subtitle {
+            text-align: center; color: rgba(255,255,255,0.9);
+            font-weight: 600; font-size: 1.1em; margin-bottom: 20px;
+        }
+        .progress-wrapper {
+            background: #fff; border-radius: 12px; padding: 16px 20px;
+            margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .progress-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px; font-weight: 600; color: #333; font-size: 0.95em;
+        }
+        .progress-bar-track {
+            height: 10px; background: #e0e0e0; border-radius: 5px; overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%; background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 5px; transition: width 0.4s ease; width: 0%;
+        }
+        .question-card {
+            background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .question-card.active { display: block; }
+        .question-card.answered { pointer-events: none; }
+        .question-text {
+            font-size: 1.1em; font-weight: 600; margin-bottom: 18px; line-height: 1.5; color: #333;
+        }
+        .question-number {
+            display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; width: 30px; height: 30px; border-radius: 50%;
+            text-align: center; line-height: 30px; font-size: 0.85em;
+            margin-right: 10px; font-weight: 700;
+        }
+        .options-list { list-style: none; }
+        .option-item {
+            padding: 13px 16px; margin-bottom: 8px; border: 2px solid #e0e0e0;
+            border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
+            font-size: 0.95em; line-height: 1.4; color: #333;
+        }
+        .option-item:hover { border-color: #667eea; background: #f0f0ff; }
+        .option-item.correct {
+            border-color: #4caf50; background: #e8f5e9; color: #2e7d32; font-weight: 600;
+        }
+        .option-item.incorrect {
+            border-color: #f44336; background: #ffebee; color: #c62828;
+        }
+        .next-btn {
+            display: none; margin-top: 16px; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; border: none; padding: 12px 28px; font-size: 1em; border-radius: 25px;
+            cursor: pointer; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+            float: right; pointer-events: auto;
+        }
+        .next-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .next-btn.visible { display: inline-block; }
+        .results-card {
+            background: #fff; border-radius: 12px; padding: 40px; text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .results-card h2 { font-size: 1.6em; margin-bottom: 10px; color: #333; }
+        .results-score { font-size: 2.8em; font-weight: 700; margin: 20px 0; }
+        .results-score.excellent { color: #4caf50; }
+        .results-score.good { color: #ff9800; }
+        .results-score.poor { color: #f44336; }
+        .results-message { font-size: 1.05em; margin-bottom: 30px; color: #555; }
+        .restart-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 14px 40px; font-size: 1.05em; border-radius: 30px; cursor: pointer;
+            font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .restart-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 1000;
+            justify-content: center; align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: #fff; border-radius: 12px; padding: 28px; max-width: 500px;
+            width: 90%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .modal-content h3 { color: #f44336; margin-bottom: 12px; font-size: 1.2em; }
+        .modal-content p { color: #555; font-size: 0.95em; line-height: 1.6; margin-bottom: 18px; }
+        .modal-close-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 10px 28px; border-radius: 20px; cursor: pointer; font-size: 0.95em; font-weight: 600;
+        }
+        .modal-close-btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Elektrina: Elektrický náboj</h1>
+        <div class="subtitle">Test B</div>
+        <div class="progress-wrapper">
+            <div class="progress-header">
+                <span id="questionCounter">Otázka 1 / 0</span>
+                <span id="progressPercent">0 %</span>
+            </div>
+            <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="quizContainer"></div>
+        <div class="results-card" id="resultsCard">
+            <h2>Výsledky testu</h2>
+            <div class="results-score" id="resultsScore"></div>
+            <div class="results-message" id="resultsMessage"></div>
+            <button class="restart-btn" id="restartBtn">Skúsiť znova</button>
+        </div>
+    </div>
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <h3>Nesprávna odpoveď</h3>
+            <p id="modalText"></p>
+            <button class="modal-close-btn" id="modalCloseBtn">Rozumiem</button>
+        </div>
+    </div>
+
+<script>
+const questionsData = [
+    {
+        question: "Čo sa presne deje s atómami pri elektrizovaní telies trením?",
+        options: [
+            { text: "Premiestňujú sa elektróny z jedného telesa na druhé.", isCorrect: true, feedback: "" },
+            { text: "Premiestňujú sa protóny z jadra jedného telesa do obalu druhého telesa.", isCorrect: false, feedback: "Protóny sú pevne viazané v jadre atómu a pri trení sa nemôžu premiestňovať." },
+            { text: "Vzniká nový elementárny náboj, ktorý obklopí povrch oboch telies.", isCorrect: false, feedback: "Elektrický náboj nevzniká z ničoho, dochádza len k presunu už existujúcich elektrónov." },
+            { text: "Celé atómy sa presúvajú medzi telesami, čím menia ich hmotnosť a náboj.", isCorrect: false, feedback: "Pri elektrizovaní trením prechádzajú medzi telesami len elektróny, nie celé atómy." }
+        ]
+    },
+    {
+        question: "Ak teleso pri trení prijme elektróny, aký je jeho výsledný elektrický stav?",
+        options: [
+            { text: "Získa prebytok elektrónov, a má preto záporný elektrický náboj.", isCorrect: true, feedback: "" },
+            { text: "Získa prebytok protónov, a má preto záporný elektrický náboj.", isCorrect: false, feedback: "Ak prijíma elektróny, má prebytok elektrónov, nie protónov." },
+            { text: "Stratí časť svojich neutrónov, čím získa kladný elektrický náboj.", isCorrect: false, feedback: "Neutróny nemajú elektrický náboj a pri trení sa nestrácajú." },
+            { text: "Odovzdá protóny inému telesu a stane sa elektricky neutrálnym.", isCorrect: false, feedback: "Protóny sa neodovzdávajú a teleso prijímajúce elektróny nie je neutrálne, ale záporne nabité." }
+        ]
+    },
+    {
+        question: "Aká je značka a základná jednotka fyzikálnej veličiny elektrický náboj?",
+        options: [
+            { text: "Značka je $Q$ a jednotka je coulomb (C).", isCorrect: true, feedback: "" },
+            { text: "Značka je $E$ a jednotka je coulomb (C).", isCorrect: false, feedback: "Značka veličiny elektrický náboj je Q. Písmenom E sa zvykne označovať napr. elektrické pole alebo energia." },
+            { text: "Značka je $C$ a jednotka je coulomb (Q).", isCorrect: false, feedback: "Tu je vymenená značka veličiny s jej jednotkou. Značka je Q, jednotka je C." },
+            { text: "Značka je $Q$ a jednotka je newton (N).", isCorrect: false, feedback: "Newton (N) je jednotkou sily, nie elektrického náboja." }
+        ]
+    },
+    {
+        question: "Aká je charakteristická vlastnosť izolantov (napr. suché drevo, plasty, sklo)?",
+        options: [
+            { text: "Elektróny sú pevne viazané v jednotlivých atómoch a voľne sa nepohybujú.", isCorrect: true, feedback: "" },
+            { text: "Najvzdialenejšie elektróny sa ľahko odpútajú a voľne sa pohybujú po látke.", isCorrect: false, feedback: "Tento opis patrí vodičom (napr. kovom), nie izolantom." },
+            { text: "Jadra ich atómov obsahujú iba neutróny bez prítomnosti protónov.", isCorrect: false, feedback: "Každé jadro atómu, aj v izolantoch, musí obsahovať protóny." },
+            { text: "Majú schopnosť neustále uvoľňovať protóny do okolitého prostredia.", isCorrect: false, feedback: "Protóny sa z jadier bežne neuvoľňujú a izolanty nemajú takúto schopnosť." }
+        ]
+    },
+    {
+        question: "Ako sa prejavuje silové pôsobenie medzi dvoma elektricky nabitými telesami?",
+        options: [
+            { text: "Telesá s rovnakým nábojom sa odpudzujú a s opačným nábojom sa priťahujú.", isCorrect: true, feedback: "" },
+            { text: "Telesá s rovnakým nábojom sa priťahujú a s opačným nábojom sa odpudzujú.", isCorrect: false, feedback: "Je to presne naopak. Súhlasné náboje (rovnaké) sa odpudzujú, nesúhlasné (opačné) priťahujú." },
+            { text: "Telesá sa priťahujú len vtedy, ak je jedno z nich elektricky neutrálne.", isCorrect: false, feedback: "Dve nabité telesá na seba pôsobia elektrickou silou aj vtedy, keď ani jedno nie je neutrálne." },
+            { text: "Všetky elektricky nabité telesá sa navzájom vždy len odpudzujú.", isCorrect: false, feedback: "Telesá s opačným (nesúhlasným) nábojom sa navzájom priťahujú, neodpudzujú." }
+        ]
+    },
+    {
+        question: "Prostredníctvom čoho sa uskutočňuje vzájomné silové pôsobenie elektricky nabitých telies?",
+        options: [
+            { text: "Prostredníctvom elektrických polí, ktoré sa nachádzajú v ich okolí.", isCorrect: true, feedback: "" },
+            { text: "Prostredníctvom voľného elektrónového plynu prítomného vo vákuu.", isCorrect: false, feedback: "Elektrónový plyn sa nachádza vo vodičoch, nie vo vákuu medzi telesami." },
+            { text: "Priamym kontaktom telies, inak silové pôsobenie nevzniká.", isCorrect: false, feedback: "Elektrické sily pôsobia na diaľku prostredníctvom elektrického poľa, dotyk nie je podmienkou." },
+            { text: "Prostredníctvom konštantnej permitivity, ktorá obklopuje ich jadrá.", isCorrect: false, feedback: "Permitivita je vlastnosť prostredia, nie fyzikálne pole sprostredkujúce silu." }
+        ]
+    },
+    {
+        question: "Akú hodnotu má konštanta úmernosti $k$ v Coulombovom zákone pre vákuum?",
+        options: [
+            { text: "$9 \\cdot 10^9 \\, \\text{N}\\cdot\\text{m}^2\\cdot\\text{C}^{-2}$", isCorrect: true, feedback: "" },
+            { text: "$8,85 \\cdot 10^{-12} \\, \\text{C}^2\\cdot\\text{N}^{-1}\\cdot\\text{m}^{-2}$", isCorrect: false, feedback: "Toto je hodnota permitivity vákua ($\\epsilon_0$), nie konštanty $k$ z Coulombovho zákona." },
+            { text: "$1,602 \\cdot 10^{-19} \\, \\text{C}$", isCorrect: false, feedback: "Toto je hodnota elementárneho elektrického náboja ($e$), nie konštanty $k$." },
+            { text: "$1 \\, \\text{N}\\cdot\\text{m}^2\\cdot\\text{C}^{-2}$", isCorrect: false, feedback: "Pre vákuum má hodnotu $1$ relatívna permitivita ($\\epsilon_r$), konštanta $k$ je oveľa väčšia." }
+        ]
+    },
+    {
+        question: "Akú hodnotu nadobúda relatívna permitivita ($\\epsilon_r$) pre vákuum a pre iné látkové prostredia?",
+        options: [
+            { text: "Pre vákuum je $\\epsilon_r = 1$, pre iné prostredia je $\\epsilon_r > 1$.", isCorrect: true, feedback: "" },
+            { text: "Pre vákuum je $\\epsilon_r > 1$, pre iné prostredia je $\\epsilon_r = 1$.", isCorrect: false, feedback: "Je to obrátene. Vákuum má základnú hodnotu 1, všetky ostatné látkové prostredia ju majú vyššiu." },
+            { text: "Pre vákuum je $\\epsilon_r = 8,85$, pre iné prostredia je to záporná hodnota.", isCorrect: false, feedback: "Hodnota 8,85 sa vzťahuje na permitivitu vákua $\\epsilon_0$ (s násobkom $10^{-12}$), relatívna permitivita je bezrozmerné číslo začínajúce od 1." },
+            { text: "Relatívna permitivita má vo všetkých prostrediach vrátane vákua rovnakú konštantnú hodnotu 1.", isCorrect: false, feedback: "Každé látkové prostredie má inú hodnotu $\\epsilon_r$, ktorá je vždy väčšia ako 1, čo ovplyvňuje výslednú silu." }
+        ]
+    }
+];
+
+// ===== UNIVERSAL SCRIPT =====
+let currentQuestion = 0;
+let score = 0;
+let answered = 0;
+let shuffledQuestions = [];
+let waitingForNext = false;
+let pendingNextQIndex = -1;
+
+function shuffle(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function initQuiz() {
+    currentQuestion = 0;
+    score = 0;
+    answered = 0;
+    waitingForNext = false;
+    pendingNextQIndex = -1;
+    shuffledQuestions = shuffle(questionsData).map(function(q) {
+        return { question: q.question, options: shuffle(q.options) };
+    });
+    document.getElementById('resultsCard').style.display = 'none';
+    document.getElementById('quizContainer').style.display = 'block';
+    renderQuiz();
+    updateProgress();
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function renderQuiz() {
+    var container = document.getElementById('quizContainer');
+    container.innerHTML = '';
+    shuffledQuestions.forEach(function(q, qIndex) {
+        var card = document.createElement('div');
+        card.className = 'question-card' + (qIndex === 0 ? ' active' : '');
+        card.id = 'qcard-' + qIndex;
+
+        var optionsHTML = '';
+        q.options.forEach(function(opt) {
+            optionsHTML += '<li class="option-item" data-correct="' + opt.isCorrect + '" data-feedback="' + escapeAttr(opt.feedback) + '">' + opt.text + '</li>';
+        });
+
+        card.innerHTML = '<div class="question-text"><span class="question-number">' + (qIndex + 1) + '</span>' + q.question + '</div><ul class="options-list">' + optionsHTML + '</ul><button class="next-btn" id="nextBtn-' + qIndex + '">Ďalšia otázka →</button>';
+        container.appendChild(card);
+
+        var items = card.querySelectorAll('.option-item');
+        items.forEach(function(item) {
+            item.addEventListener('click', function() {
+                handleAnswer(card, item, qIndex);
+            });
+        });
+
+        document.getElementById('nextBtn-' + qIndex).addEventListener('click', function() {
+            waitingForNext = false;
+            advanceToNext();
+        });
+    });
+}
+
+function escapeAttr(str) {
+    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function handleAnswer(card, selectedItem, qIndex) {
+    if (card.classList.contains('answered')) return;
+    card.classList.add('answered');
+    answered++;
+
+    var isCorrect = selectedItem.getAttribute('data-correct') === 'true';
+    var feedback = selectedItem.getAttribute('data-feedback');
+
+    if (isCorrect) {
+        selectedItem.classList.add('correct');
+        score++;
+        updateProgress();
+        setTimeout(function() {
+            advanceToNext();
+        }, 1500);
+    } else {
+        selectedItem.classList.add('incorrect');
+        card.querySelectorAll('.option-item').forEach(function(opt) {
+            if (opt.getAttribute('data-correct') === 'true') {
+                opt.classList.add('correct');
+            }
+        });
+        updateProgress();
+        waitingForNext = true;
+        if (feedback && feedback.length > 0) {
+            showModal(decodeHTMLEntities(feedback), qIndex);
+        } else {
+            showNextButton(qIndex);
+        }
+    }
+}
+
+function showNextButton(qIndex) {
+    var btn = document.getElementById('nextBtn-' + qIndex);
+    if (btn) {
+        btn.classList.add('visible');
+        btn.focus();
+    }
+}
+
+function advanceToNext() {
+    if (waitingForNext) return;
+    if (answered >= shuffledQuestions.length) {
+        showResults();
+    } else {
+        currentQuestion++;
+        showQuestion(currentQuestion);
+    }
+}
+
+function decodeHTMLEntities(text) {
+    var ta = document.createElement('textarea');
+    ta.innerHTML = text;
+    return ta.value;
+}
+
+function showQuestion(index) {
+    document.querySelectorAll('.question-card').forEach(function(c) { c.classList.remove('active'); });
+    var next = document.getElementById('qcard-' + index);
+    if (next) {
+        next.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (window.MathJax) { window.MathJax.typesetPromise(); }
+    }
+}
+
+function updateProgress() {
+    var total = shuffledQuestions.length;
+    var pct = total > 0 ? Math.round((answered / total) * 100) : 0;
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressPercent').textContent = pct + ' %';
+    document.getElementById('questionCounter').textContent = 'Otázka ' + Math.min(answered + 1, total) + ' / ' + total;
+}
+
+function showResults() {
+    document.getElementById('quizContainer').style.display = 'none';
+    var resultsCard = document.getElementById('resultsCard');
+    resultsCard.style.display = 'block';
+
+    var total = shuffledQuestions.length;
+    var pct = Math.round((score / total) * 100);
+    var scoreEl = document.getElementById('resultsScore');
+    scoreEl.textContent = score + ' / ' + total + ' (' + pct + ' %)';
+
+    scoreEl.className = 'results-score';
+    if (pct >= 80) {
+        scoreEl.classList.add('excellent');
+        document.getElementById('resultsMessage').textContent = 'Výborný výsledok! Učivo máš dobre zvládnuté.';
+    } else if (pct >= 50) {
+        scoreEl.classList.add('good');
+        document.getElementById('resultsMessage').textContent = 'Dobrý výsledok, ale ešte je priestor na zlepšenie.';
+    } else {
+        scoreEl.classList.add('poor');
+        document.getElementById('resultsMessage').textContent = 'Skús si učivo zopakovať a test absolvovať znova.';
+    }
+
+    document.getElementById('progressBar').style.width = '100%';
+    document.getElementById('progressPercent').textContent = '100 %';
+    document.getElementById('questionCounter').textContent = 'Dokončené: ' + score + ' / ' + total + ' správne';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showModal(text, qIndex) {
+    pendingNextQIndex = qIndex;
+    document.getElementById('modalText').textContent = text;
+    document.getElementById('modalOverlay').classList.add('active');
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+    if (waitingForNext && pendingNextQIndex >= 0) {
+        showNextButton(pendingNextQIndex);
+        pendingNextQIndex = -1;
+    }
+}
+
+document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' || e.key === 'Enter') {
+        if (document.getElementById('modalOverlay').classList.contains('active')) {
+            closeModal();
+        }
+    }
+});
+
+document.getElementById('restartBtn').addEventListener('click', function() {
+    initQuiz();
+});
+
+initQuiz();
+</script>
+</body>
+</html>

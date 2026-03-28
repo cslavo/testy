@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elektrický prúd - Test A</title>
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 {
+            text-align: center; color: #fff; margin-bottom: 8px;
+            font-size: 1.5em; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); line-height: 1.3;
+        }
+        .subtitle {
+            text-align: center; color: rgba(255,255,255,0.9);
+            font-weight: 600; font-size: 1.1em; margin-bottom: 20px;
+        }
+        .progress-wrapper {
+            background: #fff; border-radius: 12px; padding: 16px 20px;
+            margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .progress-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px; font-weight: 600; color: #333; font-size: 0.95em;
+        }
+        .progress-bar-track {
+            height: 10px; background: #e0e0e0; border-radius: 5px; overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%; background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 5px; transition: width 0.4s ease; width: 0%;
+        }
+        .question-card {
+            background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .question-card.active { display: block; }
+        .question-card.answered { pointer-events: none; }
+        .question-text {
+            font-size: 1.1em; font-weight: 600; margin-bottom: 18px; line-height: 1.5; color: #333;
+        }
+        .question-number {
+            display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; width: 30px; height: 30px; border-radius: 50%;
+            text-align: center; line-height: 30px; font-size: 0.85em;
+            margin-right: 10px; font-weight: 700;
+        }
+        .options-list { list-style: none; }
+        .option-item {
+            padding: 13px 16px; margin-bottom: 8px; border: 2px solid #e0e0e0;
+            border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
+            font-size: 0.95em; line-height: 1.4; color: #333;
+        }
+        .option-item:hover { border-color: #667eea; background: #f0f0ff; }
+        .option-item.correct {
+            border-color: #4caf50; background: #e8f5e9; color: #2e7d32; font-weight: 600;
+        }
+        .option-item.incorrect {
+            border-color: #f44336; background: #ffebee; color: #c62828;
+        }
+        .next-btn {
+            display: none; margin-top: 16px; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; border: none; padding: 12px 28px; font-size: 1em; border-radius: 25px;
+            cursor: pointer; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+            float: right; pointer-events: auto;
+        }
+        .next-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .next-btn.visible { display: inline-block; }
+        .results-card {
+            background: #fff; border-radius: 12px; padding: 40px; text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .results-card h2 { font-size: 1.6em; margin-bottom: 10px; color: #333; }
+        .results-score { font-size: 2.8em; font-weight: 700; margin: 20px 0; }
+        .results-score.excellent { color: #4caf50; }
+        .results-score.good { color: #ff9800; }
+        .results-score.poor { color: #f44336; }
+        .results-message { font-size: 1.05em; margin-bottom: 30px; color: #555; }
+        .restart-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 14px 40px; font-size: 1.05em; border-radius: 30px; cursor: pointer;
+            font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .restart-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 1000;
+            justify-content: center; align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: #fff; border-radius: 12px; padding: 28px; max-width: 500px;
+            width: 90%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .modal-content h3 { color: #f44336; margin-bottom: 12px; font-size: 1.2em; }
+        .modal-content p { color: #555; font-size: 0.95em; line-height: 1.6; margin-bottom: 18px; }
+        .modal-close-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 10px 28px; border-radius: 20px; cursor: pointer; font-size: 0.95em; font-weight: 600;
+        }
+        .modal-close-btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Elektrický prúd</h1>
+        <div class="subtitle">Test A</div>
+        <div class="progress-wrapper">
+            <div class="progress-header">
+                <span id="questionCounter">Otázka 1 / 0</span>
+                <span id="progressPercent">0 %</span>
+            </div>
+            <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="quizContainer"></div>
+        <div class="results-card" id="resultsCard">
+            <h2>Výsledky testu</h2>
+            <div class="results-score" id="resultsScore"></div>
+            <div class="results-message" id="resultsMessage"></div>
+            <button class="restart-btn" id="restartBtn">Skúsiť znova</button>
+        </div>
+    </div>
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <h3>Nesprávna odpoveď</h3>
+            <p id="modalText"></p>
+            <button class="modal-close-btn" id="modalCloseBtn">Rozumiem</button>
+        </div>
+    </div>
+
+<script>
+const questionsData = [
+    {
+        question: "Aký pohyb vykonávajú voľné elektróny v kovovom vodiči bez prítomnosti elektrického poľa (bez zapojenia k zdroju)?",
+        options: [
+            { text: "Chaotický pohyb.", isCorrect: true, feedback: "" },
+            { text: "Usporiadaný pohyb od záporného ku kladnému pólu.", isCorrect: false, feedback: "Tento usporiadaný pohyb nastáva až vtedy, keď vodič pripojíme k zdroju elektrického napätia, nie bez neho." },
+            { text: "Zastavia sa a zostanú pevne viazané v atómoch.", isCorrect: false, feedback: "V kovovom vodiči sú elektróny takzvaným elektrónovým plynom a sú neustále v chaotickom pohybe, nezastavujú sa." },
+            { text: "Zoskupia sa do elektrických dipólov.", isCorrect: false, feedback: "Tvorba elektrických dipólov je typická pre atómy v izolantoch (polarizácia), nie pre voľné elektróny v kovových vodičoch." }
+        ]
+    },
+    {
+        question: "Čo rozumieme pod pojmom polarizácia dielektrika?",
+        options: [
+            { text: "Posunutie viazaných nábojov (jadier a elektrónov) v atómoch izolantu, čím vznikajú elektrické dipóly.", isCorrect: true, feedback: "" },
+            { text: "Premiestnenie voľných elektrónov na protiľahlé strany izolantu.", isCorrect: false, feedback: "Izolant neobsahuje voľné elektróny; jav opísaný v tejto odpovedi predstavuje elektrostatickú indukciu vo vodičoch." },
+            { text: "Trvalé opustenie atómov elektrónmi vplyvom silného vonkajšieho elektrického poľa.", isCorrect: false, feedback: "Pri polarizácii dielektrika sa elektróny len mierne priestorovo posunú v rámci atómu, ale naďalej v ňom zostávajú viazané." },
+            { text: "Kinetický pohyb iónov od kladného k zápornému pólu zdroja.", isCorrect: false, feedback: "Pohyb iónov ako nosičov náboja je charakteristický jav pre prechod prúdu v kvapalinách (elektrolytoch), nie pre pevné dielektriká." }
+        ]
+    },
+    {
+        question: "Ako definujeme elektrický prúd ako fyzikálny dej?",
+        options: [
+            { text: "Usporiadaný pohyb voľných častíc s elektrickým nábojom.", isCorrect: true, feedback: "" },
+            { text: "Neusporiadaný a chaotický pohyb elektrónov vo vákuu alebo v kove.", isCorrect: false, feedback: "Chaotický pohyb nespĺňa podmienku elektrického prúdu; ten si nevyhnutne vyžaduje usporiadaný (jednosmerný) tok častíc." },
+            { text: "Tvorenie dipólov v dielektriku pôsobením magnetického poľa.", isCorrect: false, feedback: "Toto čiastočne popisuje polarizáciu dielektrika (ktorá sa deje pôsobením elektrického, nie magnetického poľa), a netýka sa elektrického prúdu." },
+            { text: "Podiel celkového náboja a času, za ktorý tento náboj prejde prierezom vodiča.", isCorrect: false, feedback: "Odpoveď popisuje vzorec ($I = Q/t$), čo je definícia prúdu ako fyzikálnej veličiny, nie ako fyzikálneho deja." }
+        ]
+    },
+    {
+        question: "Akým smerom sa reálne pohybujú voľné elektróny v uzavretom jednosmernom obvode?",
+        options: [
+            { text: "Od záporného pólu zdroja ku kladnému pólu.", isCorrect: true, feedback: "" },
+            { text: "Od kladného pólu zdroja k zápornému pólu.", isCorrect: false, feedback: "Od kladného k zápornému pólu smeruje takzvaný dohodnutý smer prúdu, avšak samotné elektróny (majúce záporný náboj) idú opačne." },
+            { text: "Zostávajú na mieste a prenášajú iba elektrickú energiu kmitaním.", isCorrect: false, feedback: "Pri jednosmernom elektrickom prúde sa elektróny vo vodiči reálne premiestňujú (vykonávajú usporiadaný pohyb z jedného miesta na druhé)." },
+            { text: "Od stredu vodiča k obom pólom zdroja súčasne.", isCorrect: false, feedback: "Elektrické pole vytvorené zdrojom pôsobí jedným smerom, čo spôsobuje jednosmerný prúd, nie rozptyl do dvoch strán." }
+        ]
+    },
+    {
+        question: "Akým smerom sa v kvapalinách pohybujú kladné ióny pri zapojení do elektrického obvodu?",
+        options: [
+            { text: "Od kladného pólu zdroja k zápornému pólu.", isCorrect: true, feedback: "" },
+            { text: "Od záporného pólu zdroja ku kladnému pólu.", isCorrect: false, feedback: "Tento smer je charakteristický pre záporné ióny (alebo elektróny v kove), pretože sú priťahované ku kladnému pólu." },
+            { text: "Sú statické a elektrický prúd prenášajú výlučne záporné ióny.", isCorrect: false, feedback: "V kvapalinách nie sú statické. Prúd tu prenášajú oba typy voľne pohyblivých iónov – aj kladné, aj záporné." },
+            { text: "Pohybujú sa chaoticky bez ohľadu na polaritu zdroja napätia.", isCorrect: false, feedback: "Chaotický pohyb majú iba bez prítomnosti elektrického poľa. Po pripojení zdroja sa pohyb usmerní." }
+        ]
+    },
+    {
+        question: "Aký je vzťah medzi takzvaným dohodnutým smerom prúdu a skutočným smerom pohybu elektrónov v kove?",
+        options: [
+            { text: "Dohodnutý smer prúdu je opačný ako skutočný smer pohybu elektrónov.", isCorrect: true, feedback: "" },
+            { text: "Dohodnutý smer prúdu je totožný so smerom pohybu elektrónov.", isCorrect: false, feedback: "Dohodnutý smer podľa konvencie sleduje pohyb kladných častíc, zatiaľ čo reálne elektróny sú záporné a idú naopak." },
+            { text: "Dohodnutý smer prúdu závisí od materiálu vodiča, zatiaľ čo smer elektrónov nie.", isCorrect: false, feedback: "Dohodnutý smer prúdu (od + k -) je univerzálna medzinárodná konvencia a nemení sa v závislosti od materiálu." },
+            { text: "Dohodnutý smer udáva pohyb neutrálnych atómov, zatiaľ čo elektróny idú opačne.", isCorrect: false, feedback: "Neutrálne atómy sa vôbec nepodieľajú na vedení elektrického prúdu v pevných vodičoch." }
+        ]
+    },
+    {
+        question: "Aká je fyzikálna jednotka elektrického prúdu a kam ju radíme v sústave SI?",
+        options: [
+            { text: "Ampér, pričom patrí medzi základné jednotky sústavy SI.", isCorrect: true, feedback: "" },
+            { text: "Ampér, pričom ide o odvodenú jednotku zo sústavy SI.", isCorrect: false, feedback: "Ampér nie je odvodená jednotka. Je to jedna zo siedmich primárnych základných jednotiek medzinárodnej sústavy SI." },
+            { text: "Coulomb, ktorý definuje množstvo preneseného náboja za sekundu.", isCorrect: false, feedback: "Coulomb je jednotkou elektrického náboja, zatiaľ čo pre elektrický prúd sa používa Ampér." },
+            { text: "Volt, ktorý vyjadruje elektrické silové pôsobenie poľa na elektróny.", isCorrect: false, feedback: "Volt je štandardnou fyzikálnou jednotkou pre elektrické napätie, nie pre samotný tok (prúd) elektronóv." }
+        ]
+    },
+    {
+        question: "Aký primárny účinok vyvoláva elektrický prúd pri prechode pevnými kovovými vodičmi?",
+        options: [
+            { text: "Spôsobuje zvýšenie ich teploty (tepelné účinky).", isCorrect: true, feedback: "" },
+            { text: "Zvyčajne mení ich vnútorné chemické zloženie.", isCorrect: false, feedback: "Zmena chemického zloženia pri prechode prúdu je typickým javom pre kvapaliny, nie pre pevné kovové vodiče." },
+            { text: "Vyvoláva v nich silné svetelné efekty bez akejkoľvek zmeny teploty.", isCorrect: false, feedback: "Svetelné efekty bez výraznejšej zmeny teploty sú typické skôr pre plyny. Kovy sa prechodom prúdu prioritne zahrievajú." },
+            { text: "Znižuje ich teplotu v dôsledku nadmernej spotreby elektrickej energie.", isCorrect: false, feedback: "Naopak, prechodom elektrického prúdu pevnou látkou dochádza k premenám energie, čo spôsobuje vždy vznik tepla (zahrievanie)." }
+        ]
+    },
+    {
+        question: "V akom type prostredia vyvoláva elektrický prúd predovšetkým svetelné efekty?",
+        options: [
+            { text: "V plynoch.", isCorrect: true, feedback: "" },
+            { text: "V pevných kovových vodičoch pri bežnej izbovej teplote.", isCorrect: false, feedback: "V pevných vodičoch sa prejavujú najmä tepelné a magnetické účinky; svetelné nastanú až pri extrémnom rozžeravení (napr. vlákno klasickej žiarovky)." },
+            { text: "V izolantoch, keď sa z ich štruktúr stanú elektrické dipóly.", isCorrect: false, feedback: "Samotný proces polarizácie (vytvorenie dipólov v izolantoch) nesprevádzajú vôbec žiadne svetelné efekty." },
+            { text: "V kvapalinách (elektrolytoch), kde dochádza k zmene zloženia.", isCorrect: false, feedback: "V kvapalinách sa prejavujú dominantne chemické účinky (rozklad), nie primárne svetelné efekty." }
+        ]
+    },
+    {
+        question: "Aký je principiálny rozdiel medzi izolantom a vodičom z hľadiska stavby látky?",
+        options: [
+            { text: "Izolant neobsahuje voľné elektróny, zatiaľ čo vodič obsahuje voľne pohyblivé elektróny.", isCorrect: true, feedback: "" },
+            { text: "Izolant obsahuje voľné protóny, zatiaľ čo vodič obsahuje voľné elektróny.", isCorrect: false, feedback: "Protóny sú v oboch typoch materiálov pevne viazané priamo v jadrách atómov a nemôžu sa voľne pohybovať." },
+            { text: "Izolant vedie prúd len pri veľmi nízkych teplotách, vodič iba pri vysokých.", isCorrect: false, feedback: "Základné fyzikálne rozdelenie nespočíva v okolitej teplote, ale práve v (ne)prítomnosti voľných nosičov náboja." },
+            { text: "V izolante sa pôsobením poľa premiestňujú celé atómy, vo vodiči len elektróny.", isCorrect: false, feedback: "Celé atómy v pevnom izolante sa nemôžu premiestňovať, iba sa mikroskopicky deformujú a vytvárajú elektrické dipóly." }
+        ]
+    }
+];
+
+// ===== UNIVERSAL SCRIPT (V8) =====
+let currentQuestion = 0;
+let score = 0;
+let answered = 0;
+let shuffledQuestions = [];
+let waitingForNext = false;
+let pendingNextQIndex = -1;
+
+function shuffle(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function initQuiz() {
+    currentQuestion = 0;
+    score = 0;
+    answered = 0;
+    waitingForNext = false;
+    pendingNextQIndex = -1;
+    shuffledQuestions = shuffle(questionsData).map(function(q) {
+        return { question: q.question, options: shuffle(q.options) };
+    });
+    document.getElementById('resultsCard').style.display = 'none';
+    document.getElementById('quizContainer').style.display = 'block';
+    renderQuiz();
+    updateProgress();
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function renderQuiz() {
+    var container = document.getElementById('quizContainer');
+    container.innerHTML = '';
+    shuffledQuestions.forEach(function(q, qIndex) {
+        var card = document.createElement('div');
+        card.className = 'question-card' + (qIndex === 0 ? ' active' : '');
+        card.id = 'qcard-' + qIndex;
+
+        var optionsHTML = '';
+        q.options.forEach(function(opt) {
+            optionsHTML += '<li class="option-item" data-correct="' + opt.isCorrect + '" data-feedback="' + escapeAttr(opt.feedback) + '">' + opt.text + '</li>';
+        });
+
+        card.innerHTML = '<div class="question-text"><span class="question-number">' + (qIndex + 1) + '</span>' + q.question + '</div><ul class="options-list">' + optionsHTML + '</ul><button class="next-btn" id="nextBtn-' + qIndex + '">Ďalšia otázka →</button>';
+        container.appendChild(card);
+
+        var items = card.querySelectorAll('.option-item');
+        items.forEach(function(item) {
+            item.addEventListener('click', function() {
+                handleAnswer(card, item, qIndex);
+            });
+        });
+
+        document.getElementById('nextBtn-' + qIndex).addEventListener('click', function() {
+            waitingForNext = false;
+            advanceToNext();
+        });
+    });
+}
+
+function escapeAttr(str) {
+    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function handleAnswer(card, selectedItem, qIndex) {
+    if (card.classList.contains('answered')) return;
+    card.classList.add('answered');
+    answered++;
+
+    var isCorrect = selectedItem.getAttribute('data-correct') === 'true';
+    var feedback = selectedItem.getAttribute('data-feedback');
+
+    if (isCorrect) {
+        selectedItem.classList.add('correct');
+        score++;
+        updateProgress();
+        setTimeout(function() {
+            advanceToNext();
+        }, 1500);
+    } else {
+        selectedItem.classList.add('incorrect');
+        card.querySelectorAll('.option-item').forEach(function(opt) {
+            if (opt.getAttribute('data-correct') === 'true') {
+                opt.classList.add('correct');
+            }
+        });
+        updateProgress();
+        waitingForNext = true;
+        if (feedback && feedback.length > 0) {
+            showModal(decodeHTMLEntities(feedback), qIndex);
+        } else {
+            showNextButton(qIndex);
+        }
+    }
+}
+
+function showNextButton(qIndex) {
+    var btn = document.getElementById('nextBtn-' + qIndex);
+    if (btn) {
+        btn.classList.add('visible');
+        btn.focus();
+    }
+}
+
+function advanceToNext() {
+    if (waitingForNext) return;
+    if (answered >= shuffledQuestions.length) {
+        showResults();
+    } else {
+        currentQuestion++;
+        showQuestion(currentQuestion);
+    }
+}
+
+function decodeHTMLEntities(text) {
+    var ta = document.createElement('textarea');
+    ta.innerHTML = text;
+    return ta.value;
+}
+
+function showQuestion(index) {
+    document.querySelectorAll('.question-card').forEach(function(c) { c.classList.remove('active'); });
+    var next = document.getElementById('qcard-' + index);
+    if (next) {
+        next.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (window.MathJax) { window.MathJax.typesetPromise(); }
+    }
+}
+
+function updateProgress() {
+    var total = shuffledQuestions.length;
+    var pct = total > 0 ? Math.round((answered / total) * 100) : 0;
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressPercent').textContent = pct + ' %';
+    document.getElementById('questionCounter').textContent = 'Otázka ' + Math.min(answered + 1, total) + ' / ' + total;
+}
+
+function showResults() {
+    document.getElementById('quizContainer').style.display = 'none';
+    var resultsCard = document.getElementById('resultsCard');
+    resultsCard.style.display = 'block';
+
+    var total = shuffledQuestions.length;
+    var pct = Math.round((score / total) * 100);
+    var scoreEl = document.getElementById('resultsScore');
+    scoreEl.textContent = score + ' / ' + total + ' (' + pct + ' %)';
+
+    scoreEl.className = 'results-score';
+    if (pct >= 80) {
+        scoreEl.classList.add('excellent');
+        document.getElementById('resultsMessage').textContent = 'Výborný výsledok! Učivo máš dobre zvládnuté.';
+    } else if (pct >= 50) {
+        scoreEl.classList.add('good');
+        document.getElementById('resultsMessage').textContent = 'Dobrý výsledok, ale ešte je priestor na zlepšenie.';
+    } else {
+        scoreEl.classList.add('poor');
+        document.getElementById('resultsMessage').textContent = 'Skús si učivo zopakovať a test absolvovať znova.';
+    }
+
+    document.getElementById('progressBar').style.width = '100%';
+    document.getElementById('progressPercent').textContent = '100 %';
+    document.getElementById('questionCounter').textContent = 'Dokončené: ' + score + ' / ' + total + ' správne';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showModal(text, qIndex) {
+    pendingNextQIndex = qIndex;
+    document.getElementById('modalText').textContent = text;
+    document.getElementById('modalOverlay').classList.add('active');
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+    if (waitingForNext && pendingNextQIndex >= 0) {
+        showNextButton(pendingNextQIndex);
+        pendingNextQIndex = -1;
+    }
+}
+
+document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' || e.key === 'Enter') {
+        if (document.getElementById('modalOverlay').classList.contains('active')) {
+            closeModal();
+        }
+    }
+});
+
+document.getElementById('restartBtn').addEventListener('click', function() {
+    initQuiz();
+});
+
+initQuiz();
+</script>
+</body>
+</html>

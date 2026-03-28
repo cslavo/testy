@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktívny Test</title>
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 {
+            text-align: center; color: #fff; margin-bottom: 8px;
+            font-size: 1.5em; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); line-height: 1.3;
+        }
+        .subtitle {
+            text-align: center; color: rgba(255,255,255,0.9);
+            font-weight: 600; font-size: 1.1em; margin-bottom: 20px;
+        }
+        .progress-wrapper {
+            background: #fff; border-radius: 12px; padding: 16px 20px;
+            margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .progress-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px; font-weight: 600; color: #333; font-size: 0.95em;
+        }
+        .progress-bar-track {
+            height: 10px; background: #e0e0e0; border-radius: 5px; overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%; background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 5px; transition: width 0.4s ease; width: 0%;
+        }
+        .question-card {
+            background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .question-card.active { display: block; }
+        .question-card.answered { pointer-events: none; }
+        .question-text {
+            font-size: 1.1em; font-weight: 600; margin-bottom: 18px; line-height: 1.5; color: #333;
+        }
+        .question-number {
+            display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; width: 30px; height: 30px; border-radius: 50%;
+            text-align: center; line-height: 30px; font-size: 0.85em;
+            margin-right: 10px; font-weight: 700;
+        }
+        .options-list { list-style: none; }
+        .option-item {
+            padding: 13px 16px; margin-bottom: 8px; border: 2px solid #e0e0e0;
+            border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
+            font-size: 0.95em; line-height: 1.4; color: #333;
+        }
+        .option-item:hover { border-color: #667eea; background: #f0f0ff; }
+        .option-item.correct {
+            border-color: #4caf50; background: #e8f5e9; color: #2e7d32; font-weight: 600;
+        }
+        .option-item.incorrect {
+            border-color: #f44336; background: #ffebee; color: #c62828;
+        }
+        .next-btn {
+            display: none; margin-top: 16px; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; border: none; padding: 12px 28px; font-size: 1em; border-radius: 25px;
+            cursor: pointer; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+            float: right; pointer-events: auto;
+        }
+        .next-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .next-btn.visible { display: inline-block; }
+        .results-card {
+            background: #fff; border-radius: 12px; padding: 40px; text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .results-card h2 { font-size: 1.6em; margin-bottom: 10px; color: #333; }
+        .results-score { font-size: 2.8em; font-weight: 700; margin: 20px 0; }
+        .results-score.excellent { color: #4caf50; }
+        .results-score.good { color: #ff9800; }
+        .results-score.poor { color: #f44336; }
+        .results-message { font-size: 1.05em; margin-bottom: 30px; color: #555; }
+        .restart-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 14px 40px; font-size: 1.05em; border-radius: 30px; cursor: pointer;
+            font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .restart-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 1000;
+            justify-content: center; align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: #fff; border-radius: 12px; padding: 28px; max-width: 500px;
+            width: 90%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .modal-content h3 { color: #f44336; margin-bottom: 12px; font-size: 1.2em; }
+        .modal-content p { color: #555; font-size: 0.95em; line-height: 1.6; margin-bottom: 18px; }
+        .modal-close-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 10px 28px; border-radius: 20px; cursor: pointer; font-size: 0.95em; font-weight: 600;
+        }
+        .modal-close-btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Elektrické napätie</h1>
+        <div class="subtitle">Test B</div>
+        <div class="progress-wrapper">
+            <div class="progress-header">
+                <span id="questionCounter">Otázka 1 / 0</span>
+                <span id="progressPercent">0 %</span>
+            </div>
+            <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="quizContainer"></div>
+        <div class="results-card" id="resultsCard">
+            <h2>Výsledky testu</h2>
+            <div class="results-score" id="resultsScore"></div>
+            <div class="results-message" id="resultsMessage"></div>
+            <button class="restart-btn" id="restartBtn">Skúsiť znova</button>
+        </div>
+    </div>
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <h3>Nesprávna odpoveď</h3>
+            <p id="modalText"></p>
+            <button class="modal-close-btn" id="modalCloseBtn">Rozumiem</button>
+        </div>
+    </div>
+
+<script>
+const questionsData = [
+    {
+        question: "Akou rovnicou je určená práca $W$ konaná konštantnou elektrickou silou $F_e$, ktorá posúva guľôčku v elektrickom poli medzi dvoma platňami vzdialenými o $d$?",
+        options: [
+            { text: "Je určená súčinom konštantnej elektrickej sily a vzdialenosti medzi platňami ($W = F_e \\cdot d$).", isCorrect: true, feedback: "" },
+            { text: "Je určená podielom konštantnej elektrickej sily a vzdialenosti medzi platňami ($W = F_e / d$).", isCorrect: false, feedback: "Nesprávne. Mechanická práca vo všeobecnosti aj v tomto poli vzniká pôsobením sily po určitej dráhe, takže ide o súčin, nie o podiel." },
+            { text: "Je určená súčinom prenášaného náboja a vzdialenosti medzi platňami ($W = Q \\cdot d$).", isCorrect: false, feedback: "Nesprávne. Práca je určená silou a dráhou ($F_e \\cdot d$). Súčin náboja a dráhy neposkytuje vo fyzike jednotku práce." },
+            { text: "Získame ju ako rozdiel konštantnej elektrickej sily a odporu vzduchu pôsobiaceho na guľôčku.", isCorrect: false, feedback: "Nesprávne. Hoci sa energia spotrebuje aj na prekonanie odporu vzduchu, samotná rovnica pre celkovú prácu elektrickej sily na danej dráhe do vzorca odpočítanie odporu takto nezahŕňa." }
+        ]
+    },
+    {
+        question: "Čo sa podľa textu stane s elektricky vodivou guľôčkou zavesenou medzi dvoma rovnobežnými opačne nabitými platňami bezprostredne po jej prvom dotyku s jednou z nich?",
+        options: [
+            { text: "Získa elektrický náboj a začne konať kmitavý pohyb, pričom naráža striedavo na kladnú a zápornú platňu.", isCorrect: true, feedback: "" },
+            { text: "Trvalo sa prilepí na platňu opačnej polarity, pretože sa jej náboj pri dotyku okamžite neutralizuje.", isCorrect: false, feedback: "Nesprávne. Guľôčka sa neprilepí. Po dotyku sa nabije súhlasným nábojom, ten ju odpudí smerom k opačnej platni a vznikne kmitavý pohyb." },
+            { text: "Zostane levitovať presne v strede medzi platňami, kde sa všetky elektrické sily navzájom vyrušia do rovnováhy.", isCorrect: false, feedback: "Nesprávne. Na to by musela byť guľôčka bez náboja presne v strede bez počiatočného pohybu. Akonáhle sa platne dotkne, získa náboj a pohyb začne." },
+            { text: "Začne sa pohybovať po kružnici okolo stredovej osi medzi dvoma platňami kvôli interakcii poľa s nábojom.", isCorrect: false, feedback: "Nesprávne. Elektrické pole rovnobežných platní vytvára lineárnu silu (pohyb z jednej strany na druhú), nie dostredivú silu pre pohyb po kružnici." }
+        ]
+    },
+    {
+        question: "Aké je správne zapojenie polarity svoriek voltmetra k zdroju pri meraní jednosmerného napätia?",
+        options: [
+            { text: "Svorku + pripájame ku kladnému pólu zdroja a svorku - k zápornému pólu zdroja.", isCorrect: true, feedback: "" },
+            { text: "Svorku + pripájame k zápornému pólu a svorku - ku kladnému, aby sa prúdový okruh správne uzavrel.", isCorrect: false, feedback: "Nesprávne. Týmto by sme pri jednosmernom napätí otočili polaritu merania (ručička by išla do mínusu alebo by digitálny prístroj ukázal zápornú hodnotu)." },
+            { text: "Obe svorky pripájame na kladný pól zdroja, pričom záporná svorka slúži len ako mechanické uzemnenie.", isCorrect: false, feedback: "Nesprávne. Napätie je rozdiel potenciálov medzi DVOMA rozdielnymi pólmi. Ak pripojíme obe svorky na ten istý pól, nameriame nulové napätie." },
+            { text: "Pri jednosmernom prúde na zapojení svoriek nezáleží, moderný voltmeter si polaritu prispôsobí vnútorne automaticky.", isCorrect: false, feedback: "Nesprávne. Učebný text prísne a explicitne špecifikuje: svorku + pripájame ku kladnému pólu a svorku - k zápornému." }
+        ]
+    },
+    {
+        question: "Akým spôsobom môžeme podľa učiva zistiť veľkosť odchýlky merania pri digitálnych meracích prístrojoch?",
+        options: [
+            { text: "Odchýlka merania digitálnych prístrojov je jasne uvedená v návode, a to osobitne pre každý merací rozsah.", isCorrect: true, feedback: "" },
+            { text: "Odchýlka je pre všetky digitálne prístroje konštantná a absolútne nezávisí od zvoleného meracieho rozsahu.", isCorrect: false, feedback: "Nesprávne. Tabuľka a text v učive jasne ukazujú, že pre iný rozsah napätia (napr. 2V vs 200V) má prístroj garantovanú inú odchýlku (rozlíšenie)." },
+            { text: "Pri digitálnych prístrojoch sa odchýlka teoreticky nevyskytuje, pretože meranie je digitálne a teda absolútne presné.", isCorrect: false, feedback: "Nesprávne. Každé fyzikálne meranie, či už analógové alebo digitálne, je zaťažené určitou chybou a má svoju odchýlku (alebo toleranciu súčiastok)." },
+            { text: "Odchýlku digitálneho prístroja si musí používateľ vždy vypočítať sám výlučne experimentálne pomocou opakovaného merania.", isCorrect: false, feedback: "Nesprávne. Výrobca hodnoty odchýlok štandardne poskytuje v návode prístroja podľa technických špecifikácií, netreba ich bádať experimentálne." }
+        ]
+    },
+    {
+        question: "Aký vzťah platí pre elektrické napätia na sériovo zapojených spotrebičoch podľa teoretického predpokladu praktického cvičenia (Úloha č. 2)?",
+        options: [
+            { text: "Súčet napätí na jednotlivých sériovo zapojených spotrebičoch sa rovná celkovému nameranému napätiu na nich ($U_{1\\to2} + U_{2\\to3} = U_{1\\to3}$).", isCorrect: true, feedback: "" },
+            { text: "Napätie na každom jednom sériovo zapojenom spotrebiči je zhodné a úplne sa rovná celkovému napätiu meraného obvodu.", isCorrect: false, feedback: "Nesprávne. Toto pravidlo platí pre paralelné (vedľajšie) zapojenie spotrebičov, v žiadnom prípade nie pre sériové." },
+            { text: "Celkové napätie sériovo zapojených spotrebičov sa vždy určuje ako podiel (zlomok) čiastkových napätí na jednotlivých spotrebičoch.", isCorrect: false, feedback: "Nesprávne. V sériovom obvode sa napätie na zdroji a spotrebičoch sčíta, nepoužíva sa delenie (podiel)." },
+            { text: "Súčet čiastkových napätí na spotrebičoch v sérii je vždy rovný nule z dôvodu úbytku energie v spojovacích drôtoch.", isCorrect: false, feedback: "Nesprávne. Súčet napätí na spotrebičoch vyrovnáva napätie na svorkách pripojených k zdroju, nerovná sa nule." }
+        ]
+    },
+    {
+        question: "Akú úvodnú analógiu používa text na lepšie vysvetlenie pôvodu elektrického napätia spojeného s konaním práce?",
+        options: [
+            { text: "Naťahovanie gumičky, v ktorej vďaka jej pružnosti vzniká po vykonaní práce napätie, ktoré môže opätovne konať prácu.", isCorrect: true, feedback: "" },
+            { text: "Gumičku, ktorá po svojom natiahnutí nevytvára žiadne vnútorné napätie, kým nedôjde k jej pretrhnutiu (na rozdiel od elektrického poľa).", isCorrect: false, feedback: "Nesprávne. Text jasne tvrdí, že v napnutej gumičke priamo vzniká vnútorné napätie a to koná prácu pri návrate späť." },
+            { text: "Sily pružnosti konajú prácu výhradne počas procesu samotného naťahovania gumičky, kým pri jej uvoľnení a návrate je vykonaná práca nulová.", isCorrect: false, feedback: "Nesprávne. Podľa textu konajú sily pružnosti prácu práve pri návrate gumičky do jej pôvodného stavu." },
+            { text: "Naťahovanie pružnej gumičky, v ktorej sa zvyšuje napätie výlučne v dôsledku rastúcej teploty materiálu spôsobeného trením.", isCorrect: false, feedback: "Nesprávne. Termodynamika alebo ohrev v analógii v učive vôbec nefiguruje. Ide iba o mechanickú prácu zmeny dĺžky." }
+        ]
+    }
+];
+
+// ===== UNIVERSAL SCRIPT =====
+let currentQuestion = 0;
+let score = 0;
+let answered = 0;
+let shuffledQuestions = [];
+let waitingForNext = false;
+let pendingNextQIndex = -1;
+
+function shuffle(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function initQuiz() {
+    currentQuestion = 0;
+    score = 0;
+    answered = 0;
+    waitingForNext = false;
+    pendingNextQIndex = -1;
+    shuffledQuestions = shuffle(questionsData).map(function(q) {
+        return { question: q.question, options: shuffle(q.options) };
+    });
+    document.getElementById('resultsCard').style.display = 'none';
+    document.getElementById('quizContainer').style.display = 'block';
+    renderQuiz();
+    updateProgress();
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function renderQuiz() {
+    var container = document.getElementById('quizContainer');
+    container.innerHTML = '';
+    shuffledQuestions.forEach(function(q, qIndex) {
+        var card = document.createElement('div');
+        card.className = 'question-card' + (qIndex === 0 ? ' active' : '');
+        card.id = 'qcard-' + qIndex;
+
+        var optionsHTML = '';
+        q.options.forEach(function(opt) {
+            optionsHTML += '<li class="option-item" data-correct="' + opt.isCorrect + '" data-feedback="' + escapeAttr(opt.feedback) + '">' + opt.text + '</li>';
+        });
+
+        card.innerHTML = '<div class="question-text"><span class="question-number">' + (qIndex + 1) + '</span>' + q.question + '</div><ul class="options-list">' + optionsHTML + '</ul><button class="next-btn" id="nextBtn-' + qIndex + '">Ďalšia otázka →</button>';
+        container.appendChild(card);
+
+        var items = card.querySelectorAll('.option-item');
+        items.forEach(function(item) {
+            item.addEventListener('click', function() {
+                handleAnswer(card, item, qIndex);
+            });
+        });
+
+        document.getElementById('nextBtn-' + qIndex).addEventListener('click', function() {
+            waitingForNext = false;
+            advanceToNext();
+        });
+    });
+}
+
+function escapeAttr(str) {
+    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function handleAnswer(card, selectedItem, qIndex) {
+    if (card.classList.contains('answered')) return;
+    card.classList.add('answered');
+    answered++;
+
+    var isCorrect = selectedItem.getAttribute('data-correct') === 'true';
+    var feedback = selectedItem.getAttribute('data-feedback');
+
+    if (isCorrect) {
+        selectedItem.classList.add('correct');
+        score++;
+        updateProgress();
+        setTimeout(function() { advanceToNext(); }, 1500);
+    } else {
+        selectedItem.classList.add('incorrect');
+        card.querySelectorAll('.option-item').forEach(function(opt) {
+            if (opt.getAttribute('data-correct') === 'true') {
+                opt.classList.add('correct');
+            }
+        });
+        updateProgress();
+        waitingForNext = true;
+        if (feedback && feedback.length > 0) {
+            showModal(decodeHTMLEntities(feedback), qIndex);
+        } else {
+            showNextButton(qIndex);
+        }
+    }
+}
+
+function showNextButton(qIndex) {
+    var btn = document.getElementById('nextBtn-' + qIndex);
+    if (btn) { btn.classList.add('visible'); btn.focus(); }
+}
+
+function advanceToNext() {
+    if (waitingForNext) return;
+    if (answered >= shuffledQuestions.length) {
+        showResults();
+    } else {
+        currentQuestion++;
+        showQuestion(currentQuestion);
+    }
+}
+
+function decodeHTMLEntities(text) {
+    var ta = document.createElement('textarea');
+    ta.innerHTML = text;
+    return ta.value;
+}
+
+function showQuestion(index) {
+    document.querySelectorAll('.question-card').forEach(function(c) { c.classList.remove('active'); });
+    var next = document.getElementById('qcard-' + index);
+    if (next) {
+        next.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (window.MathJax) { window.MathJax.typesetPromise(); }
+    }
+}
+
+function updateProgress() {
+    var total = shuffledQuestions.length;
+    var pct = total > 0 ? Math.round((answered / total) * 100) : 0;
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressPercent').textContent = pct + ' %';
+    document.getElementById('questionCounter').textContent = 'Otázka ' + Math.min(answered + 1, total) + ' / ' + total;
+}
+
+function showResults() {
+    document.getElementById('quizContainer').style.display = 'none';
+    var resultsCard = document.getElementById('resultsCard');
+    resultsCard.style.display = 'block';
+
+    var total = shuffledQuestions.length;
+    var pct = Math.round((score / total) * 100);
+    var scoreEl = document.getElementById('resultsScore');
+    scoreEl.textContent = score + ' / ' + total + ' (' + pct + ' %)';
+
+    scoreEl.className = 'results-score';
+    if (pct >= 80) {
+        scoreEl.classList.add('excellent');
+        document.getElementById('resultsMessage').textContent = 'Výborný výsledok! Učivo máš dobre zvládnuté.';
+    } else if (pct >= 50) {
+        scoreEl.classList.add('good');
+        document.getElementById('resultsMessage').textContent = 'Dobrý výsledok, ale ešte je priestor na zlepšenie.';
+    } else {
+        scoreEl.classList.add('poor');
+        document.getElementById('resultsMessage').textContent = 'Skús si učivo zopakovať a test absolvovať znova.';
+    }
+
+    document.getElementById('progressBar').style.width = '100%';
+    document.getElementById('progressPercent').textContent = '100 %';
+    document.getElementById('questionCounter').textContent = 'Dokončené: ' + score + ' / ' + total + ' správne';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showModal(text, qIndex) {
+    pendingNextQIndex = qIndex;
+    document.getElementById('modalText').textContent = text;
+    document.getElementById('modalOverlay').classList.add('active');
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+    if (waitingForNext && pendingNextQIndex >= 0) {
+        showNextButton(pendingNextQIndex);
+        pendingNextQIndex = -1;
+    }
+}
+
+document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' || e.key === 'Enter') {
+        if (document.getElementById('modalOverlay').classList.contains('active')) { closeModal(); }
+    }
+});
+
+document.getElementById('restartBtn').addEventListener('click', function() { initQuiz(); });
+
+initQuiz();
+</script>
+</body>
+</html>

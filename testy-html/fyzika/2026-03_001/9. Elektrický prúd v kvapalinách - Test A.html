@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktívny Test</title>
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 {
+            text-align: center; color: #fff; margin-bottom: 8px;
+            font-size: 1.5em; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); line-height: 1.3;
+        }
+        .subtitle {
+            text-align: center; color: rgba(255,255,255,0.9);
+            font-weight: 600; font-size: 1.1em; margin-bottom: 20px;
+        }
+        .progress-wrapper {
+            background: #fff; border-radius: 12px; padding: 16px 20px;
+            margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .progress-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px; font-weight: 600; color: #333; font-size: 0.95em;
+        }
+        .progress-bar-track {
+            height: 10px; background: #e0e0e0; border-radius: 5px; overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%; background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 5px; transition: width 0.4s ease; width: 0%;
+        }
+        .question-card {
+            background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .question-card.active { display: block; }
+        .question-card.answered { pointer-events: none; }
+        .question-text {
+            font-size: 1.1em; font-weight: 600; margin-bottom: 18px; line-height: 1.5; color: #333;
+        }
+        .question-number {
+            display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; width: 30px; height: 30px; border-radius: 50%;
+            text-align: center; line-height: 30px; font-size: 0.85em;
+            margin-right: 10px; font-weight: 700;
+        }
+        .options-list { list-style: none; }
+        .option-item {
+            padding: 13px 16px; margin-bottom: 8px; border: 2px solid #e0e0e0;
+            border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
+            font-size: 0.95em; line-height: 1.4; color: #333;
+        }
+        .option-item:hover { border-color: #667eea; background: #f0f0ff; }
+        .option-item.correct {
+            border-color: #4caf50; background: #e8f5e9; color: #2e7d32; font-weight: 600;
+        }
+        .option-item.incorrect {
+            border-color: #f44336; background: #ffebee; color: #c62828;
+        }
+        .next-btn {
+            display: none; margin-top: 16px; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; border: none; padding: 12px 28px; font-size: 1em; border-radius: 25px;
+            cursor: pointer; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+            float: right; pointer-events: auto;
+        }
+        .next-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .next-btn.visible { display: inline-block; }
+        .results-card {
+            background: #fff; border-radius: 12px; padding: 40px; text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .results-card h2 { font-size: 1.6em; margin-bottom: 10px; color: #333; }
+        .results-score { font-size: 2.8em; font-weight: 700; margin: 20px 0; }
+        .results-score.excellent { color: #4caf50; }
+        .results-score.good { color: #ff9800; }
+        .results-score.poor { color: #f44336; }
+        .results-message { font-size: 1.05em; margin-bottom: 30px; color: #555; }
+        .restart-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 14px 40px; font-size: 1.05em; border-radius: 30px; cursor: pointer;
+            font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .restart-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 1000;
+            justify-content: center; align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: #fff; border-radius: 12px; padding: 28px; max-width: 500px;
+            width: 90%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .modal-content h3 { color: #f44336; margin-bottom: 12px; font-size: 1.2em; }
+        .modal-content p { color: #555; font-size: 0.95em; line-height: 1.6; margin-bottom: 18px; }
+        .modal-close-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 10px 28px; border-radius: 20px; cursor: pointer; font-size: 0.95em; font-weight: 600;
+        }
+        .modal-close-btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>9 ELEKTRICKÝ PRÚD V KVAPALINÁCH</h1>
+        <div class="subtitle">Test A</div>
+        <div class="progress-wrapper">
+            <div class="progress-header">
+                <span id="questionCounter">Otázka 1 / 0</span>
+                <span id="progressPercent">0 %</span>
+            </div>
+            <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="quizContainer"></div>
+        <div class="results-card" id="resultsCard">
+            <h2>Výsledky testu</h2>
+            <div class="results-score" id="resultsScore"></div>
+            <div class="results-message" id="resultsMessage"></div>
+            <button class="restart-btn" id="restartBtn">Skúsiť znova</button>
+        </div>
+    </div>
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <h3>Nesprávna odpoveď</h3>
+            <p id="modalText"></p>
+            <button class="modal-close-btn" id="modalCloseBtn">Rozumiem</button>
+        </div>
+    </div>
+
+<script>
+const questionsData = [
+    {
+        question: "Akú podmienku musí spĺňať voda, aby ňou nemohol prechádzať elektrický prúd?",
+        options: [
+            { text: "Musí to byť chemicky čistá voda.", isCorrect: true, feedback: "" },
+            { text: "Musí obsahovať voľné častice s nábojom, napríklad chlorid sodný.", isCorrect: false, feedback: "Prítomnosť voľných častíc s nábojom (napr. rozpustená soľ) naopak spôsobuje, že voda sa stáva elektricky vodivou." },
+            { text: "Musí byť zahriata na bod varu, čím sa preruší tok iónov.", isCorrect: false, feedback: "Teplota sama o sebe vodivosť čistej vody nezvyšuje na úroveň elektrolytu, dôležitá je chemická čistota (absencia iónov)." },
+            { text: "Musí byť oddelená od vzdušného kyslíka.", isCorrect: false, feedback: "Vzdušný kyslík ovplyvňuje koróziu, ale pre nevodivosť vody je kľúčová jej chemická čistota, teda chýbajúce ióny." }
+        ]
+    },
+    {
+        question: "Čo rozumieme pod pojmom elektrolytická disociácia?",
+        options: [
+            { text: "Vznik voľných iónov rozpadom rozpustenej látky v rozpúšťadle.", isCorrect: true, feedback: "" },
+            { text: "Rozpad elektród pôsobením elektrického prúdu v kvapaline.", isCorrect: false, feedback: "Elektrolytická disociácia je proces v roztoku (štiepenie molekúl na ióny), nie mechanické alebo chemické poškodenie samotnej elektródy." },
+            { text: "Proces, pri ktorom sa neutrálne atómy kovu zlučujú do molekúl.", isCorrect: false, feedback: "Je to presne naopak, disociácia znamená rozpad látky na nabité častice (ióny), nie ich zlučovanie do molekúl." },
+            { text: "Usporiadaný pohyb iónov medzi anódou a katódou.", isCorrect: false, feedback: "Usporiadaný pohyb iónov sa nazýva elektrický prúd v kvapalinách. Disociácia je len samotný vznik týchto iónov." }
+        ]
+    },
+    {
+        question: "Ktorým smerom sa pohybujú katióny v elektrickom poli vnútri elektrolytu?",
+        options: [
+            { text: "Pohybujú sa smerom ku katóde.", isCorrect: true, feedback: "" },
+            { text: "Pohybujú sa smerom k anóde.", isCorrect: false, feedback: "Katióny sú kladné ióny. Keďže katóda je spojená so záporným pólom zdroja, priťahuje práve kladné katióny. K anóde idú anióny." },
+            { text: "Zostávajú v strede elektrolytu a tvoria elektrický odpor.", isCorrect: false, feedback: "Pod vplyvom elektrického poľa nezostávajú na mieste, ale vykonávajú usporiadaný pohyb smerom k príslušnej elektróde." },
+            { text: "Pohybujú sa chaoticky a vytvárajú teplo.", isCorrect: false, feedback: "Bez elektrického poľa by sa pohybovali chaoticky, ale pri prechode prúdu majú jasne usporiadaný pohyb smerom k zápornej katóde." }
+        ]
+    },
+    {
+        question: "Čo sa vždy vylučuje na katóde pri prechode elektrického prúdu elektrolytom?",
+        options: [
+            { text: "Vodík alebo kov.", isCorrect: true, feedback: "" },
+            { text: "Kyslík alebo nekovové prvky.", isCorrect: false, feedback: "Kyslík a iné anióny sa pohybujú k anóde (kladnej elektróde), nie ku katóde." },
+            { text: "Iba plynné látky, ako sú vodík a kyslík.", isCorrect: false, feedback: "Na katóde sa veľmi často vylučujú aj pevné kovy (napríklad meď pri elektrolýze síranu meďnatého)." },
+            { text: "Nové molekuly kyseliny a zásady.", isCorrect: false, feedback: "Na katóde sa vylučujú neutrálne atómy kovu alebo plynný vodík, nie zložité zlúčeniny ako kyseliny." }
+        ]
+    },
+    {
+        question: "Čo sa deje na medenej anóde pri elektrolýze vodného roztoku síranu meďnatého ($CuSO_4$)?",
+        options: [
+            { text: "Z anódy prechádza do roztoku toľko atómov medi, koľko sa vylučuje na katóde.", isCorrect: true, feedback: "" },
+            { text: "Na anóde sa vylučujú pevné kryštály čistej medi z roztoku.", isCorrect: false, feedback: "Vylučovanie čistej medi prebieha na katóde. Na anóde naopak meď ubúda a prechádza do roztoku." },
+            { text: "Anióny $SO_4^{2-}$ odovzdávajú anóde elektróny a vylučuje sa kyslík.", isCorrect: false, feedback: "Pri tejto konkrétnej reakcii anióny reagujú s materiálom anódy (meďou) a vytvárajú nové molekuly $CuSO_4$. Kyslík by sa vylučoval, ak by bola anóda napr. z platiny v kyseline sírovej." },
+            { text: "Katióny $Cu^{2+}$ sa spájajú s anódou a neutralizujú jej elektrický náboj.", isCorrect: false, feedback: "Katióny sú kladné, preto sú odpudzované od kladnej anódy a priťahované k zápornej katóde." }
+        ]
+    },
+    {
+        question: "Ktorá z nasledujúcich definícií vyjadruje Faradayov zákon elektrolýzy?",
+        options: [
+            { text: "Hmotnosť vylúčenej látky je priamo úmerná náboju, ktorý prešiel elektrolytom.", isCorrect: true, feedback: "" },
+            { text: "Hmotnosť vylúčenej látky klesá s narastajúcim časom prechodu prúdu.", isCorrect: false, feedback: "Podľa Faradayovho zákona $m = AQ$. Ak prúd prechádza dlhšie, prejde väčší náboj a vylúči sa väčšia hmotnosť, neklesá." },
+            { text: "Elektrické napätie medzi elektródami je priamo úmerné koncentrácii iónov.", isCorrect: false, feedback: "Faradayov zákon rieši závislosť hmotnosti vylúčenej látky od preneseného náboja, nie závislosť napätia od koncentrácie." },
+            { text: "Vodivosť elektrolytu je nepriamo úmerná teplote roztoku.", isCorrect: false, feedback: "Faradayov zákon sa týka hmotnosti látky vylúčenej na elektródach, nie samotnej vodivosti kvapaliny vzhľadom na teplotu." }
+        ]
+    },
+    {
+        question: "Akou oblasťou sa zaoberá elektrometalurgia?",
+        options: [
+            { text: "Výrobou alebo čistením kovov pomocou elektrolýzy.", isCorrect: true, feedback: "" },
+            { text: "Zušľachťovaním kovov ich zahrievaním na vysoké teploty v elektrickej peci.", isCorrect: false, feedback: "Elektrometalurgia v kontexte tejto kapitoly využíva jav elektrolýzy v kvapalinách (napr. na výrobu hliníka), nie primárne teplo z elektrickej pece." },
+            { text: "Vytváraním elektrickej energie spaľovaním kovového odpadu.", isCorrect: false, feedback: "Tento proces nemá s elektrometalurgiou nič spoločné. Elektrometalurgia naopak elektrickú energiu spotrebúva na prácu s kovmi." },
+            { text: "Sledovaním korózie kovov vplyvom vlhkosti vzduchu.", isCorrect: false, feedback: "Toto je definícia samotnej korózie a jej štúdia, zatiaľ čo elektrometalurgia je praktické priemyselné odvetvie na spracovanie kovov." }
+        ]
+    },
+    {
+        question: "Aký je princíp fungovania akumulátorov v kontexte elektrického prúdu v kvapalinách?",
+        options: [
+            { text: "Sú to galvanické články, ktoré sa stávajú zdrojom napätia až po predchádzajúcom prechode prúdu ich elektrolytom.", isCorrect: true, feedback: "" },
+            { text: "Slúžia iba ako pasívny vodič, ktorý nahrádza kovové drôty v obvodoch s vysokým napätím.", isCorrect: false, feedback: "Akumulátory nie sú len vodiče, sú to aktívne zdroje elektromotorického napätia (po ich nabití)." },
+            { text: "Generujú prúd výlučne vďaka trvalému chemickému rozkladu bez možnosti opätovného nabitia.", isCorrect: false, feedback: "Nemožnosť opätovného nabitia platí pre primárne články. Akumulátory (sekundárne články) sa dajú nabíjať prechodom prúdu." },
+            { text: "Získavajú elektrický náboj trením elektród o viskózny elektrolyt.", isCorrect: false, feedback: "Náboj a napätie získavajú elektrochemickými reakciami, nie mechanickým trením elektród." }
+        ]
+    },
+    {
+        question: "Na akom princípe funguje metóda zabránenia vlhnutiu muriva pomocou elektrolýzy?",
+        options: [
+            { text: "Elektrický prúd usmerní pohyb iónov vo vode v murive, čím ju možno vysušiť.", isCorrect: true, feedback: "" },
+            { text: "Murivo sa pokryje tenkou vrstvou striebra, ktorá odpudzuje vodné kvapky.", isCorrect: false, feedback: "Pokovovanie povrchov existuje (galvanické pokovovanie), ale nerieši vnútorné vysušovanie muriva. Murivo sa nepokovuje." },
+            { text: "Elektródy murivo zahrejú a voda sa okamžite premení na paru.", isCorrect: false, feedback: "Zahrievanie je tepelný účinok prúdu. Metóda vysúšania muriva spomenutá v texte je založená na priamom elektrochemickom procese (elektrolýze)." },
+            { text: "Vlhkosť je neutralizovaná pridaním chloridu sodného do steny.", isCorrect: false, feedback: "Pridanie soli by iba zvýšilo vodivosť vlhkého muriva, ale samo o sebe stenu nevysuší." }
+        ]
+    },
+    {
+        question: "Aký objav spravil Alessandro Volta v roku 1796 po pokusoch Luigiho Galvaniho?",
+        options: [
+            { text: "Ukázal, že nejde o „živočíšnu elektrinu“, ale o premenu chemickej energie.", isCorrect: true, feedback: "" },
+            { text: "Zistil, že žabie stehienka produkujú elektrický prúd aj bez prítomnosti kovov.", isCorrect: false, feedback: "Volta naopak vyvrátil, že elektrina pochádza zo živočícha. Dokázal, že vzniká interakciou dvoch rôznych kovov a elektrolytu." },
+            { text: "Zostrojiť prvý akumulátor, ktorý poháňal elektrické motory.", isCorrect: false, feedback: "Volta nevytvoril akumulátor (nabíjateľný článok), ale primárny galvanický článok demonštrujúci premenu chemickej energie." },
+            { text: "Objavil matematický vzťah $m = AQ$ pre hmotnosť vylúčenej látky.", isCorrect: false, feedback: "Tento vzťah (Faradayov zákon) objavil Michael Faraday v roku 1833, nie Volta." }
+        ]
+    },
+    {
+        question: "Ktoré častice zabezpečujú prenos elektrického prúdu v kvapalinách?",
+        options: [
+            { text: "Voľne pohyblivé kladné a záporné ióny.", isCorrect: true, feedback: "" },
+            { text: "Výlučne voľné elektróny uvoľnené z atómov elektrolytu.", isCorrect: false, feedback: "V kovoch prúd prenášajú elektróny, ale v kvapalinách ho sprostredkujú celé nabité atómy/molekuly, teda ióny." },
+            { text: "Iba záporné anióny, kým katióny zostávajú viazané v štruktúre.", isCorrect: false, feedback: "V kvapalinách sa voľne pohybujú a na prenose prúdu sa podieľajú oba typy iónov, kladné aj záporné." },
+            { text: "Vodíkové a kyslíkové atómy bez elektrického náboja.", isCorrect: false, feedback: "Neutrálne atómy nereagujú na elektrické pole a nevedú elektrický prúd. Častice musia mať náboj." }
+        ]
+    },
+    {
+        question: "Z čoho sa skladá galvanický článok, napríklad v batérii z ovocia?",
+        options: [
+            { text: "Z dvoch chemicky odlišných elektród ponorených do vodivého roztoku (elektrolytu).", isCorrect: true, feedback: "" },
+            { text: "Z dvoch elektród z rovnakého materiálu ponorených do dvoch rôznych kyselín.", isCorrect: false, feedback: "Na vznik napätia musia byť z rôzneho materiálu práve elektródy (napr. železo a meď). Ak sú rovnaké, elektromotorické napätie nevznikne." },
+            { text: "Z čistej chemickej vody, v ktorej plávajú voľné elektróny.", isCorrect: false, feedback: "Čistá voda je nevodivá a elektrolyt neobsahuje „plávajúce elektróny“, ale ióny." },
+            { text: "Zo zdroja striedavého napätia a jednej kovovej katódy.", isCorrect: false, feedback: "Galvanický článok sám o sebe JE zdrojom (jednosmerného) napätia, nie je na neho pripájaný. Musí mať tiež dve elektródy, nie jednu." }
+        ]
+    }
+];
+
+// ===== UNIVERSAL SCRIPT (V8) =====
+let currentQuestion = 0;
+let score = 0;
+let answered = 0;
+let shuffledQuestions = [];
+let waitingForNext = false;
+let pendingNextQIndex = -1;
+
+function shuffle(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function initQuiz() {
+    currentQuestion = 0;
+    score = 0;
+    answered = 0;
+    waitingForNext = false;
+    pendingNextQIndex = -1;
+    shuffledQuestions = shuffle(questionsData).map(function(q) {
+        return { question: q.question, options: shuffle(q.options) };
+    });
+    document.getElementById('resultsCard').style.display = 'none';
+    document.getElementById('quizContainer').style.display = 'block';
+    renderQuiz();
+    updateProgress();
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function renderQuiz() {
+    var container = document.getElementById('quizContainer');
+    container.innerHTML = '';
+    shuffledQuestions.forEach(function(q, qIndex) {
+        var card = document.createElement('div');
+        card.className = 'question-card' + (qIndex === 0 ? ' active' : '');
+        card.id = 'qcard-' + qIndex;
+
+        var optionsHTML = '';
+        q.options.forEach(function(opt) {
+            optionsHTML += '<li class="option-item" data-correct="' + opt.isCorrect + '" data-feedback="' + escapeAttr(opt.feedback) + '">' + opt.text + '</li>';
+        });
+
+        card.innerHTML = '<div class="question-text"><span class="question-number">' + (qIndex + 1) + '</span>' + q.question + '</div><ul class="options-list">' + optionsHTML + '</ul><button class="next-btn" id="nextBtn-' + qIndex + '">Ďalšia otázka →</button>';
+        container.appendChild(card);
+
+        var items = card.querySelectorAll('.option-item');
+        items.forEach(function(item) {
+            item.addEventListener('click', function() {
+                handleAnswer(card, item, qIndex);
+            });
+        });
+
+        document.getElementById('nextBtn-' + qIndex).addEventListener('click', function() {
+            waitingForNext = false;
+            advanceToNext();
+        });
+    });
+}
+
+function escapeAttr(str) {
+    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function handleAnswer(card, selectedItem, qIndex) {
+    if (card.classList.contains('answered')) return;
+    card.classList.add('answered');
+    answered++;
+
+    var isCorrect = selectedItem.getAttribute('data-correct') === 'true';
+    var feedback = selectedItem.getAttribute('data-feedback');
+
+    if (isCorrect) {
+        selectedItem.classList.add('correct');
+        score++;
+        updateProgress();
+        setTimeout(function() { advanceToNext(); }, 1500);
+    } else {
+        selectedItem.classList.add('incorrect');
+        card.querySelectorAll('.option-item').forEach(function(opt) {
+            if (opt.getAttribute('data-correct') === 'true') {
+                opt.classList.add('correct');
+            }
+        });
+        updateProgress();
+        waitingForNext = true;
+        if (feedback && feedback.length > 0) {
+            showModal(decodeHTMLEntities(feedback), qIndex);
+        } else {
+            showNextButton(qIndex);
+        }
+    }
+}
+
+function showNextButton(qIndex) {
+    var btn = document.getElementById('nextBtn-' + qIndex);
+    if (btn) { btn.classList.add('visible'); btn.focus(); }
+}
+
+function advanceToNext() {
+    if (waitingForNext) return;
+    if (answered >= shuffledQuestions.length) {
+        showResults();
+    } else {
+        currentQuestion++;
+        showQuestion(currentQuestion);
+    }
+}
+
+function decodeHTMLEntities(text) {
+    var ta = document.createElement('textarea');
+    ta.innerHTML = text;
+    return ta.value;
+}
+
+function showQuestion(index) {
+    document.querySelectorAll('.question-card').forEach(function(c) { c.classList.remove('active'); });
+    var next = document.getElementById('qcard-' + index);
+    if (next) {
+        next.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (window.MathJax) { window.MathJax.typesetPromise(); }
+    }
+}
+
+function updateProgress() {
+    var total = shuffledQuestions.length;
+    var pct = total > 0 ? Math.round((answered / total) * 100) : 0;
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressPercent').textContent = pct + ' %';
+    document.getElementById('questionCounter').textContent = 'Otázka ' + Math.min(answered + 1, total) + ' / ' + total;
+}
+
+function showResults() {
+    document.getElementById('quizContainer').style.display = 'none';
+    var resultsCard = document.getElementById('resultsCard');
+    resultsCard.style.display = 'block';
+
+    var total = shuffledQuestions.length;
+    var pct = Math.round((score / total) * 100);
+    var scoreEl = document.getElementById('resultsScore');
+    scoreEl.textContent = score + ' / ' + total + ' (' + pct + ' %)';
+
+    scoreEl.className = 'results-score';
+    if (pct >= 80) {
+        scoreEl.classList.add('excellent');
+        document.getElementById('resultsMessage').textContent = 'Výborný výsledok! Učivo máš dobre zvládnuté.';
+    } else if (pct >= 50) {
+        scoreEl.classList.add('good');
+        document.getElementById('resultsMessage').textContent = 'Dobrý výsledok, ale ešte je priestor na zlepšenie.';
+    } else {
+        scoreEl.classList.add('poor');
+        document.getElementById('resultsMessage').textContent = 'Skús si učivo zopakovať a test absolvovať znova.';
+    }
+
+    document.getElementById('progressBar').style.width = '100%';
+    document.getElementById('progressPercent').textContent = '100 %';
+    document.getElementById('questionCounter').textContent = 'Dokončené: ' + score + ' / ' + total + ' správne';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showModal(text, qIndex) {
+    pendingNextQIndex = qIndex;
+    document.getElementById('modalText').textContent = text;
+    document.getElementById('modalOverlay').classList.add('active');
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+    if (waitingForNext && pendingNextQIndex >= 0) {
+        showNextButton(pendingNextQIndex);
+        pendingNextQIndex = -1;
+    }
+}
+
+document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+document.getElementById('modalOverlay').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape' || e.key === 'Enter') { if (document.getElementById('modalOverlay').classList.contains('active')) closeModal(); } });
+document.getElementById('restartBtn').addEventListener('click', function() { initQuiz(); });
+
+initQuiz();
+</script>
+</body>
+</html>

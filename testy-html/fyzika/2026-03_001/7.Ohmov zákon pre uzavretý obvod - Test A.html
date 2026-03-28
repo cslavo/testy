@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktívny Test</title>
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 {
+            text-align: center; color: #fff; margin-bottom: 8px;
+            font-size: 1.5em; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); line-height: 1.3;
+        }
+        .subtitle {
+            text-align: center; color: rgba(255,255,255,0.9);
+            font-weight: 600; font-size: 1.1em; margin-bottom: 20px;
+        }
+        .progress-wrapper {
+            background: #fff; border-radius: 12px; padding: 16px 20px;
+            margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .progress-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px; font-weight: 600; color: #333; font-size: 0.95em;
+        }
+        .progress-bar-track {
+            height: 10px; background: #e0e0e0; border-radius: 5px; overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%; background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 5px; transition: width 0.4s ease; width: 0%;
+        }
+        .question-card {
+            background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .question-card.active { display: block; }
+        .question-card.answered { pointer-events: none; }
+        .question-text {
+            font-size: 1.1em; font-weight: 600; margin-bottom: 18px; line-height: 1.5; color: #333;
+        }
+        .question-number {
+            display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; width: 30px; height: 30px; border-radius: 50%;
+            text-align: center; line-height: 30px; font-size: 0.85em;
+            margin-right: 10px; font-weight: 700;
+        }
+        .options-list { list-style: none; }
+        .option-item {
+            padding: 13px 16px; margin-bottom: 8px; border: 2px solid #e0e0e0;
+            border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
+            font-size: 0.95em; line-height: 1.4; color: #333;
+        }
+        .option-item:hover { border-color: #667eea; background: #f0f0ff; }
+        .option-item.correct {
+            border-color: #4caf50; background: #e8f5e9; color: #2e7d32; font-weight: 600;
+        }
+        .option-item.incorrect {
+            border-color: #f44336; background: #ffebee; color: #c62828;
+        }
+        .next-btn {
+            display: none; margin-top: 16px; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; border: none; padding: 12px 28px; font-size: 1em; border-radius: 25px;
+            cursor: pointer; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+            float: right; pointer-events: auto;
+        }
+        .next-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .next-btn.visible { display: inline-block; }
+        .results-card {
+            background: #fff; border-radius: 12px; padding: 40px; text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .results-card h2 { font-size: 1.6em; margin-bottom: 10px; color: #333; }
+        .results-score { font-size: 2.8em; font-weight: 700; margin: 20px 0; }
+        .results-score.excellent { color: #4caf50; }
+        .results-score.good { color: #ff9800; }
+        .results-score.poor { color: #f44336; }
+        .results-message { font-size: 1.05em; margin-bottom: 30px; color: #555; }
+        .restart-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 14px 40px; font-size: 1.05em; border-radius: 30px; cursor: pointer;
+            font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .restart-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 1000;
+            justify-content: center; align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: #fff; border-radius: 12px; padding: 28px; max-width: 500px;
+            width: 90%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .modal-content h3 { color: #f44336; margin-bottom: 12px; font-size: 1.2em; }
+        .modal-content p { color: #555; font-size: 0.95em; line-height: 1.6; margin-bottom: 18px; }
+        .modal-close-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 10px 28px; border-radius: 20px; cursor: pointer; font-size: 0.95em; font-weight: 600;
+        }
+        .modal-close-btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ohmov zákon pre uzavretý elektrický obvod</h1>
+        <div class="subtitle">Test A</div>
+        <div class="progress-wrapper">
+            <div class="progress-header">
+                <span id="questionCounter">Otázka 1 / 0</span>
+                <span id="progressPercent">0 %</span>
+            </div>
+            <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="quizContainer"></div>
+        <div class="results-card" id="resultsCard">
+            <h2>Výsledky testu</h2>
+            <div class="results-score" id="resultsScore"></div>
+            <div class="results-message" id="resultsMessage"></div>
+            <button class="restart-btn" id="restartBtn">Skúsiť znova</button>
+        </div>
+    </div>
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <h3>Nesprávna odpoveď</h3>
+            <p id="modalText"></p>
+            <button class="modal-close-btn" id="modalCloseBtn">Rozumiem</button>
+        </div>
+    </div>
+
+<script>
+const questionsData = [
+    {
+        question: "Ako sa nazýva napätie namerané na póloch plochej batérie, keď obvodom neprechádza takmer žiadny prúd?",
+        options: [
+            { text: "Elektromotorické napätie zdroja (napätie naprázdno).", isCorrect: true, feedback: "" },
+            { text: "Svorkové napätie zdroja.", isCorrect: false, feedback: "Svorkové napätie sa meria až vtedy, keď je obvod uzavretý a preteká ním prúd." },
+            { text: "Úbytok napätia na zdroji.", isCorrect: false, feedback: "Úbytok napätia je rozdiel medzi elektromotorickým a svorkovým napätím, vzniká až pri zaťažení zdroja prúdom." },
+            { text: "Maximálne napätie spotrebiča.", isCorrect: false, feedback: "Tento pojem text nepozná. Napätie nezaťaženého zdroja sa označuje ako elektromotorické napätie." }
+        ]
+    },
+    {
+        question: "Ako reaguje hodnota svorkového napätia zdroja, ak sa prúd odoberaný zo zdroja zväčšuje?",
+        options: [
+            { text: "Hodnota svorkového napätia sa zmenšuje.", isCorrect: true, feedback: "" },
+            { text: "Hodnota svorkového napätia sa zväčšuje.", isCorrect: false, feedback: "Je to presne naopak. Čím väčší prúd sa zo zdroja odoberá, tým väčší je úbytok napätia na vnútornom odpore, a preto svorkové napätie klesá." },
+            { text: "Hodnota svorkového napätia zostáva konštantná.", isCorrect: false, feedback: "Svorkové napätie nie je konštantné. Mení sa v závislosti od pretekajúceho prúdu podľa vzťahu $U = U_e - R_i \\cdot I$." },
+            { text: "Svorkové napätie okamžite klesne na nulu.", isCorrect: false, feedback: "Na nulu by kleslo iba v extrémnom prípade, ak by vnútorný odpor bol nekonečný. Pri bežnom odbere sa len postupne zmenšuje." }
+        ]
+    },
+    {
+        question: "Čo presne tvorí vnútornú časť uzavretého elektrického obvodu?",
+        options: [
+            { text: "Vodivý priestor medzi pólmi vnútri zdroja.", isCorrect: true, feedback: "" },
+            { text: "Všetky spotrebiče pripojené priamo k zdroju.", isCorrect: false, feedback: "Spotrebiče a vodiče tvoria vonkajšiu časť obvodu, nie vnútornú." },
+            { text: "Kombinácia ističov a pripojovacích vodičov.", isCorrect: false, feedback: "Ističe a vodiče sú súčasťou vonkajšej časti obvodu, ktorá predstavuje vonkajší odpor $R$." },
+            { text: "Súčet vonkajšieho odporu obvodu a svorkového napätia.", isCorrect: false, feedback: "Ide o nezmyselnú kombináciu veličín. Vnútorná časť obvodu definuje fyzický priestor v zdroji napätia." }
+        ]
+    },
+    {
+        question: "Kedy v elektrickom obvode nastáva stav nazývaný spojenie nakrátko (skrat)?",
+        options: [
+            { text: "Ak odpor vonkajšej časti dosiahne hodnotu rovnú $0\\ \\Omega$.", isCorrect: true, feedback: "" },
+            { text: "Ak vnútorný odpor zdroja dosiahne hodnotu rovnú $0\\ \\Omega$.", isCorrect: false, feedback: "Vnútorný odpor zdroja ($R_i$) je daný konštrukciou zdroja a nedá sa bežne znížiť na nulu. Skrat nastáva zlyhaním (alebo prepojením) vonkajšieho odporu." },
+            { text: "Ak sa z obvodu odoberie akýkoľvek prúd bez zapnutého spínača.", isCorrect: false, feedback: "Skrat je stav, kedy prúd nekontrolovane stúpne kvôli nulovému vonkajšiemu odporu, nesúvisí s odberom bez spínača." },
+            { text: "Ak sa svorkové napätie zdroja vyrovná elektromotorickému napätiu.", isCorrect: false, feedback: "Tento stav nastáva vtedy, keď obvodom netečie žiadny prúd (nezaťažený zdroj), čo je presný opak skratu." }
+        ]
+    },
+    {
+        question: "Čomu sa rovná prúd v uzavretom elektrickom obvode podľa Ohmovho zákona pre uzavretý obvod?",
+        options: [
+            { text: "Podielu elektromotorického napätia zdroja a súčtu odporov vonkajšej a vnútornej časti obvodu.", isCorrect: true, feedback: "" },
+            { text: "Podielu svorkového napätia a vnútorného odporu zdroja.", isCorrect: false, feedback: "Tento podiel nevypočíta prúd v celom obvode. Prúd preteká celým obvodom, preto sa musí deliť súčtom oboch odporov ($R + R_i$)." },
+            { text: "Súčinu elektromotorického napätia a vnútorného odporu.", isCorrect: false, feedback: "Ohmov zákon vyjadruje prúd ako podiel (napätie lomeno odpor), nikdy nie ako súčin týchto veličín." },
+            { text: "Súčtu elektromotorického napätia a vonkajšieho odporu obvodu.", isCorrect: false, feedback: "Sčítať napätie (Volty) a odpor (Ohmy) je fyzikálny nezmysel. Prúd je daný podielom $U_e / (R + R_i)$." }
+        ]
+    },
+    {
+        question: "Aká je primárna funkcia poistiek a ističov v elektrickom obvode?",
+        options: [
+            { text: "Odpojiť zdroj, ak je prúd v obvode väčší ako povolená hodnota, a chrániť spotrebič.", isCorrect: true, feedback: "" },
+            { text: "Zabezpečiť, aby svorkové napätie zdroja nikdy nekleslo pod hodnotu elektromotorického napätia.", isCorrect: false, feedback: "Poistky neregulujú napätie, ich úlohou je fyzicky prerušiť obvod pri nebezpečne vysokom prúde (napr. pri skrate)." },
+            { text: "Udržiavať konštantný vnútorný odpor zdroja počas chodu spotrebičov.", isCorrect: false, feedback: "Vnútorný odpor je vlastnosťou samotného zdroja (napr. batérie) a poistka ho nedokáže nijako ovplyvňovať." },
+            { text: "Znížiť elektromotorické napätie zdroja pri spojení nakrátko na $0\\ V$.", isCorrect: false, feedback: "Poistka obvod rozpojí. Elektromotorické napätie zdroja samotného sa poistkou nezníži, len sa zamedzí odberu prúdu." }
+        ]
+    },
+    {
+        question: "Z čoho pozostáva celkový odpor elektrického obvodu?",
+        options: [
+            { text: "Zo súčtu odporu vonkajšej časti a vnútorného odporu zdroja.", isCorrect: true, feedback: "" },
+            { text: "Výlučne z odporu pripojených spotrebičov.", isCorrect: false, feedback: "Spotrebiče tvoria len vonkajší odpor ($R$). Do celkového odporu sa musí zarátať aj vnútorný odpor zdroja ($R_i$)." },
+            { text: "Z podielu vnútorného odporu zdroja a svorkového napätia.", isCorrect: false, feedback: "Celkový odpor je jednoduchý súčet dvoch prekážok prechádzajúcemu prúdu, nevyjadruje sa podielom s napätím." },
+            { text: "Z rozdielu medzi vonkajším odporom a úbytkom napätia na zdroji.", isCorrect: false, feedback: "Odpor sa meria v Ohmoch a úbytok napätia vo Voltoch. Tieto dve veličiny nemožno od seba odčítať." }
+        ]
+    },
+    {
+        question: "V praktickom cvičení so zapojeným reostatom, čo sa stane pri jeho zopnutí a postupnom znižovaní odporu?",
+        options: [
+            { text: "Prúd bude narastať a svorkové napätie na zdroji bude klesať.", isCorrect: true, feedback: "" },
+            { text: "Prúd aj svorkové napätie na zdroji budú narastať.", isCorrect: false, feedback: "So znižovaním vonkajšieho odporu síce prúd rastie, ale to spôsobuje väčší úbytok napätia vnútri zdroja. Preto svorkové napätie naopak klesá." },
+            { text: "Prúd bude klesať a svorkové napätie sa priblíži k elektromotorickému napätiu.", isCorrect: false, feedback: "Tento stav by nastal, ak by sme odpor reostatu zväčšovali, nie znižovali." },
+            { text: "Odpor reostatu nemá vplyv na svorkové napätie, mení sa iba prúd.", isCorrect: false, feedback: "Ohmov zákon jasne hovorí, že zmena prúdu priamo ovplyvňuje svorkové napätie, ktoré je dané vzťahom $U = U_e - R_i \\cdot I$." }
+        ]
+    }
+];
+
+// ===== UNIVERSAL SCRIPT (V8) =====
+let currentQuestion = 0;
+let score = 0;
+let answered = 0;
+let shuffledQuestions = [];
+let waitingForNext = false;
+let pendingNextQIndex = -1;
+
+function shuffle(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function initQuiz() {
+    currentQuestion = 0;
+    score = 0;
+    answered = 0;
+    waitingForNext = false;
+    pendingNextQIndex = -1;
+    shuffledQuestions = shuffle(questionsData).map(function(q) {
+        return { question: q.question, options: shuffle(q.options) };
+    });
+    document.getElementById('resultsCard').style.display = 'none';
+    document.getElementById('quizContainer').style.display = 'block';
+    renderQuiz();
+    updateProgress();
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function renderQuiz() {
+    var container = document.getElementById('quizContainer');
+    container.innerHTML = '';
+    shuffledQuestions.forEach(function(q, qIndex) {
+        var card = document.createElement('div');
+        card.className = 'question-card' + (qIndex === 0 ? ' active' : '');
+        card.id = 'qcard-' + qIndex;
+
+        var optionsHTML = '';
+        q.options.forEach(function(opt) {
+            optionsHTML += '<li class="option-item" data-correct="' + opt.isCorrect + '" data-feedback="' + escapeAttr(opt.feedback) + '">' + opt.text + '</li>';
+        });
+
+        card.innerHTML = '<div class="question-text"><span class="question-number">' + (qIndex + 1) + '</span>' + q.question + '</div><ul class="options-list">' + optionsHTML + '</ul><button class="next-btn" id="nextBtn-' + qIndex + '">Ďalšia otázka →</button>';
+        container.appendChild(card);
+
+        var items = card.querySelectorAll('.option-item');
+        items.forEach(function(item) {
+            item.addEventListener('click', function() {
+                handleAnswer(card, item, qIndex);
+            });
+        });
+
+        document.getElementById('nextBtn-' + qIndex).addEventListener('click', function() {
+            waitingForNext = false;
+            advanceToNext();
+        });
+    });
+}
+
+function escapeAttr(str) {
+    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function handleAnswer(card, selectedItem, qIndex) {
+    if (card.classList.contains('answered')) return;
+    card.classList.add('answered');
+    answered++;
+
+    var isCorrect = selectedItem.getAttribute('data-correct') === 'true';
+    var feedback = selectedItem.getAttribute('data-feedback');
+
+    if (isCorrect) {
+        selectedItem.classList.add('correct');
+        score++;
+        updateProgress();
+        setTimeout(function() { advanceToNext(); }, 1500);
+    } else {
+        selectedItem.classList.add('incorrect');
+        card.querySelectorAll('.option-item').forEach(function(opt) {
+            if (opt.getAttribute('data-correct') === 'true') {
+                opt.classList.add('correct');
+            }
+        });
+        updateProgress();
+        waitingForNext = true;
+        if (feedback && feedback.length > 0) {
+            showModal(decodeHTMLEntities(feedback), qIndex);
+        } else {
+            showNextButton(qIndex);
+        }
+    }
+}
+
+function showNextButton(qIndex) {
+    var btn = document.getElementById('nextBtn-' + qIndex);
+    if (btn) { btn.classList.add('visible'); btn.focus(); }
+}
+
+function advanceToNext() {
+    if (waitingForNext) return;
+    if (answered >= shuffledQuestions.length) {
+        showResults();
+    } else {
+        currentQuestion++;
+        showQuestion(currentQuestion);
+    }
+}
+
+function decodeHTMLEntities(text) {
+    var ta = document.createElement('textarea');
+    ta.innerHTML = text;
+    return ta.value;
+}
+
+function showQuestion(index) {
+    document.querySelectorAll('.question-card').forEach(function(c) { c.classList.remove('active'); });
+    var next = document.getElementById('qcard-' + index);
+    if (next) {
+        next.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (window.MathJax) { window.MathJax.typesetPromise(); }
+    }
+}
+
+function updateProgress() {
+    var total = shuffledQuestions.length;
+    var pct = total > 0 ? Math.round((answered / total) * 100) : 0;
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressPercent').textContent = pct + ' %';
+    document.getElementById('questionCounter').textContent = 'Otázka ' + Math.min(answered + 1, total) + ' / ' + total;
+}
+
+function showResults() {
+    document.getElementById('quizContainer').style.display = 'none';
+    var resultsCard = document.getElementById('resultsCard');
+    resultsCard.style.display = 'block';
+
+    var total = shuffledQuestions.length;
+    var pct = Math.round((score / total) * 100);
+    var scoreEl = document.getElementById('resultsScore');
+    scoreEl.textContent = score + ' / ' + total + ' (' + pct + ' %)';
+
+    scoreEl.className = 'results-score';
+    if (pct >= 80) {
+        scoreEl.classList.add('excellent');
+        document.getElementById('resultsMessage').textContent = 'Výborný výsledok! Učivo máš dobre zvládnuté.';
+    } else if (pct >= 50) {
+        scoreEl.classList.add('good');
+        document.getElementById('resultsMessage').textContent = 'Dobrý výsledok, ale ešte je priestor na zlepšenie.';
+    } else {
+        scoreEl.classList.add('poor');
+        document.getElementById('resultsMessage').textContent = 'Skús si učivo zopakovať a test absolvovať znova.';
+    }
+
+    document.getElementById('progressBar').style.width = '100%';
+    document.getElementById('progressPercent').textContent = '100 %';
+    document.getElementById('questionCounter').textContent = 'Dokončené: ' + score + ' / ' + total + ' správne';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showModal(text, qIndex) {
+    pendingNextQIndex = qIndex;
+    document.getElementById('modalText').textContent = text;
+    document.getElementById('modalOverlay').classList.add('active');
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+    if (waitingForNext && pendingNextQIndex >= 0) {
+        showNextButton(pendingNextQIndex);
+        pendingNextQIndex = -1;
+    }
+}
+
+document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' || e.key === 'Enter') {
+        if (document.getElementById('modalOverlay').classList.contains('active')) {
+            closeModal();
+        }
+    }
+});
+
+document.getElementById('restartBtn').addEventListener('click', function() {
+    initQuiz();
+});
+
+initQuiz();
+</script>
+</body>
+</html>

@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktívny Test</title>
+    <script>window.MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 {
+            text-align: center; color: #fff; margin-bottom: 8px;
+            font-size: 1.5em; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); line-height: 1.3;
+        }
+        .subtitle {
+            text-align: center; color: rgba(255,255,255,0.9);
+            font-weight: 600; font-size: 1.1em; margin-bottom: 20px;
+        }
+        .progress-wrapper {
+            background: #fff; border-radius: 12px; padding: 16px 20px;
+            margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .progress-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px; font-weight: 600; color: #333; font-size: 0.95em;
+        }
+        .progress-bar-track {
+            height: 10px; background: #e0e0e0; border-radius: 5px; overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%; background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 5px; transition: width 0.4s ease; width: 0%;
+        }
+        .question-card {
+            background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .question-card.active { display: block; }
+        .question-card.answered { pointer-events: none; }
+        .question-text {
+            font-size: 1.1em; font-weight: 600; margin-bottom: 18px; line-height: 1.5; color: #333;
+        }
+        .question-number {
+            display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; width: 30px; height: 30px; border-radius: 50%;
+            text-align: center; line-height: 30px; font-size: 0.85em;
+            margin-right: 10px; font-weight: 700;
+        }
+        .options-list { list-style: none; }
+        .option-item {
+            padding: 13px 16px; margin-bottom: 8px; border: 2px solid #e0e0e0;
+            border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
+            font-size: 0.95em; line-height: 1.4; color: #333;
+        }
+        .option-item:hover { border-color: #667eea; background: #f0f0ff; }
+        .option-item.correct {
+            border-color: #4caf50; background: #e8f5e9; color: #2e7d32; font-weight: 600;
+        }
+        .option-item.incorrect {
+            border-color: #f44336; background: #ffebee; color: #c62828;
+        }
+        .next-btn {
+            display: none; margin-top: 16px; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; border: none; padding: 12px 28px; font-size: 1em; border-radius: 25px;
+            cursor: pointer; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+            float: right; pointer-events: auto;
+        }
+        .next-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .next-btn.visible { display: inline-block; }
+        .results-card {
+            background: #fff; border-radius: 12px; padding: 40px; text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .results-card h2 { font-size: 1.6em; margin-bottom: 10px; color: #333; }
+        .results-score { font-size: 2.8em; font-weight: 700; margin: 20px 0; }
+        .results-score.excellent { color: #4caf50; }
+        .results-score.good { color: #ff9800; }
+        .results-score.poor { color: #f44336; }
+        .results-message { font-size: 1.05em; margin-bottom: 30px; color: #555; }
+        .restart-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 14px 40px; font-size: 1.05em; border-radius: 30px; cursor: pointer;
+            font-weight: 600; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .restart-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 1000;
+            justify-content: center; align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: #fff; border-radius: 12px; padding: 28px; max-width: 500px;
+            width: 90%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .modal-content h3 { color: #f44336; margin-bottom: 12px; font-size: 1.2em; }
+        .modal-content p { color: #555; font-size: 0.95em; line-height: 1.6; margin-bottom: 18px; }
+        .modal-close-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none;
+            padding: 10px 28px; border-radius: 20px; cursor: pointer; font-size: 0.95em; font-weight: 600;
+        }
+        .modal-close-btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Elektrina: Elektrický náboj</h1>
+        <div class="subtitle">Test A</div>
+        <div class="progress-wrapper">
+            <div class="progress-header">
+                <span id="questionCounter">Otázka 1 / 0</span>
+                <span id="progressPercent">0 %</span>
+            </div>
+            <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="quizContainer"></div>
+        <div class="results-card" id="resultsCard">
+            <h2>Výsledky testu</h2>
+            <div class="results-score" id="resultsScore"></div>
+            <div class="results-message" id="resultsMessage"></div>
+            <button class="restart-btn" id="restartBtn">Skúsiť znova</button>
+        </div>
+    </div>
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <h3>Nesprávna odpoveď</h3>
+            <p id="modalText"></p>
+            <button class="modal-close-btn" id="modalCloseBtn">Rozumiem</button>
+        </div>
+    </div>
+
+<script>
+const questionsData = [
+    {
+        question: "Z akých častíc sa skladá jadro atómu?",
+        options: [
+            { text: "Z kladne nabitých protónov a neutrálnych neutrónov.", isCorrect: true, feedback: "" },
+            { text: "Z kladne nabitých protónov a záporne nabitých elektrónov.", isCorrect: false, feedback: "Elektróny tvoria obal atómu, nenachádzajú sa v jeho jadre." },
+            { text: "Výlučne z neutrálnych neutrónov, ktoré stabilizujú atóm.", isCorrect: false, feedback: "Jadro musí obsahovať protóny, bez nich by atóm nemal kladný náboj v jadre." },
+            { text: "Zo záporne nabitých elektrónov a neutrálnych neutrónov.", isCorrect: false, feedback: "Jadro atómu je kladné, preto obsahuje protóny, nie záporné elektróny." }
+        ]
+    },
+    {
+        question: "Kedy hovoríme, že sú látky navonok elektricky neutrálne?",
+        options: [
+            { text: "Keď je v jednotlivých atómoch počet protónov rovný počtu elektrónov.", isCorrect: true, feedback: "" },
+            { text: "Keď je celkový počet neutrónov väčší ako súčet protónov a elektrónov.", isCorrect: false, feedback: "Počet neutrónov nemá vplyv na celkovú elektrickú neutralitu atómu." },
+            { text: "Keď atómy látky úplne stratia svoj elektrónový plyn.", isCorrect: false, feedback: "Strata elektrónov vedie k vzniku kladného elektrického náboja, nie k neutralite." },
+            { text: "Keď počet neutrónov vyrovnáva celkový záporný náboj elektrónov.", isCorrect: false, feedback: "Záporný náboj elektrónov vyrovnávajú kladné protóny, nie neutrálne neutróny." }
+        ]
+    },
+    {
+        question: "Akým spôsobom teleso získa kladný elektrický náboj?",
+        options: [
+            { text: "Teleso odovzdá elektróny, čím získa nadbytok protónov.", isCorrect: true, feedback: "" },
+            { text: "Teleso prijme z iného telesa nadbytok kladných protónov.", isCorrect: false, feedback: "Pri trení sa premiestňujú výlučne elektróny, protóny ostávajú pevne viazané v jadre." },
+            { text: "Teleso odovzdá neutróny, čím sa prejaví kladný náboj jadra.", isCorrect: false, feedback: "Odovzdanie neutrónov by nezmenilo elektrický náboj telesa, keďže sú bez náboja." },
+            { text: "Teleso prijme elektróny, ktoré zneutralizujú jeho pôvodný stav.", isCorrect: false, feedback: "Prijatím elektrónov teleso získa záporný náboj, nie kladný." }
+        ]
+    },
+    {
+        question: "Aká je hodnota elementárneho elektrického náboja ($e$)?",
+        options: [
+            { text: "1,602 × 10⁻¹⁹ C", isCorrect: true, feedback: "" },
+            { text: "8,85 × 10⁻¹² C", isCorrect: false, feedback: "Táto hodnota predstavuje permitivitu vákua ($\\epsilon_0$), nie veľkosť elementárneho náboja." },
+            { text: "9,0 × 10⁹ C", isCorrect: false, feedback: "Toto je hodnota konštanty úmernosti ($k$) v Coulombovom zákone pre vákuum." },
+            { text: "1,602 × 10⁻¹⁹ N", isCorrect: false, feedback: "Jednotkou elektrického náboja je coulomb (C), nie newton (N), ktorý je jednotkou sily." }
+        ]
+    },
+    {
+        question: "Prečo sú niektoré kovy, napríklad meď, dobrými vodičmi elektrického náboja?",
+        options: [
+            { text: "Pretože sa najvzdialenejšie elektróny ľahko odpútajú od jadra a tvoria tzv. elektrónový plyn.", isCorrect: true, feedback: "" },
+            { text: "Pretože majú elektróny pevne viazané v jednotlivých atómoch, čo umožňuje prenos energie.", isCorrect: false, feedback: "Pevne viazané elektróny sú charakteristické pre izolanty, nie pre vodiče." },
+            { text: "Pretože ich jadro dokáže uvoľňovať protóny do priestoru medzi atómami.", isCorrect: false, feedback: "Protóny sú pevne uväznené v jadre a nepodieľajú sa na vedení elektrického prúdu v kovoch." },
+            { text: "Pretože pri trení nevytvárajú žiadne elektrické pole v okolí telesa.", isCorrect: false, feedback: "Každé nabité teleso vytvára okolo seba elektrické pole bez ohľadu na to, či ide o vodič." }
+        ]
+    },
+    {
+        question: "Čo vyjadruje rovnica $Q = N \\cdot e$?",
+        options: [
+            { text: "Že veľkosť elektrického náboja telesa je vždy násobkom veľkosti elementárneho náboja.", isCorrect: true, feedback: "" },
+            { text: "Že elektrická sila závisí od počtu neutrónov v atóme vynásobeného konštantou.", isCorrect: false, feedback: "Rovnica sa týka celkového náboja, nie sily, a pracuje s elementárnym nábojom, nie s neutrónmi." },
+            { text: "Že vzájomné silové pôsobenie telies je priamo úmerné ich vzdialenosti.", isCorrect: false, feedback: "Toto je mylná interpretácia. O silovom pôsobení a vzdialenosti hovorí Coulombov zákon." },
+            { text: "Že permitivita prostredia závisí od elementárneho elektrického náboja.", isCorrect: false, feedback: "Permitivita prostredia je materiálová konštanta a nepočíta sa pomocou tohto vzorca." }
+        ]
+    },
+    {
+        question: "Podľa Coulombovho zákona je veľkosť elektrickej sily $F_e$ medzi dvoma nabitými telesami:",
+        options: [
+            { text: "Priamo úmerná súčinu ich nábojov a nepriamo úmerná druhej mocnine ich vzdialenosti.", isCorrect: true, feedback: "" },
+            { text: "Priamo úmerná ich vzdialenosti a nepriamo úmerná súčinu ich nábojov.", isCorrect: false, feedback: "Coulombov zákon hovorí presný opak. Sila so vzdialenosťou rýchlo klesá." },
+            { text: "Priamo úmerná súčtu ich nábojov a nepriamo úmerná ich vzdialenosti.", isCorrect: false, feedback: "Sila závisí od súčinu nábojov (nie súčtu) a druhej mocniny vzdialenosti (nie len vzdialenosti)." },
+            { text: "Nepriamo úmerná súčinu ich nábojov aj druhej mocnine ich vzdialenosti.", isCorrect: false, feedback: "Sila rastie so zväčšujúcim sa nábojom, takže tam musí platiť priama úmernosť." }
+        ]
+    },
+    {
+        question: "Ako ovplyvní izolujúce látkové prostredie (napríklad olej, $\\epsilon_r = 2$) elektrickú silu medzi dvoma nabitými telesami v porovnaní s vákuom?",
+        options: [
+            { text: "Telesá na seba pôsobia menšou silou ako vo vákuu.", isCorrect: true, feedback: "" },
+            { text: "Telesá na seba pôsobia väčšou silou ako vo vákuu.", isCorrect: false, feedback: "Relatívna permitivita látkového prostredia je vždy väčšia ako 1 a vo vzorci je v menovateli, preto sa výsledná sila zmenší." },
+            { text: "Sila medzi telesami zostane rovnaká, pretože ich náboj sa nezmenil.", isCorrect: false, feedback: "Hoci sa náboj nezmenil, prítomnosť iného prostredia ako vákua zoslabuje elektrické pole medzi nimi." },
+            { text: "Sila sa zmení z príťažlivej na odpudivú.", isCorrect: false, feedback: "Prostredie nemení charakter sily (odpudivá/príťažlivá), mení len jej veľkosť." }
+        ]
+    }
+];
+
+// ===== UNIVERSAL SCRIPT =====
+let currentQuestion = 0;
+let score = 0;
+let answered = 0;
+let shuffledQuestions = [];
+let waitingForNext = false;
+let pendingNextQIndex = -1;
+
+function shuffle(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function initQuiz() {
+    currentQuestion = 0;
+    score = 0;
+    answered = 0;
+    waitingForNext = false;
+    pendingNextQIndex = -1;
+    shuffledQuestions = shuffle(questionsData).map(function(q) {
+        return { question: q.question, options: shuffle(q.options) };
+    });
+    document.getElementById('resultsCard').style.display = 'none';
+    document.getElementById('quizContainer').style.display = 'block';
+    renderQuiz();
+    updateProgress();
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function renderQuiz() {
+    var container = document.getElementById('quizContainer');
+    container.innerHTML = '';
+    shuffledQuestions.forEach(function(q, qIndex) {
+        var card = document.createElement('div');
+        card.className = 'question-card' + (qIndex === 0 ? ' active' : '');
+        card.id = 'qcard-' + qIndex;
+
+        var optionsHTML = '';
+        q.options.forEach(function(opt) {
+            optionsHTML += '<li class="option-item" data-correct="' + opt.isCorrect + '" data-feedback="' + escapeAttr(opt.feedback) + '">' + opt.text + '</li>';
+        });
+
+        card.innerHTML = '<div class="question-text"><span class="question-number">' + (qIndex + 1) + '</span>' + q.question + '</div><ul class="options-list">' + optionsHTML + '</ul><button class="next-btn" id="nextBtn-' + qIndex + '">Ďalšia otázka →</button>';
+        container.appendChild(card);
+
+        var items = card.querySelectorAll('.option-item');
+        items.forEach(function(item) {
+            item.addEventListener('click', function() {
+                handleAnswer(card, item, qIndex);
+            });
+        });
+
+        document.getElementById('nextBtn-' + qIndex).addEventListener('click', function() {
+            waitingForNext = false;
+            advanceToNext();
+        });
+    });
+}
+
+function escapeAttr(str) {
+    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function handleAnswer(card, selectedItem, qIndex) {
+    if (card.classList.contains('answered')) return;
+    card.classList.add('answered');
+    answered++;
+
+    var isCorrect = selectedItem.getAttribute('data-correct') === 'true';
+    var feedback = selectedItem.getAttribute('data-feedback');
+
+    if (isCorrect) {
+        selectedItem.classList.add('correct');
+        score++;
+        updateProgress();
+        setTimeout(function() {
+            advanceToNext();
+        }, 1500);
+    } else {
+        selectedItem.classList.add('incorrect');
+        card.querySelectorAll('.option-item').forEach(function(opt) {
+            if (opt.getAttribute('data-correct') === 'true') {
+                opt.classList.add('correct');
+            }
+        });
+        updateProgress();
+        waitingForNext = true;
+        if (feedback && feedback.length > 0) {
+            showModal(decodeHTMLEntities(feedback), qIndex);
+        } else {
+            showNextButton(qIndex);
+        }
+    }
+}
+
+function showNextButton(qIndex) {
+    var btn = document.getElementById('nextBtn-' + qIndex);
+    if (btn) {
+        btn.classList.add('visible');
+        btn.focus();
+    }
+}
+
+function advanceToNext() {
+    if (waitingForNext) return;
+    if (answered >= shuffledQuestions.length) {
+        showResults();
+    } else {
+        currentQuestion++;
+        showQuestion(currentQuestion);
+    }
+}
+
+function decodeHTMLEntities(text) {
+    var ta = document.createElement('textarea');
+    ta.innerHTML = text;
+    return ta.value;
+}
+
+function showQuestion(index) {
+    document.querySelectorAll('.question-card').forEach(function(c) { c.classList.remove('active'); });
+    var next = document.getElementById('qcard-' + index);
+    if (next) {
+        next.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (window.MathJax) { window.MathJax.typesetPromise(); }
+    }
+}
+
+function updateProgress() {
+    var total = shuffledQuestions.length;
+    var pct = total > 0 ? Math.round((answered / total) * 100) : 0;
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressPercent').textContent = pct + ' %';
+    document.getElementById('questionCounter').textContent = 'Otázka ' + Math.min(answered + 1, total) + ' / ' + total;
+}
+
+function showResults() {
+    document.getElementById('quizContainer').style.display = 'none';
+    var resultsCard = document.getElementById('resultsCard');
+    resultsCard.style.display = 'block';
+
+    var total = shuffledQuestions.length;
+    var pct = Math.round((score / total) * 100);
+    var scoreEl = document.getElementById('resultsScore');
+    scoreEl.textContent = score + ' / ' + total + ' (' + pct + ' %)';
+
+    scoreEl.className = 'results-score';
+    if (pct >= 80) {
+        scoreEl.classList.add('excellent');
+        document.getElementById('resultsMessage').textContent = 'Výborný výsledok! Učivo máš dobre zvládnuté.';
+    } else if (pct >= 50) {
+        scoreEl.classList.add('good');
+        document.getElementById('resultsMessage').textContent = 'Dobrý výsledok, ale ešte je priestor na zlepšenie.';
+    } else {
+        scoreEl.classList.add('poor');
+        document.getElementById('resultsMessage').textContent = 'Skús si učivo zopakovať a test absolvovať znova.';
+    }
+
+    document.getElementById('progressBar').style.width = '100%';
+    document.getElementById('progressPercent').textContent = '100 %';
+    document.getElementById('questionCounter').textContent = 'Dokončené: ' + score + ' / ' + total + ' správne';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showModal(text, qIndex) {
+    pendingNextQIndex = qIndex;
+    document.getElementById('modalText').textContent = text;
+    document.getElementById('modalOverlay').classList.add('active');
+    if (window.MathJax) { window.MathJax.typesetPromise(); }
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+    if (waitingForNext && pendingNextQIndex >= 0) {
+        showNextButton(pendingNextQIndex);
+        pendingNextQIndex = -1;
+    }
+}
+
+document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' || e.key === 'Enter') {
+        if (document.getElementById('modalOverlay').classList.contains('active')) {
+            closeModal();
+        }
+    }
+});
+
+document.getElementById('restartBtn').addEventListener('click', function() {
+    initQuiz();
+});
+
+initQuiz();
+</script>
+</body>
+</html>
